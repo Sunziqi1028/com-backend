@@ -1,0 +1,7 @@
+2021-02-23 19:52:56	[32mINFO[0m	init default logger             	{"comp": "core.elog"}
+2021-02-23 19:52:56	[32mINFO[0m	init ego logger                 	{"comp": "core.elog"}
+2021-02-23 19:52:56	[32mINFO[0m	init config                     	{"comp": "core.econf", "addr": "config.toml"}
+2021-02-23 19:52:56	[32mINFO[0m	init max procs                  	{"comp": "app", "value": 8}
+2021-02-23 19:52:56	[33mWARN[0m	not init trace                  	{"value": "need trace config: [trace.jaeger] in config", "comp": "app"}
+2021-02-23 19:52:56	[32mINFO[0m	start server                    	{"comp": "server.egin", "compName": "server.http", "addr": "http://[::]:9001"}
+2021-02-23 19:52:56	[32mINFO[0m	add route                       	{"comp": "server.egin", "compName": "server.http", "method": "GET", "path": "/hello"}
