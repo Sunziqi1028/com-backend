@@ -1,7 +1,4 @@
 # Binaries for programs and plugins
-
--- @EgoctlOverwrite YES
--- @EgoctlGenerateTime 20210110_221111
 .idea
 .vscode
 bak
@@ -33,3 +30,4 @@ default.json.*
 # vendor/
 /vendor
 /logs/*
+*bak*
