@@ -5,7 +5,7 @@
 [mysql.user]
     connMaxLifetime = "300s"
     debug = true
-    dsn = "root:root@tcp(localhost:3306)/ego?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local&timeout=1s&readTimeout=5s&writeTimeout=5s"
+    dsn = "root:123456@tcp(127.0.0.1:3306)/ceres?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local&timeout=1s&readTimeout=5s&writeTimeout=5s"
     level = "panic"
     maxIdleConns = 50
     maxOpenConns = 100

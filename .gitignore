@@ -1,4 +1,22 @@
 # Binaries for programs and plugins
+
+-- @EgoctlOverwrite YES
+-- @EgoctlGenerateTime 20210110_221111
+.idea
+.vscode
+bak
+crm
+bin.tar.gz
+dist.tar.gz
+default.json.*
+*.log
+*.log.*
+/bin/*
+*.sys.*
+
+
+*.swp
+*.swo
 *.exe
 *.exe~
 *.dll
@@ -13,6 +31,5 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-.idea
 /vendor
 /logs/*

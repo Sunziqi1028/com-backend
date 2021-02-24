@@ -1,5 +1,5 @@
 // @EgoctlOverwrite YES
-// @EgoctlGenerateTime 20210223_202936
+// @EgoctlGenerateTime 20210224_173217
 package mysql
 
 import (
@@ -12,21 +12,21 @@ import (
 
 type Enum struct {
 	
-	Id int `gorm:"AUTO_INCREMENT;comment:'id'"` id
+	Id int `gorm:"AUTO_INCREMENT;comment:'id'"` // id
 	
-	GroupKey string `gorm:"not null;comment:'组名key，唯一标识符'"` 唯一标识符
+	GroupKey string `gorm:"not null;comment:'组名key，唯一标识符'"` // 唯一标识符
 	
-	GroupTitle string `gorm:"not null;comment:'名称'"` 名称
+	GroupTitle string `gorm:"not null;comment:'名称'"` // 名称
 	
-	Key int `gorm:"not null;comment:'ant键'"` 值
+	Key int `gorm:"not null;comment:'ant键'"` // 值
 	
-	Title string `gorm:"not null;comment:'ant名称'"` 名称
+	Title string `gorm:"not null;comment:'ant名称'"` // 名称
 	
-	Ctime int64 `gorm:"not null;comment:'创建时间'"` 创建时间
+	Ctime int64 `gorm:"not null;comment:'创建时间'"` // 创建时间
 	
-	Utime int64 `gorm:"not null;comment:'更新时间'"` 更新时间
+	Utime int64 `gorm:"not null;comment:'更新时间'"` // 更新时间
 	
-	Dtime int64 `gorm:"not null;comment:'删除时间'"` 删除时间
+	Dtime int64 `gorm:"not null;comment:'删除时间'"` // 删除时间
 	
 }
 
