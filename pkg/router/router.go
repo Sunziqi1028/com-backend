@@ -3,14 +3,17 @@
 package router
 
 import (
-	"github.com/gotomicro/ego/server/egin"
 	"ceres/pkg/invoker"
+
+	"github.com/gotomicro/ego/server/egin"
 )
 
 func ServeHTTP() *egin.Component {
 	r := invoker.Gin
-    
-    InitEnum(r)
-    
+
+	// should register all router rules in this file
+
+	InitEnum(r)
+
 	return r
 }

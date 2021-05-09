@@ -3,21 +3,22 @@
 package core
 
 import (
+	"errors"
 	"net/http"
+	"reflect"
+	"strings"
+	"sync"
+
 	"github.com/gin-gonic/gin"
-    "errors"
-    "reflect"
-    "strings"
-    "sync"
-    "github.com/gin-gonic/gin/binding"
-    "github.com/go-playground/locales/zh"
-    ut "github.com/go-playground/universal-translator"
-    "github.com/go-playground/validator/v10"
-    tzh "github.com/go-playground/validator/v10/translations/zh"
-    "github.com/gotomicro/ego/core/elog"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/locales/zh"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	tzh "github.com/go-playground/validator/v10/translations/zh"
+	"github.com/gotomicro/ego/core/elog"
 )
 
-
+// @Deprecated： dead code
 
 func init() {
 	binding.Validator = &defaultValidator{}
@@ -129,7 +130,6 @@ func (c *Context) Bind(obj interface{}) (err error) {
 func (c *Context) ShouldBind(obj interface{}) (err error) {
 	return validate(c.Context.ShouldBind(obj))
 }
-
 
 type defaultValidator struct {
 	once     sync.Once

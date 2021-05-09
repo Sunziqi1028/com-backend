@@ -1,5 +1,6 @@
 // @EgoctlOverwrite NO
 // @EgoctlGenerateTime 20210223_202936
+// @Deprecated： replace to the initialization package
 package invoker
 
 import (

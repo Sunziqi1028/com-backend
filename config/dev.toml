@@ -1,0 +1,11 @@
+[server.http]
+    port = 9001
+[server.governor]
+    port = 9003
+[mysql.user]
+    connMaxLifetime = "300s"
+    debug = true
+    dsn = "root:123456@tcp(127.0.0.1:3306)/ceres?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local&timeout=1s&readTimeout=5s&writeTimeout=5s"
+    level = "panic"
+    maxIdleConns = 50
+    maxOpenConns = 100
