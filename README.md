@@ -9,5 +9,5 @@ Fistly, you have to read the documents of Ego seriously.
 
 The user interface API we will support as HTTP APIs, and the eth event will be trigger from other service by gRpc interfaces.
 
-Pleas see mor informations at [Implementation Notes](./implementaton.md)
+Pleas see mor informations at [Implementation Notes](implementaton.md)
 

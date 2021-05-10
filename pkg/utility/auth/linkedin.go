@@ -31,7 +31,7 @@ func (linkedin *LinkedIn) GetAccessToken(requestToken string) (accessToken strin
 	data.Set("code", requestToken)
 	data.Set("client_id", linkedin.ClientID)
 	data.Set("client_secret", linkedin.ClientSecret)
-	data.Set("redirect_uri", linkedin.RedirectURI)
+	data.Set("redirect_uri", linkedin.RedirectURI) // FIXME: should use json format body ?
 	request, _ := http.NewRequest(
 		"POST",
 		"https://www.linkedin.com/oauth/v2/accessToken",
@@ -57,7 +57,7 @@ func (linkedin *LinkedIn) GetAccessToken(requestToken string) (accessToken strin
 /// GetUserProfile
 /// LinkedIn Oauth get user profile logic
 /// see https://docs.microsoft.com/zh-cn/linkedin/shared/integrations/people/profile-api?context=linkedin/consumer/context
-func (linkedin *LinkedIn) GetUserProfile(accessToken string) (account OauthAccount, err error) {
+func (linkedin *LinkedIn) GetUserProfile(accessToken string, _userId string) (account OauthAccount, err error) {
 
 	return
 }

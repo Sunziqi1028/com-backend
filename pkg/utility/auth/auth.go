@@ -25,5 +25,5 @@ type OauthClient interface {
 	GetAccessToken(requestToken string) (token string, err error)
 
 	/// GetUserProfile
-	GetUserProfile(accessToken string) (account OauthAccount, err error)
+	GetUserProfile(accessToken string, userId string) (account OauthAccount, err error)
 }

@@ -100,7 +100,7 @@ func (account *GithubUserProfile) GetUserNick() string {
 
 /// GetUserProfile
 /// get user profile information from api.github.com/user
-func (github *Github) GetUserProfile(accessToken string) (account OauthAccount, err error) {
+func (github *Github) GetUserProfile(accessToken string, _userId string) (account OauthAccount, err error) {
 	u, _ := url.Parse("https://api.github.com/user")
 	request := &http.Request{
 		Method: "GET",
