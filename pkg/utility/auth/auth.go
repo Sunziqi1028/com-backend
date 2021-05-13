@@ -1,5 +1,14 @@
 package auth
 
+import (
+	"crypto/tls"
+	"net/http"
+)
+
+/// Comunion Oauth interface
+/// Comunion Ceres only do the final legged in all Oauth2 processing
+/// The Frontend will handle the other two legged using the standard Oauth2 API
+
 /// OauthAccount
 /// Oauth account interface to get the Oauth user unique ID nick name and the avatar
 type OauthAccount interface {
@@ -18,12 +27,22 @@ type OauthAccount interface {
 }
 
 /// OauthClient
-/// Abstraction of the comunion oauth account login logic
+/// Abstraction of Oauth Login logic
 type OauthClient interface {
-
-	/// GetAccessToken
-	GetAccessToken(requestToken string) (token string, err error)
-
 	/// GetUserProfile
-	GetUserProfile(accessToken string, userId string) (account OauthAccount, err error)
+	GetUserProfile() (account OauthAccount, err error)
+}
+
+/// FIXME：should replace with ceres http library
+var httpClient = &http.Client{
+	Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	},
+}
+
+/// NewGithubOauthClient
+/// build a new Github Oauth Client
+func NewGithubOauthClient() (client OauthClient) {
+
+	return
 }

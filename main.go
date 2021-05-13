@@ -3,14 +3,23 @@
 package main
 
 import (
+	"ceres/pkg/invoker"
+	"ceres/pkg/router"
+
 	"github.com/gotomicro/ego"
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/gotomicro/ego/server/egovernor"
-	"ceres/pkg/invoker"
-	"ceres/pkg/router"
 )
 
 func main() {
+	// Order:
+	// init the logger
+	// init the gorm
+	// init the redis
+	// init the utility
+	// init the grpc
+	// init the gin
+
 	if err := ego.New().
 		Invoker(invoker.Init).
 		Serve(

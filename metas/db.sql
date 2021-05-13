@@ -1,3 +1,10 @@
+create table if not exists meta_snowflake_ip_tbl(
+    id bigint not null auto_increament,
+    ip varchar(30) not null default '' comment 'current machine runtime local IP',
+    create_at datetime not null default current_timestamp,
+    primary key(id) 
+);
+
 create table if not exists comer_tbl(
     id bigint not null auto_increament,
     uin bigint not null comment 'comunion comer unique identifier',
@@ -18,7 +25,7 @@ create table if not exists account_tbl(
     main smallint not null default 0 comment 'comunion comer use this account as main account',
     nick varchar(50) not null default '' comment 'comunion comer nick name',
     avatar varchar(255) not null default '' comment 'comunion avatar link address',
-    category int not null default 0 comment 'comunion outer account type 1 for wallet 2 for Oauth',
+    category int not null default 0 comment 'comunion outer account type 1 for eth 2 for Oauth',
     type int not null default 0 comment '1 for github 2 for metamask 3 for twitter 4 for facebook 5 for likedin 6 for iamtoken',
     linked smallint not null default 0 comment '0 for unlink 1 for linked',
     create_at datetime not null default current_timestamp,

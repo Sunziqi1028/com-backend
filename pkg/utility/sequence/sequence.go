@@ -7,8 +7,5 @@ package sequence
 /// interface to generate the unique senquence number
 type Senquence interface {
 	/// Next will return the next senquence
-	/// used in the comer logic not only the comer but the profile
-	/// used in the bounty logic
-	/// used in the disco logic
 	Next() uint64
 }
