@@ -5,6 +5,14 @@ import (
 	"net/http"
 )
 
+/// the constraints will be injected at compile time with Github CI
+/// see more at build.sh
+/// FIXME：should move to github action ci
+var (
+	GithubOauthClientID     string
+	GithubOauthClientSecret string
+)
+
 /// Comunion Oauth interface
 /// Comunion Ceres only do the final legged in all Oauth2 processing
 /// The Frontend will handle the other two legged using the standard Oauth2 API
@@ -41,8 +49,12 @@ var httpClient = &http.Client{
 }
 
 /// NewGithubOauthClient
-/// build a new Github Oauth Client
-func NewGithubOauthClient() (client OauthClient) {
-
-	return
+/// build a new Github Oauth Client with the request token from login
+func NewGithubOauthClient(requestToken string) (client OauthClient) {
+	return &Github{
+		ClientID:     GithubOauthClientID,
+		ClientSecret: GithubOauthClientSecret,
+		client:       httpClient,
+		requestToken: requestToken,
+	}
 }

@@ -1,46 +1,46 @@
 package account
 
 import (
+	model "ceres/pkg/model/account"
+	"ceres/pkg/router"
+	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gotomicro/ego/core/elog"
 )
 
-func LoginWithGithub(_ *gin.Context) {
-
-}
-
-func LoginWithFacebook(_ *gin.Context) {
-
-}
-
-func LoginWithTwitter(_ *gin.Context) {
-
-}
-
-func LoginWithLinkedIn(_ *gin.Context) {
-
-}
-
-/// loginWithOauth is the abstraction of the standard login flow
-func loginWithOauth(context *gin.Context, client auth.OauthClient) {
-	// firsly auth the login
-	// next to get the user profile
-	// do the service logic
-	_, err := client.GetUserProfile()
-	if err != nil {
-		elog.Error("Login with oauth faild")
-		context.JSON(200, nil)
+/// LoginWithGithub
+/// login with github oauth
+func LoginWithGithub(ctx *router.Context) {
+	requestToken := ctx.Query("request_token")
+	if requestToken == "" {
+		ctx.ERROR(400, "request_token missed")
+		return
 	}
-
-	// use the account object to handle the logic if comer is exits then sign a new JWT Token 
+	client := auth.NewGithubOauthClient(requestToken)
+	response, err := service.LoginWithOauth(client, model.GithubOauth)
+	if err != nil {
+		ctx.ERROR(500, err.Error())
+		return
+	}
+	ctx.OK(response)
+	return
 }
 
-func LoginWithMetamask(_ *gin.Context) {
+func LoginWithFacebook(_ *router.Context) {
 
 }
 
-func LoginWithIamtoken(_ *gin.Context) {
+func LoginWithTwitter(_ *router.Context) {
+
+}
+
+func LoginWithLinkedIn(_ *router.Context) {
+
+}
+
+func LoginWithMetamask(_ *router.Context) {
+
+}
+
+func LoginWithImtoken(_ *router.Context) {
 
 }

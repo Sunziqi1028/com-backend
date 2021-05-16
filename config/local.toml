@@ -9,3 +9,6 @@
     level = "panic"
     maxIdleConns = 50
     maxOpenConns = 100
+    
+
+"ceres.snowflake.epoch" = 1

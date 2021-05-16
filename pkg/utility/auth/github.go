@@ -15,6 +15,7 @@ type Github struct {
 	ClientID     string
 	ClientSecret string
 	client       *http.Client
+	requestToken string
 }
 
 /// NewGithubClient
@@ -40,7 +41,7 @@ type githubAccessTokenResponse struct {
 
 /// GetAccessToken
 /// use the requestToken to get the access token which will be used to get the github user information
-func (github *Github) GetAccessToken(requestToken string) (accessToken string, err error) {
+func (github *Github) getAccessToken(requestToken string) (accessToken string, err error) {
 	u, _ := url.Parse(
 		fmt.Sprintf(
 			"https://github.com/login/oauth/access_token?%s&%s&%s",
@@ -100,7 +101,11 @@ func (account *GithubUserProfile) GetUserNick() string {
 
 /// GetUserProfile
 /// get user profile information from api.github.com/user
-func (github *Github) GetUserProfile(accessToken string, _userId string) (account OauthAccount, err error) {
+func (github *Github) GetUserProfile() (account OauthAccount, err error) {
+	accessToken, err := github.getAccessToken(github.requestToken)
+	if err != nil {
+		return
+	}
 	u, _ := url.Parse("https://api.github.com/user")
 	request := &http.Request{
 		Method: "GET",

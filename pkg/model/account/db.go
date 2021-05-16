@@ -9,6 +9,19 @@ import (
 
 /// Account Database models and operations
 
+// constraints of the category and account 
+const (
+	EthAccount   = 1
+	OauthAccount = 2
+
+	GithubOauth   = 1
+	MetamaskEth   = 2
+	TwitterOauth  = 3
+	FacbookOauth  = 4
+	LinkedInOauth = 5
+	ImtokenEth    = 6
+)
+
 /// Comer the comer model of comunion inner account
 type Comer struct {
 	ID       uint64    `gorm:"id"`
@@ -120,5 +133,23 @@ func UnlinkComerAndAccount(db *gorm.DB, uin uint64, account *Account) {
 func ListAllAccountsOfComer(db *gorm.DB, uin uint64) (list []Account, err error) {
 	res := db.Find(&list)
 	err = res.Error
+	return
+}
+
+/// GetComerByAccoutOIN
+/// get comer entity by the account oin
+func GetComerByAccoutOIN(db *gorm.DB, oin string) (comer Comer, err error) {
+	account := &Account{}
+	db = db.Find(account)
+	err = db.Error
+	if err != nil {
+		return
+	}
+	uin := account.UIN
+	db = db.Where("uin = ?", uin).Find(&comer)
+	err = db.Error
+	if err != nil {
+		return
+	}
 	return
 }
