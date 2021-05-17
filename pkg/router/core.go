@@ -32,7 +32,7 @@ func (ctx *Context) OK(data interface{}) {
 	)
 }
 
-/// ERROR with message 
+/// ERROR with message
 func (ctx *Context) ERROR(code int, message string) {
 	ctx.Context.JSON(
 		200,
