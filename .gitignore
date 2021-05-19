@@ -32,3 +32,6 @@ default.json.*
 /logs/*
 *bak*
 .vscode
+ceres
+run.script
+logs
