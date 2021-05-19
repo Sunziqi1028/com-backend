@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +15,7 @@ type Facebook struct {
 	ClientID     string
 	ClientSecret string
 	RedirectURI  string
+	RequestToken string
 	client       *http.Client
 }
 
@@ -25,13 +27,13 @@ type facebookAccessTokenResponse struct {
 
 /// GetAccessToken
 /// use the requestToken to get the access token which will be used to get the github user information
-func (facebook *Facebook) GetAccessToken(requestToken string) (accessToken string, err error) {
+func (facebook *Facebook) getAccessToken() (accessToken string, err error) {
 	u := fmt.Sprintf(
 		"https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s&client_secret=%s&code=%s",
 		facebook.ClientID,
 		facebook.RedirectURI,
 		facebook.ClientSecret,
-		requestToken,
+		facebook.RequestToken,
 	)
 	request, _ := http.NewRequest(
 		"GET",
@@ -73,7 +75,7 @@ func (response *facebookInspectResposne) GetUserID() string {
 type FacebookOauthAccount struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
-	Picture string `json:"picture"` // FIXME: should check if this field is String type or object 
+	Picture string `json:"picture"` 
 }
 
 /// implement the OauthAccount interface
@@ -93,7 +95,11 @@ func (account *FacebookOauthAccount) GetUserNick() string {
 
 /// GetUserProfile
 /// Facebook Oauth get user profile logic
-func (facebook *Facebook) GetUserProfile(accessToken string, _userId string) (account OauthAccount, err error) {
+func (facebook *Facebook) GetUserProfile() (account OauthAccount, err error) {
+	accessToken, err := facebook.getAccessToken()
+	if err != nil {
+		return
+	}
 	// firstly to intspect the access token to get the facebook user ID
 	request, _ := http.NewRequest(
 		"GET",
@@ -121,18 +127,21 @@ func (facebook *Facebook) GetUserProfile(accessToken string, _userId string) (ac
 		fmt.Sprintf("https://graph.facebook.com/v10.0/%s?fields=id,name,picture&access_token=%s", r.GetUserID(), accessToken),
 		nil,
 	)
-	response, err = facebook.client.Do(request)
-	if err != nil {
-		return
+	for i := 0; i < 3; i++ {
+		response, err = facebook.client.Do(request)
+		if err != nil {
+			return
+		}
+		body, err = io.ReadAll(response.Body)
+		if err != nil {
+			return
+		}
+		account = &FacebookOauthAccount{}
+		err = json.Unmarshal(body, account)
+		if err != nil {
+			return
+		}
 	}
-	body, err = io.ReadAll(response.Body)
-	if err != nil {
-		return
-	}
-	account = &FacebookOauthAccount{}
-	err = json.Unmarshal(body, account)
-	if err != nil {
-		return
-	}
+	err = errors.New("try to get the user profile too many times")
 	return
 }

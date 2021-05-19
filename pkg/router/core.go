@@ -2,6 +2,13 @@ package router
 
 import "github.com/gin-gonic/gin"
 
+const (
+	ErrParametersInvaild = 400
+	ErrForbidden         = 403
+	ErrTokenExpired      = 401
+	ErrBuisnessError     = 500
+)
+
 /// Response http base response
 type Response struct {
 	Code    int         `json:"code"`
@@ -52,6 +59,18 @@ func (ctx *Context) JSON(code int, data interface{}) {
 			Code:    code,
 			Message: "Success",
 			Data:    data,
+		},
+	)
+}
+
+/// EXPIRED when the token expired then will return this event
+func (ctx *Context) EXPIRED() {
+	ctx.Context.JSON(
+		ErrTokenExpired,
+		&Response{
+			Code:    ErrTokenExpired,
+			Message: "Success",
+			Data:    new(interface{}),
 		},
 	)
 }

@@ -4,15 +4,17 @@ import (
 	"context"
 	"time"
 
+	config "ceres/pkg/config/minio"
+
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/minio/minio-go/v7"
 )
 
-func PreSignUpload(client *minio.Client, file, bucket string) (url string, err error) {
+func PreSignUpload(client *minio.Client, file string) (url string, err error) {
 
 	u, err := client.PresignedPutObject(
 		context.TODO(),
-		bucket,
+		config.Bucket,
 		file,
 		time.Minute*10,
 	)

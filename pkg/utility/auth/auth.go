@@ -1,16 +1,9 @@
 package auth
 
 import (
+	"ceres/pkg/config/auth"
 	"crypto/tls"
 	"net/http"
-)
-
-/// the constraints will be injected at compile time with Github CI
-/// see more at build.sh
-/// FIXME：should move to github action ci
-var (
-	GithubOauthClientID     string
-	GithubOauthClientSecret string
 )
 
 /// Comunion Oauth interface
@@ -49,12 +42,38 @@ var httpClient = &http.Client{
 }
 
 /// NewGithubOauthClient
-/// build a new Github Oauth Client with the request token from login
+/// build a new Github client with the request token from login
 func NewGithubOauthClient(requestToken string) (client OauthClient) {
 	return &Github{
-		ClientID:     GithubOauthClientID,
-		ClientSecret: GithubOauthClientSecret,
+		ClientID:     auth.GithubClientID,
+		ClientSecret: auth.GithubClientSecret,
 		client:       httpClient,
 		requestToken: requestToken,
 	}
+}
+
+/// NewFacebookClient
+/// build a new Facebook client with the request token from login 
+func NewFacebookClient(requestToken string) (client OauthClient){
+	return &Facebook{
+		ClientID: auth.FacebookClientID,
+		ClientSecret: auth.FacebookClientSecret,
+		RedirectURI: auth.FacebookCallbackURL,
+		client:  httpClient,
+		RequestToken: requestToken,
+	}
+}
+
+/// NewTwitterClient
+/// build a new Twitter client with the request token from login 
+func NewTwitterClient() (client OauthClient){
+
+	return
+}
+
+/// NewLinkedinClient
+/// build a new LinkedIn client with the request token from login 
+func NewLinkedinClient() (client OauthClient){
+
+	return
 }
