@@ -31,3 +31,4 @@ default.json.*
 /vendor
 /logs/*
 *bak*
+.vscode

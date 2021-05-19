@@ -5,7 +5,43 @@
 [mysql.user]
     connMaxLifetime = "300s"
     debug = true
-    dsn = "root:123456@tcp(127.0.0.1:3306)/ceres?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local&timeout=1s&readTimeout=5s&writeTimeout=5s"
+    dsn = "root:Comunion2021@tcp(127.0.0.1:3306)/ceres?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local&timeout=1s&readTimeout=5s&writeTimeout=5s"
     level = "panic"
     maxIdleConns = 50
     maxOpenConns = 100
+[redis.stub]
+    debug = true
+    mode = "stub"
+    addr = "127.0.0.1:6379"
+
+# TODO: rename the configurations key 
+
+[ceres.http]
+    port = 9001
+
+[ceres.grpc]
+    port = 9002
+
+[ceres.governor]
+    port = 9003
+
+[ceres.redis]
+    debug = true
+    mode = "stub"
+    addr = "127.0.0.1:6379"
+
+[ceres.mysql]
+    connMaxLifetime = "300s"
+    debug = true
+    dsn = "root:Comunion2021@tcp(127.0.0.1:3306)/ceres?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local&timeout=1s&readTimeout=5s&writeTimeout=5s"
+    level = "panic"
+    maxIdleConns = 50
+    maxOpenConns = 100
+
+[ceres.minio]
+    accessKey = ""
+    secretKey = ""
+    endpoint = ""
+    bucket = ""
+
+"ceres.snowflake.epoch" = 1
