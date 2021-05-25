@@ -1,18 +1,15 @@
 package auth
 
-/// will be init at compile time with the -X parameter 
+// will be init at compile time with the -X parameter
 
-var(
-
+var (
 	JwtSecret string
 
-	GithubClientID string
+	GithubClientID     string
 	GithubClientSecret string
-	GithubCallbackURL string
+	GithubCallbackURL  string
 
-	FacebookClientID string
+	FacebookClientID     string
 	FacebookClientSecret string
-	FacebookCallbackURL string
-
-
+	FacebookCallbackURL  string
 )

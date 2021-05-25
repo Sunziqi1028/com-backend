@@ -21,10 +21,8 @@ func initSequnece() (err error) {
 	machineID := meta.GetMachineID(mysql.DB, machineIP)
 	epoch, _ := econf.Get("ceres.snowflake.epoch").(int) //TODO: should check if this is correct
 
-
 	// Create snowflake sequences
 	AccountSequnece = sequence.NewSnowflake(uint64(epoch), uint64(machineID))
-	
 
 	return
 }
