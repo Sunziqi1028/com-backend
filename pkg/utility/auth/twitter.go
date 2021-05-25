@@ -1,7 +1,7 @@
 package auth
 
-type Twitter struct{
-	ConsumerKey string 
+type Twitter struct {
+	ConsumerKey    string
 	ConsumerSecret string
 }
 
