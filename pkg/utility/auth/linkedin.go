@@ -2,7 +2,7 @@ package auth
 
 import (
 	"encoding/json"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -41,7 +41,7 @@ func (linkedin *LinkedIn) GetAccessToken(requestToken string) (accessToken strin
 	if err != nil {
 		return
 	}
-	body, err := io.ReadAll(response.Body)
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
