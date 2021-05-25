@@ -2,7 +2,7 @@ name: actions
 on:
   push:
     branches:
-      - master
+      - all
   pull_request:
 jobs:
   golangci-lint:
