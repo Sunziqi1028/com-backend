@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -44,7 +44,7 @@ func (facebook *Facebook) getAccessToken() (accessToken string, err error) {
 	if err != nil {
 		return
 	}
-	body, err := io.ReadAll(response.Body)
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
@@ -75,7 +75,7 @@ func (response *facebookInspectResposne) GetUserID() string {
 type FacebookOauthAccount struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
-	Picture string `json:"picture"` 
+	Picture string `json:"picture"`
 }
 
 /// implement the OauthAccount interface
@@ -110,7 +110,7 @@ func (facebook *Facebook) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		return
 	}
-	body, err := io.ReadAll(response.Body)
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
@@ -132,7 +132,7 @@ func (facebook *Facebook) GetUserProfile() (account OauthAccount, err error) {
 		if err != nil {
 			return
 		}
-		body, err = io.ReadAll(response.Body)
+		body, err = ioutil.ReadAll(response.Body)
 		if err != nil {
 			return
 		}

@@ -14,13 +14,13 @@ import (
 func LoginWithGithub(ctx *router.Context) {
 	requestToken := ctx.Query("request_token")
 	if requestToken == "" {
-		ctx.ERROR(400, "request_token missed")
+		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
 		return
 	}
 	client := auth.NewGithubOauthClient(requestToken)
 	response, err := service.LoginWithOauth(client, model.GithubOauth)
 	if err != nil {
-		ctx.ERROR(500, err.Error())
+		ctx.ERROR(router.ErrBuisnessError, err.Error())
 		return
 	}
 	ctx.OK(response)
@@ -31,24 +31,24 @@ func LoginWithGithub(ctx *router.Context) {
 func LoginWithFacebook(ctx *router.Context) {
 	requestToken := ctx.Query("request_token")
 	if requestToken == "" {
-		ctx.ERROR(400, "request_token missed")
+		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
 		return
 	}
 	client := auth.NewFacebookClient(requestToken)
 	response, err := service.LoginWithOauth(client, model.GithubOauth)
 	if err != nil {
-		ctx.ERROR(500, err.Error())
+		ctx.ERROR(router.ErrBuisnessError, err.Error())
 		return
 	}
 	ctx.OK(response)
 }
 
 func LoginWithTwitter(_ *router.Context) {
-
+	// TODO: should complete the twitter logic
 }
 
 func LoginWithLinkedIn(_ *router.Context) {
-
+	// TODO: should complete the linkedin logic
 }
 
 /// GetBlockchainLoginNonce

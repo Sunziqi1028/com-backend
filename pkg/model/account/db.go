@@ -9,7 +9,7 @@ import (
 
 /// Account Database models and operations
 
-// constraints of the category and account 
+// constraints of the category and account
 const (
 	EthAccount   = 1
 	OauthAccount = 2
@@ -76,6 +76,19 @@ func (Profile) TableName() string {
 	return "comer_profile_tbl"
 }
 
+/// profile skill tag
+type ProfileSkillTag struct {
+	ID       uint64    `gorm:"id"`
+	Name     string    `gorm:"name"`
+	Vaild    bool      `gorm:"vaild"`
+	CreateAt time.Time `gorm:"create_at"`
+	UpdateAt time.Time `gorm:"update_at"`
+}
+
+func (ProfileSkillTag) TableName() string {
+	return "comer_profile_skill_tag_tbl"
+}
+
 /// CreateComerWithAccount
 /// using the outer acccount to create a comer
 func CreateComerWithAccount(db *gorm.DB, comer *Comer, account *Account) (err error) {
@@ -140,7 +153,7 @@ func ListAllAccountsOfComer(db *gorm.DB, uin uint64) (list []Account, err error)
 /// get comer entity by the account oin
 func GetComerByAccoutOIN(db *gorm.DB, oin string) (comer Comer, err error) {
 	account := &Account{}
-	db = db.Find(account)
+	db = db.Where("oin = ?", oin).Find(account)
 	err = db.Error
 	if err != nil {
 		return
@@ -151,5 +164,17 @@ func GetComerByAccoutOIN(db *gorm.DB, oin string) (comer Comer, err error) {
 	if err != nil {
 		return
 	}
+	return
+}
+
+/// GetComerProfile by the uin
+func GetComerProfile(db *gorm.DB, uin uint64) (profile Profile, err error) {
+
+	return
+}
+
+/// GetSkillList by the ids
+func GetSkillList(db *gorm.DB, ids []uint64) (skills []ProfileSkillTag, err error) {
+
 	return
 }

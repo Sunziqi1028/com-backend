@@ -27,7 +27,8 @@ type HandlerFunc func(c *Context)
 /// Wrap the gin router function with the ceres core context
 func Wrap(h HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
+		ctx := &Context{c}
+		h(ctx)
 	}
 }
 

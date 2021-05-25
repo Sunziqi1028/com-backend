@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -61,7 +61,7 @@ func (github *Github) getAccessToken(requestToken string) (accessToken string, e
 	if err != nil {
 		return
 	}
-	body, err := io.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}
@@ -119,7 +119,7 @@ func (github *Github) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		return
 	}
-	body, err := io.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}

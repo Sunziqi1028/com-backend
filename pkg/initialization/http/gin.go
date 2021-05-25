@@ -18,6 +18,8 @@ func Init() (err error) {
 	Gin.GET("/account/oauth/login/twitter", router.Wrap(account.LoginWithTwitter))
 	Gin.GET("/account/oauth/login/facebook", router.Wrap(account.LoginWithFacebook))
 
+	// Gin.Use()
+
 	/// Below routers need the JWT verification middleware
 
 	// Profile Routers

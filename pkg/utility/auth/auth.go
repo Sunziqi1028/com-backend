@@ -34,7 +34,7 @@ type OauthClient interface {
 	GetUserProfile() (account OauthAccount, err error)
 }
 
-/// FIXME：should replace with ceres http library
+/// FIXME：should replace with ceres http library in the future
 var httpClient = &http.Client{
 	Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -53,27 +53,27 @@ func NewGithubOauthClient(requestToken string) (client OauthClient) {
 }
 
 /// NewFacebookClient
-/// build a new Facebook client with the request token from login 
-func NewFacebookClient(requestToken string) (client OauthClient){
+/// build a new Facebook client with the request token from login
+func NewFacebookClient(requestToken string) (client OauthClient) {
 	return &Facebook{
-		ClientID: auth.FacebookClientID,
+		ClientID:     auth.FacebookClientID,
 		ClientSecret: auth.FacebookClientSecret,
-		RedirectURI: auth.FacebookCallbackURL,
-		client:  httpClient,
+		RedirectURI:  auth.FacebookCallbackURL,
+		client:       httpClient,
 		RequestToken: requestToken,
 	}
 }
 
 /// NewTwitterClient
-/// build a new Twitter client with the request token from login 
-func NewTwitterClient() (client OauthClient){
+/// build a new Twitter client with the request token from login
+func NewTwitterClient() (client OauthClient) {
 
 	return
 }
 
 /// NewLinkedinClient
-/// build a new LinkedIn client with the request token from login 
-func NewLinkedinClient() (client OauthClient){
+/// build a new LinkedIn client with the request token from login
+func NewLinkedinClient() (client OauthClient) {
 
 	return
 }
