@@ -1,12 +1,12 @@
 package auth
 
+// Twitter
 type Twitter struct {
 	ConsumerKey    string
 	ConsumerSecret string
 }
 
-// TwitterOauthAccount
-// Twitter Oauth user profile account
+// TwitterOauthAccount  Twitter Oauth user profile account
 type TwitterOauthAccount struct {
 	ID              string `json:"id"`
 	Name            string `json:"name"`
