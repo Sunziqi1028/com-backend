@@ -33,7 +33,7 @@ jobs:
         run: go test ./
 
       - name: Run go vet
-          run: make govet
+        run: make govet
 
   build:
     name: build
