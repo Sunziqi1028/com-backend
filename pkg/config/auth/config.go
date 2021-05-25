@@ -1,6 +1,6 @@
 package auth
 
-/// will be init at compile time with the -X parameter
+// will be init at compile time with the -X parameter
 
 var (
 	JwtSecret string

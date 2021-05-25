@@ -5,25 +5,25 @@ type Twitter struct {
 	ConsumerSecret string
 }
 
-/// TwitterOauthAccount
-/// Twitter Oauth user profile account
+// TwitterOauthAccount
+// Twitter Oauth user profile account
 type TwitterOauthAccount struct {
 	ID              string `json:"id"`
 	Name            string `json:"name"`
 	ProfileImageURL string `json:"profile_image_url_https"`
 }
 
-/// GetUserID
+// GetUserID
 func (account *TwitterOauthAccount) GetUserID() string {
 	return account.ID
 }
 
-/// GetUserNick
+// GetUserNick
 func (account *TwitterOauthAccount) GetUserNick() string {
 	return account.Name
 }
 
-/// GetUserAvatar
+// GetUserAvatar
 func (account *TwitterOauthAccount) GetUserAvatar() string {
 	return account.ProfileImageURL
 }
