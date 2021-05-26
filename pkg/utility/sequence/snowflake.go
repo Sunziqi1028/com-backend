@@ -1,6 +1,7 @@
 package sequence
 
 import (
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -33,7 +34,7 @@ func NewSnowflake(epoch, workerID uint64) (snowflake *Snowflake) {
 	return &Snowflake{
 		epoch:        epoch,
 		workerID:     workerID,
-		detacenterID: uint64(1),
+		detacenterID: uint64(rand.Int63()),
 	}
 }
 

@@ -1,10 +1,10 @@
 package utility
 
 import (
-	"ceres/pkg/initialization/mysql"
-	"ceres/pkg/model/meta"
 	"ceres/pkg/utility/net"
 	"ceres/pkg/utility/sequence"
+	"strconv"
+	"strings"
 
 	"github.com/gotomicro/ego/core/econf"
 )
@@ -18,13 +18,15 @@ var BountySeqnence sequence.Senquence
 
 func initSequnece() (err error) {
 	machineIP := net.GetDomianIP()
-	machineID := meta.GetMachineID(mysql.DB, machineIP)
+	machineSignature := strings.Replace(machineIP, ".", "", 4)
+	machineID, err := strconv.ParseInt(machineSignature, 10, 64)
+	if err != nil {
+		return
+	}
+	machineID = machineID % 32
 	epoch, _ := econf.Get("ceres.snowflake.epoch").(int) //TODO: should check if this is correct
-
-
 	// Create snowflake sequences
 	AccountSequnece = sequence.NewSnowflake(uint64(epoch), uint64(machineID))
-	
 
 	return
 }
