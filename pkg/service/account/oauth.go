@@ -11,8 +11,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+/// LoginWithOauth
 /// common oauth login logic in comunion
-
 func LoginWithOauth(client auth.OauthClient, oauthType int) (response *account.ComerLoginResponse, err error) {
 
 	oauth, err := client.GetUserProfile()
@@ -67,4 +67,10 @@ func LoginWithOauth(client auth.OauthClient, oauthType int) (response *account.C
 	}
 
 	return
+}
+
+/// LinkOauthAccountToComer
+/// link a new Oauth account to the current comer
+func LinkOauthAccountToComer(uin uint64, client auth.OauthClient, oauthType int) {
+
 }

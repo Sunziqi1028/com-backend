@@ -1,10 +1,3 @@
-create table if not exists meta_snowflake_ip_tbl(
-    id bigint not null auto_increament,
-    ip varchar(30) not null default '' comment 'current machine runtime local IP',
-    create_at datetime not null default current_timestamp,
-    primary key(id) 
-);
-
 create table if not exists comer_tbl(
     id bigint not null auto_increament,
     uin bigint not null comment 'comunion comer unique identifier',

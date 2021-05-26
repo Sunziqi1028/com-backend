@@ -111,3 +111,9 @@ func VerifyEthSignatureAndLogin(address []byte, message []byte, signatue []byte,
 	}
 	return
 }
+
+/// LinkEthAccountToComer
+/// link a new eth wallet account to comer
+func LinkEthAccountToComer() {
+
+}

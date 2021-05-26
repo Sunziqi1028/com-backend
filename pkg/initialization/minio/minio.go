@@ -22,7 +22,7 @@ func Init() (err error) {
 	// init the minio client
 
 	C := &config{}
-	err = econf.UnmarshalKey("ceres.minio", C)
+	err = econf.UnmarshalKey("ceres.minio", C) //TODO：should change the logic to compile variables
 	if err != nil {
 		elog.Panicf("Parsing the minio configurations faild %v", err)
 	}
