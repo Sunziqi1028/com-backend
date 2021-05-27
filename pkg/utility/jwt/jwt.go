@@ -1,15 +1,12 @@
 package jwt
 
 import (
+	"ceres/pkg/config/auth"
 	"fmt"
 	"strconv"
 	"time"
 
 	JWT "github.com/dgrijalva/jwt-go"
-)
-
-var (
-	Secret string
 )
 
 /// Sign jwt token for current uin
@@ -20,14 +17,14 @@ func Sign(uin uint64) (token string) {
 	claims["iat"] = time.Now().Unix()
 	claims["comer_uin"] = fmt.Sprintf("%d", uin)
 	jwt.Claims = claims
-	token, _ = jwt.SignedString(Secret)
+	token, _ = jwt.SignedString(auth.JWTSecret)
 	return
 }
 
 /// Verify jwt token if success then return the uin
 func Verify(token string) (uin uint64, err error) {
 	auth, err := JWT.Parse(token, func(t *JWT.Token) (interface{}, error) {
-		return Secret, nil
+		return auth.JWTSecret, nil
 	})
 	if err != nil {
 		return

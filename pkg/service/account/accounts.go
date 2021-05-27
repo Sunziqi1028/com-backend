@@ -1,3 +1,3 @@
 package account
 
-// manage the account informations
+// manage the account informations link and unlink

@@ -45,16 +45,6 @@ create table if not exists comer_profile_tbl(
     index comer_uin_index(uin) using btree
 );
 
-create table if not exists comer_profile_skill_tag_tbl(
-    id bigint not null auto_increament,
-    name varchar(50) not null comment 'comer skill tag name',
-    valid smallint not null default 1 comment 'if this skill tag is avlidable',
-    create_at datetime not null default current_timestamp,
-    update_at datetime not null default current_timestamp on update current_timestamp,
-    primary key(id)
-);
-
-
 create table if not exists bounty_tbl(
     id bigint not null auto_increament,
     ifentifier bigint not null comment 'comunion bounty identifier',
@@ -86,4 +76,16 @@ create table if not exists bounty_comer_rel_tbl(
     update_at datetime not null default current_timestamp on update current_timestamp,
     primary key(id),
     index bounty_identifier_comer_idx(bounty_identifier, comer_uin, state, type) using btree
+);
+
+create table if not exists comunion_tags_tbl(
+    id bigint not null auto_increament,
+    name varchar(55) not null default '' comment 'comunion tag name',
+    code int not null default 0 comment 'comunion tag code have to be unique',
+    category smallint not null default 0 comment '',
+    create_at datetime not null default current_timestamp,
+    update_at datetime not null default current_timestamp on update current_timestamp,
+    primary key(id),
+    index code_index(code) using btree,
+    unique key(code, category)
 );

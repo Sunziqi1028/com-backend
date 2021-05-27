@@ -12,4 +12,6 @@ var (
 	FacebookClientID     string
 	FacebookClientSecret string
 	FacebookCallbackURL  string
+
+	JWTSecret string
 )

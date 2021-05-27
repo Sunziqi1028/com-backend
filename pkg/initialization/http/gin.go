@@ -3,6 +3,7 @@ package http
 import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/account"
+	"ceres/pkg/router/tags"
 
 	"github.com/gotomicro/ego/server/egin"
 )
@@ -29,6 +30,10 @@ func Init() (err error) {
 	// Disco Routers
 
 	// Goverance Routers
+
+	// tag list no authorization need but need some limit in gateway
+	Gin.GET("/tags/startup/list", router.Wrap(tags.GetStartupTagList))
+	Gin.GET("/tags/skill/list", router.Wrap(tags.GetStartupTagList))
 
 	return
 }

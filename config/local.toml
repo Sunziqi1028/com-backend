@@ -1,3 +1,5 @@
+#TODO: should format next 
+
 [server.http]
     port = 9001
 [server.governor]
@@ -45,3 +47,44 @@
     bucket = ""
 
 "ceres.snowflake.epoch" = 1
+
+# comunion.secret.toml format should covert to this config file format 
+
+# [server.http]
+#     port = 9001
+# [server.grpc]
+#     port = 9002
+# [server.governor]
+#     port = 9003
+
+
+# [ceres.mysql]
+#     connMaxLifetime = "300s"
+#     debug = true
+#     dsn = "root:Comunion2021@tcp(127.0.0.1:3306)/ceres?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local&timeout=1s&readTimeout=5s&writeTimeout=5s"
+#     level = "panic"
+#     maxIdleConns = 50
+#     maxOpenConns = 100
+# [ceres.redis]
+#     debug = true
+#     mode = "stub"
+#     addr = "127.0.0.1:6379"
+
+# [ceres.minio]
+#     accessKey = ""
+#     secretKey = ""
+#     endpoint = ""
+#     bucket = ""
+
+# [ceres.oauth]
+#     [github]
+#         clientID = ""
+#         clientSecret = ""
+#         callbackURL = ""
+#     [facebook]
+#         clientID = ""
+#         clientSecret = ""
+#         callbackURL = ""
+
+# [ceres.snowflake]
+#     epoch = 1

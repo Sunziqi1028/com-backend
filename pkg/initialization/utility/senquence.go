@@ -23,7 +23,7 @@ func initSequnece() (err error) {
 	if err != nil {
 		return
 	}
-	machineID = machineID % 32
+	machineID %= 32
 	epoch, _ := econf.Get("ceres.snowflake.epoch").(int) //TODO: should check if this is correct
 	// Create snowflake sequences
 	AccountSequnece = sequence.NewSnowflake(uint64(epoch), uint64(machineID))

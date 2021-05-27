@@ -35,3 +35,4 @@ default.json.*
 ceres
 run.script
 logs
+comunion.secret.toml
