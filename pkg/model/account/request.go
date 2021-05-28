@@ -11,3 +11,22 @@ type EthSignatureObject struct {
 	S           string `json:"s"`
 	Signature   string `json:"signature"`
 }
+
+/// CreateProfileRequest
+/// create a new profile then will let the entity to backend
+type CreateProfileRequest struct {
+	SKills      []uint64 `json:"skills"`
+	Description string   `json:"description"`
+	About       string   `json:"about"`
+	Email       string   `json:"email"`
+}
+
+/// UpdateProfileRequest
+/// update the comer profile
+type UpdateProfileRequest struct {
+	Identifier  uint64   `json:"identifier"`
+	SKills      []uint64 `json:"skills"`
+	Description string   `json:"description"`
+	About       string   `json:"about"`
+	Email       string   `json:"email"`
+}

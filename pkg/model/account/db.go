@@ -64,6 +64,7 @@ type Profile struct {
 	Remark      string    `gorm:"remark"`
 	Identifier  uint64    `gorm:"identifier"`
 	Name        string    `gorm:"name"`
+	About       string    `gorm:"about"`
 	Description string    `gorm:"description"`
 	Email       string    `gorm:"email"`
 	Skills      string    `gorm:"skills"`
@@ -168,13 +169,37 @@ func GetComerByAccoutOIN(db *gorm.DB, oin string) (comer Comer, err error) {
 }
 
 /// GetComerProfile by the uin
+/// FIXME: should change the function name
 func GetComerProfile(db *gorm.DB, uin uint64) (profile Profile, err error) {
+	db = db.Where("uin = ?", uin).First(&profile)
+	err = db.Error
+	return
+}
 
+/// GetComerProfileByIdentifier by identifier
+func GetComerProfileByIdentifier(db *gorm.DB, identifier uint64) (profile Profile, err error) {
+	db = db.Where("identifier = ?", identifier).First(&profile)
+	err = db.Error
+	return
+}
+
+/// CreateComerProfile create a new comer profile
+func CreateComerProfile(db *gorm.DB, profile *Profile) (err error) {
+	db = db.Save(profile)
+	err = db.Error
+	return
+}
+
+/// UpdateComerProfile update the comer profile
+func UpdateComerProfile(db *gorm.DB, profile *Profile) (err error) {
+	db = db.Save(profile)
+	err = db.Error
 	return
 }
 
 /// GetSkillList by the ids
 func GetSkillList(db *gorm.DB, ids []uint64) (skills []ProfileSkillTag, err error) {
-
+	db = db.Where("id in ?", ids).Find(&skills)
+	err = db.Error
 	return
 }

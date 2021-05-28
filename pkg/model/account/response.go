@@ -14,3 +14,11 @@ type ComerLoginResponse struct {
 type WalletNonceResponse struct {
 	Nonce string `json:"nonce"`
 }
+
+/// ComerProfileResponse return the profile of some comer
+type ComerProfileResponse struct {
+	Skills      []string `json:"skills"`
+	About       string   `json:"about"`
+	Description string   `json:"description"`
+	Email       string   `json:"email"`
+}

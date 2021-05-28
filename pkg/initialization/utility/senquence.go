@@ -14,6 +14,7 @@ import (
 
 // AccountSequnece which will generate the Comer UIN
 var AccountSequnece sequence.Senquence
+var ProfileSequence sequence.Senquence
 var BountySeqnence sequence.Senquence
 
 func initSequnece() (err error) {
@@ -27,6 +28,7 @@ func initSequnece() (err error) {
 	epoch, _ := econf.Get("ceres.snowflake.epoch").(int) //TODO: should check if this is correct
 	// Create snowflake sequences
 	AccountSequnece = sequence.NewSnowflake(uint64(epoch), uint64(machineID))
-
+	ProfileSequence = sequence.NewSnowflake(uint64(epoch), uint64(machineID))
+	BountySeqnence = sequence.NewSnowflake(uint64(epoch), uint64(machineID))
 	return
 }
