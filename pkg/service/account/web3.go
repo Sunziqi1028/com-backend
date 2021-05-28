@@ -15,6 +15,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/jinzhu/gorm"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -68,7 +69,7 @@ func VerifyEthSignatureAndLogin(address []byte, message []byte, signatue []byte,
 	// origin address passed from the frontend is the 0x prefix
 	// but in this logic ceres will move the 0x predix in the router to do next
 
-	comer, err := account.GetComerByAccoutOIN(mysql.DB, o)
+	comer, err := account.GetComerByAccountOIN(mysql.DB, o)
 	if err != nil {
 		elog.Error(err.Error())
 		return
@@ -82,6 +83,7 @@ func VerifyEthSignatureAndLogin(address []byte, message []byte, signatue []byte,
 		comer.Avatar = comer.ComerID
 		comer.Nick = "0x" + o
 		outer := &account.Account{}
+		outer.Identifier = utility.AccountSequnece.Next()
 		outer.OIN = o
 		outer.UIN = comer.UIN
 		outer.IsMain = true
@@ -94,6 +96,11 @@ func VerifyEthSignatureAndLogin(address []byte, message []byte, signatue []byte,
 		err = account.CreateComerWithAccount(mysql.DB, &comer, outer)
 		if err != nil {
 			elog.Errorf("Comunion Eth login faild, because of %v", err)
+			return
+		}
+		_, err = redis.Client.Del(context.TODO(), "0x"+o)
+		if err != nil {
+			elog.Errorf("Comunion redis remove key failed %v", err)
 			return
 		}
 	}
@@ -114,6 +121,64 @@ func VerifyEthSignatureAndLogin(address []byte, message []byte, signatue []byte,
 
 /// LinkEthAccountToComer
 /// link a new eth wallet account to comer
-func LinkEthAccountToComer() {
+func LinkEthAccountToComer(uin uint64, address []byte, message []byte, signatue []byte, walletType int) (err error) {
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		comer, err := account.GetComerByAccountUIN(tx, uin)
+		if err != nil {
+			return err
+		}
+		if comer.ID == 0 {
+			return errors.New("comer is not exists")
+		}
+		publicKey, err := secp256k1.RecoverPubkey(message, signatue)
+		if err != nil {
+			return err
+		}
 
+		o := hex.EncodeToString(address)
+		n := hex.EncodeToString(publicKey)
+
+		if o != n {
+			err = errors.New("illegal login request because the recover failed from the signature")
+			return err
+		}
+		// origin address passed from the frontend is the 0x prefix
+		// but in this logic ceres will move the 0x predix in the router to do next
+		refComer, err := account.GetComerByAccountOIN(mysql.DB, o)
+		if err != nil {
+			elog.Error(err.Error())
+			return err
+		}
+
+		if refComer.ID == 0 {
+			outer, err := account.GetAccountByOIN(tx, o)
+			if err != nil {
+				return err
+			}
+			if outer.ID == 0 {
+				outer.Identifier = utility.AccountSequnece.Next()
+			}
+			outer.OIN = o
+			outer.UIN = comer.UIN
+			outer.IsMain = false
+			outer.IsLinked = true
+			outer.Nick = comer.Nick
+			outer.Avatar = comer.Avatar
+			outer.Category = account.EthAccount
+			outer.Type = walletType
+			// Create the account and comer within transaction
+			err = account.LinkComerWithAccount(mysql.DB, uin, &outer)
+			if err != nil {
+				return err
+			}
+			_, err = redis.Client.Del(context.TODO(), "0x"+o)
+			if err != nil {
+				elog.Errorf("Comunion redis remove key failed %v", err)
+				return nil
+			}
+			return nil
+		}
+		return errors.New("current eth wallet account is linked with a comer")
+	})
+	return
 }

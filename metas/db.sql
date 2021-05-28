@@ -13,6 +13,7 @@ create table if not exists comer_tbl(
 
 create table if not exists account_tbl(
     id bigint not null auto_increament,
+    identifier bigint not null comment 'comunion comer outer account identifier',
     uin bigint not null comment 'comunion comer unique identifier',
     oin varchar(100) not null comment 'comunion comer outer account unique identifier, wallet will be public key and Oauth is the OauthID',
     main smallint not null default 0 comment 'comunion comer use this account as main account',

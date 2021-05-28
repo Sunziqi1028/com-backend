@@ -40,17 +40,18 @@ func (Comer) TableName() string {
 
 /// Account the account model of outer account
 type Account struct {
-	ID       uint64    `gorm:"id"`
-	UIN      uint64    `gorm:"uin"`
-	OIN      string    `gorm:"oin"`
-	IsMain   bool      `gorm:"main"`
-	Nick     string    `gorm:"nick"`
-	Avatar   string    `gorm:"avatar"`
-	Category int       `gorm:"categor"`
-	Type     int       `gorm:"type"`
-	IsLinked bool      `gorm:"linked"`
-	CreateAt time.Time `gorm:"create_at"`
-	UpdateAt time.Time `gorm:"update_at"`
+	ID         uint64    `gorm:"id"`
+	Identifier uint64    `gorm:"identifier"`
+	UIN        uint64    `gorm:"uin"`
+	OIN        string    `gorm:"oin"`
+	IsMain     bool      `gorm:"main"`
+	Nick       string    `gorm:"nick"`
+	Avatar     string    `gorm:"avatar"`
+	Category   int       `gorm:"category"`
+	Type       int       `gorm:"type"`
+	IsLinked   bool      `gorm:"linked"`
+	CreateAt   time.Time `gorm:"create_at"`
+	UpdateAt   time.Time `gorm:"update_at"`
 }
 
 func (Account) TableName() string {
@@ -123,6 +124,22 @@ func UpdateComer(db *gorm.DB, comer *Comer) (err error) {
 	return
 }
 
+/// GetAccountByOIN
+/// get the outer account by OIN
+func GetAccountByOIN(db *gorm.DB, oin string) (account Account, err error) {
+	db = db.Where("oin = ?", oin).First(&account)
+	err = db.Error
+	return
+}
+
+/// GetAccountByIdentifier
+/// get account by identifier
+func GetAccountByIdentifier(db *gorm.DB, identifier uint64) (account Account, err error) {
+	db = db.Where("identifier = ?", identifier).First(&account)
+	err = db.Error
+	return
+}
+
 /// LinkComerWithAccount
 /// link a new account to an existed comer
 func LinkComerWithAccount(db *gorm.DB, uin uint64, account *Account) (err error) {
@@ -135,24 +152,41 @@ func LinkComerWithAccount(db *gorm.DB, uin uint64, account *Account) (err error)
 	return
 }
 
-/// UnlinkComerAndAccount
+/// UnlinkAllComerAndAccounts
 /// unlink the account with oin ref to the comer with uin
-func UnlinkComerAndAccount(db *gorm.DB, uin uint64, account *Account) {
+func UnlinkAllComerAndAccounts(db *gorm.DB, uin uint64, account *Account) {
 	account.IsLinked = false
+	account.UIN = 0
 	db.Where("uin = ?", uin).Save(account)
+}
+
+/// UnlinkComerAccount
+/// unlink one account of comer
+func UnlinkComerAccount(db *gorm.DB, account *Account) (err error) {
+	db = db.Save(account)
+	err = db.Error
+	return
 }
 
 /// ListAllAccountsOfComer
 /// list all accounts of this comer with uin
 func ListAllAccountsOfComer(db *gorm.DB, uin uint64) (list []Account, err error) {
-	res := db.Find(&list)
+	res := db.Where("uin = ?", uin).Find(&list)
 	err = res.Error
 	return
 }
 
-/// GetComerByAccoutOIN
+/// GetComerByAccountUIN
+/// get comer by account uin
+func GetComerByAccountUIN(db *gorm.DB, uin uint64) (comer Comer, err error) {
+	db = db.Where("uin = ?", uin).First(&comer)
+	err = db.Error
+	return
+}
+
+/// GetComerByAccountOIN
 /// get comer entity by the account oin
-func GetComerByAccoutOIN(db *gorm.DB, oin string) (comer Comer, err error) {
+func GetComerByAccountOIN(db *gorm.DB, oin string) (comer Comer, err error) {
 	account := &Account{}
 	db = db.Where("oin = ?", oin).Find(account)
 	err = db.Error

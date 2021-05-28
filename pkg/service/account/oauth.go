@@ -6,8 +6,10 @@ import (
 	"ceres/pkg/model/account"
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
+	"errors"
 
 	"github.com/gotomicro/ego/core/elog"
+	"github.com/jinzhu/gorm"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -20,7 +22,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType int) (response *account.C
 		return
 	}
 	// try to find comer
-	comer, err := account.GetComerByAccoutOIN(mysql.DB, oauth.GetUserID())
+	comer, err := account.GetComerByAccountOIN(mysql.DB, oauth.GetUserID())
 	if err != nil {
 		elog.Errorf("Comunion Oauth login faild, because of %v", err)
 		return
@@ -37,6 +39,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType int) (response *account.C
 		}
 
 		outer := &account.Account{}
+
 		outer.OIN = oauth.GetUserID()
 		outer.UIN = comer.UIN
 		outer.IsMain = true
@@ -71,6 +74,47 @@ func LoginWithOauth(client auth.OauthClient, oauthType int) (response *account.C
 
 /// LinkOauthAccountToComer
 /// link a new Oauth account to the current comer
-func LinkOauthAccountToComer(uin uint64, client auth.OauthClient, oauthType int) {
-
+func LinkOauthAccountToComer(uin uint64, client auth.OauthClient, oauthType int) (err error) {
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		comer, err := account.GetComerByAccountUIN(tx, uin)
+		if err != nil {
+			return err
+		}
+		if comer.ID == 0 {
+			return errors.New("comer is not exists")
+		}
+		oauth, err := client.GetUserProfile()
+		if err != nil {
+			return err
+		}
+		refComer, err := account.GetComerByAccountOIN(mysql.DB, oauth.GetUserID())
+		if err != nil {
+			return err
+		}
+		if refComer.ID == 0 {
+			outer, err := account.GetAccountByOIN(tx, oauth.GetUserID())
+			if err != nil {
+				return err
+			}
+			if outer.ID == 0 {
+				// if current account is not exists then create now
+				outer.Identifier = utility.AccountSequnece.Next()
+			}
+			outer.OIN = oauth.GetUserID()
+			outer.UIN = comer.UIN
+			outer.IsMain = false
+			outer.IsLinked = true
+			outer.Nick = comer.Nick
+			outer.Avatar = comer.Avatar
+			outer.Category = account.OauthAccount
+			outer.Type = oauthType
+			err = account.LinkComerWithAccount(mysql.DB, uin, &outer)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+		return errors.New("current oauth account is linked with a comer")
+	})
+	return
 }
