@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-/// LinkedIn REST Client
-/// implemnetes the OauthClient interface
-/// see https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?context=linkedin%2Fcontext&tabs=HTTPS
+// LinkedIn REST Client
+// implemnetes the OauthClient interface
+// see https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?context=linkedin%2Fcontext&tabs=HTTPS
 type LinkedIn struct {
 	ClientID     string
 	ClientSecret string
@@ -23,8 +23,7 @@ type linkedAccessTokenResponse struct {
 	ExpiredIn   uint64 `json:"expires_in"`
 }
 
-/// GetAccessToken
-/// from the linkedIn open api the parameter in linkedin is named code
+// GetAccessToken from the linkedIn open api the parameter in linkedin is named code
 func (linkedin *LinkedIn) GetAccessToken(requestToken string) (accessToken string, err error) {
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
@@ -54,9 +53,8 @@ func (linkedin *LinkedIn) GetAccessToken(requestToken string) (accessToken strin
 	return
 }
 
-/// GetUserProfile
-/// LinkedIn Oauth get user profile logic
-/// see https://docs.microsoft.com/zh-cn/linkedin/shared/integrations/people/profile-api?context=linkedin/consumer/context
+// GetUserProfile LinkedIn Oauth get user profile logic
+// see https://docs.microsoft.com/zh-cn/linkedin/shared/integrations/people/profile-api?context=linkedin/consumer/context
 func (linkedin *LinkedIn) GetUserProfile(accessToken string, _userId string) (account OauthAccount, err error) {
 
 	return

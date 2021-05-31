@@ -1,8 +1,7 @@
 package account
 
-/// EthSignatureObject
-/// the standard result of the web3.js signature
-/// the signature use the spec256k1 algos
+// EthSignatureObject the standard result of the web3.js signature
+// the signature use the spec256k1 algos
 type EthSignatureObject struct {
 	Address     string `json:"address"`
 	MessageHash string `json:"message_hash"`
@@ -12,8 +11,7 @@ type EthSignatureObject struct {
 	Signature   string `json:"signature"`
 }
 
-/// CreateProfileRequest
-/// create a new profile then will let the entity to backend
+// CreateProfileRequest create a new profile then will let the entity to backend
 type CreateProfileRequest struct {
 	SKills      []uint64 `json:"skills"`
 	Description string   `json:"description"`
@@ -21,8 +19,7 @@ type CreateProfileRequest struct {
 	Email       string   `json:"email"`
 }
 
-/// UpdateProfileRequest
-/// update the comer profile
+// UpdateProfileRequest  update the comer profile
 type UpdateProfileRequest struct {
 	Identifier  uint64   `json:"identifier"`
 	SKills      []uint64 `json:"skills"`

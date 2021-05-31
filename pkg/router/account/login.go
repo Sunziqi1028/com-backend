@@ -9,8 +9,7 @@ import (
 	"strings"
 )
 
-/// LoginWithGithub
-/// login with github oauth
+// LoginWithGithub login with github oauth
 func LoginWithGithub(ctx *router.Context) {
 	requestToken := ctx.Query("request_token")
 	if requestToken == "" {
@@ -26,8 +25,7 @@ func LoginWithGithub(ctx *router.Context) {
 	ctx.OK(response)
 }
 
-/// LoginWithFacebook
-/// login with facebook oauth
+// LoginWithFacebook login with facebook oauth
 func LoginWithFacebook(ctx *router.Context) {
 	requestToken := ctx.Query("request_token")
 	if requestToken == "" {
@@ -43,16 +41,17 @@ func LoginWithFacebook(ctx *router.Context) {
 	ctx.OK(response)
 }
 
+// LoginWithTwitter login with twitter oauth
 func LoginWithTwitter(_ *router.Context) {
 	// TODO: should complete the twitter logic
 }
 
+// LoginWithLinkedIn login with linkedin oauth
 func LoginWithLinkedIn(_ *router.Context) {
 	// TODO: should complete the linkedin logic
 }
 
-/// GetBlockchainLoginNonce
-/// get the blockchain login nonce
+// GetBlockchainLoginNonce get the blockchain login nonce.
 func GetBlockchainLoginNonce(ctx *router.Context) {
 	address := ctx.Query("address")
 	if address == "" {
@@ -73,8 +72,7 @@ func GetBlockchainLoginNonce(ctx *router.Context) {
 	ctx.OK(nonce)
 }
 
-/// LoginWithMetamask
-/// login with the metamask signature
+// LoginWithMetamask login with the metamask signature.
 func LoginWithMetamask(ctx *router.Context) {
 	signature := &model.EthSignatureObject{}
 	err := ctx.BindJSON(signature)

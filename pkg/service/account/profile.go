@@ -11,9 +11,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-/// GetComerProfile
-/// get current comer profile
-/// if profile is not exists then will let the router return 404
+// GetComerProfile get current comer profile
+// if profile is not exists then will let the router return 404
 func GetComerProfile(uin uint64) (response *model.ComerProfileResponse, err error) {
 	profile, err := model.GetComerProfile(mysql.DB, uin)
 	if err != nil {
@@ -42,9 +41,8 @@ func GetComerProfile(uin uint64) (response *model.ComerProfileResponse, err erro
 	return
 }
 
-/// CreateComerProfile
-/// create a new profil for comer
-/// current comer should not be exists now
+// CreateComerProfile  create a new profil for comer
+// current comer should not be exists now
 func CreateComerProfile(uin uint64, post *model.CreateProfileRequest) (err error) {
 	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
 		profile, err := model.GetComerProfile(tx, uin)
@@ -72,9 +70,8 @@ func CreateComerProfile(uin uint64, post *model.CreateProfileRequest) (err error
 	return
 }
 
-/// UpdateComerProfile
-/// update the comer profile
-/// if profile is not exists then will return the not exits error
+// UpdateComerProfile update the comer profile
+// if profile is not exists then will return the not exits error
 func UpdateComerProfile(uin uint64, post *model.UpdateProfileRequest) (err error) {
 	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
 		profile, err := model.GetComerProfileByIdentifier(tx, post.Identifier)

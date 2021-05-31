@@ -9,8 +9,7 @@ import (
 
 // manage the account informations link and unlink
 
-/// GetComerAccounts
-/// get current comer accounts
+// GetComerAccounts get current comer accounts
 func GetComerAccounts(uin uint64) (response *model.ComerOuterAccountListResponse, err error) {
 	accounts, err := model.ListAllAccountsOfComer(mysql.DB, uin)
 	if err != nil {
@@ -35,8 +34,7 @@ func GetComerAccounts(uin uint64) (response *model.ComerOuterAccountListResponse
 	return
 }
 
-/// UnlinkComerAccount
-/// unlink the comer account
+// UnlinkComerAccount  unlink the comer account
 func UnlinkComerAccount(uin, identifier uint64) (err error) {
 	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
 		account, err := model.GetAccountByIdentifier(tx, identifier)

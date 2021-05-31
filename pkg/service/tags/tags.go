@@ -5,9 +5,8 @@ import (
 	model "ceres/pkg/model/tag"
 )
 
-/// GetStartupTagList
-/// return the all startup tags in list
-func GetStartupTagList() (response model.TagListResponse, err error) {
+// GetStartupTagList return the all startup tags in list
+func GetStartupTagList() (response model.ListResponse, err error) {
 	tags, err := model.GetTagListByCategory(mysql.DB, model.StartupTag)
 	if err != nil {
 		return
@@ -25,22 +24,19 @@ func GetStartupTagList() (response model.TagListResponse, err error) {
 	return
 }
 
-/// GetSkillTagList
-/// return the all startup tags in list
-func GetSkillTagList() (response model.TagListResponse, err error) {
+// GetSkillTagList  return the all startup tags in list
+func GetSkillTagList() (response model.ListResponse, err error) {
 	tags, err := model.GetTagListByCategory(mysql.DB, model.SkillTag)
 	if err != nil {
 		return
 	}
-	var list []model.SingleTag
 	for _, tag := range tags {
 		t := model.SingleTag{
 			Name: tag.Name,
 			Code: tag.Code,
 		}
-		list = append(list, t)
+		response.List = append(response.List, t)
 	}
-	response.Total = uint64(len(list))
-	response.List = list
+	response.Total = uint64(len(response.List))
 	return
 }

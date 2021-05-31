@@ -7,6 +7,7 @@ import (
 	"github.com/gotomicro/ego/core/elog"
 )
 
+// Middleware constraints
 const (
 	AuthorizationHeader      = "X-COMUNION-AUTHORIZATION"
 	AuthorizationErrorHeader = "X-COMUNION-AUTHFAILED"
@@ -16,8 +17,7 @@ const (
 	ComerLoginedRole         = "Comer"
 )
 
-/// JwtAuthorizationMiddleware
-/// handle the authorization
+// JwtAuthorizationMiddleware  handle the authorization
 func JwtAuthorizationMiddleware(ctx *gin.Context) {
 
 	token := ctx.Request.Header[AuthorizationHeader]

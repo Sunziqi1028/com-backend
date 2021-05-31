@@ -13,17 +13,17 @@ type TwitterOauthAccount struct {
 	ProfileImageURL string `json:"profile_image_url_https"`
 }
 
-// GetUserID
+// GetUserID implements the OauthAccount interface
 func (account *TwitterOauthAccount) GetUserID() string {
 	return account.ID
 }
 
-// GetUserNick
+// GetUserNick implements the OauthAccount interface
 func (account *TwitterOauthAccount) GetUserNick() string {
 	return account.Name
 }
 
-// GetUserAvatar
+// GetUserAvatar implements the OauthAccount interface
 func (account *TwitterOauthAccount) GetUserAvatar() string {
 	return account.ProfileImageURL
 }

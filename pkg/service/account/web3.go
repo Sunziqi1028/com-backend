@@ -23,15 +23,15 @@ const (
 	expire = time.Second * 240
 )
 
-/// createNonce
-/// create a new nonce
+// createNonce
+// create a new nonce
 func createNonce() string {
 	rand.Seed(time.Now().UnixNano())
 	return fmt.Sprintf("%06v", rand.Intn(1000000000))
 }
 
-/// GenerateWeb3LoginNonce
-/// generate the login nonce help frontend to sign the login signature
+// GenerateWeb3LoginNonce
+// generate the login nonce help frontend to sign the login signature
 func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceResponse, err error) {
 	nonce, err := redis.Client.Get(context.TODO(), address)
 	if err != nil {
@@ -49,11 +49,10 @@ func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceRespon
 	return
 }
 
-/// VerifyEthSignatureAndLogin
-/// verify the signature and login with the eth wallet
-func VerifyEthSignatureAndLogin(address []byte, message []byte, signatue []byte, walletType int) (response *account.ComerLoginResponse, err error) {
+// VerifyEthSignatureAndLogin verify the signature and login with the eth wallet
+func VerifyEthSignatureAndLogin(address []byte, message []byte, signatures []byte, walletType int) (response *account.ComerLoginResponse, err error) {
 
-	publicKey, err := secp256k1.RecoverPubkey(message, signatue)
+	publicKey, err := secp256k1.RecoverPubkey(message, signatures)
 	if err != nil {
 		return
 	}
@@ -119,9 +118,8 @@ func VerifyEthSignatureAndLogin(address []byte, message []byte, signatue []byte,
 	return
 }
 
-/// LinkEthAccountToComer
-/// link a new eth wallet account to comer
-func LinkEthAccountToComer(uin uint64, address []byte, message []byte, signatue []byte, walletType int) (err error) {
+// LinkEthAccountToComer link a new eth wallet account to comer
+func LinkEthAccountToComer(uin uint64, address []byte, message []byte, signatures []byte, walletType int) (err error) {
 	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
 		comer, err := account.GetComerByAccountUIN(tx, uin)
 		if err != nil {
@@ -130,7 +128,7 @@ func LinkEthAccountToComer(uin uint64, address []byte, message []byte, signatue 
 		if comer.ID == 0 {
 			return errors.New("comer is not exists")
 		}
-		publicKey, err := secp256k1.RecoverPubkey(message, signatue)
+		publicKey, err := secp256k1.RecoverPubkey(message, signatures)
 		if err != nil {
 			return err
 		}

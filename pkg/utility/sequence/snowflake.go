@@ -21,7 +21,7 @@ const (
 	timestampShift  = sequenceBits + workerBits + datacenterBits
 )
 
-/// Snowflake algorithm implementation
+// Snowflake algorithm implementation
 type Snowflake struct {
 	sync.Mutex
 	epoch        uint64
@@ -31,16 +31,17 @@ type Snowflake struct {
 	sequence     uint64
 }
 
+// NewSnowflake create a new Snowflake algorithm
 func NewSnowflake(epoch, workerID uint64) (snowflake *Snowflake) {
-	centerId, _ := rand.Int(rand.Reader, big.NewInt(int64(10)))
+	centerID, _ := rand.Int(rand.Reader, big.NewInt(int64(10)))
 	return &Snowflake{
 		epoch:        epoch,
 		workerID:     workerID,
-		detacenterID: uint64(centerId.Bit(32)),
+		detacenterID: uint64(centerID.Bit(32)),
 	}
 }
 
-/// Next implementa the Sequence interface
+// Next implementa the Sequence interface
 func (flake *Snowflake) Next() (seq uint64) {
 	flake.Lock()
 	now := time.Now().UnixNano() / 1000000

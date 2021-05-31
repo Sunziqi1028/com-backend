@@ -8,8 +8,10 @@ import (
 	"github.com/gotomicro/ego/server/egin"
 )
 
+// Gin instance
 var Gin *egin.Component
 
+// Init the Gin instance and the routers
 func Init() (err error) {
 	Gin = egin.Load("server.http").Build()
 	// register the router at this
@@ -21,7 +23,7 @@ func Init() (err error) {
 
 	// Gin.Use()
 
-	/// Below routers need the JWT verification middleware
+	// Below routers need the JWT verification middleware
 
 	// Profile Routers
 

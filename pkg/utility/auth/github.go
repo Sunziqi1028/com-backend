@@ -9,8 +9,8 @@ import (
 	"net/url"
 )
 
-/// Github REST client
-/// implemnetes the OauthClient interface
+// Github REST client
+// implemnetes the OauthClient interface
 type Github struct {
 	ClientID     string
 	ClientSecret string
@@ -18,8 +18,7 @@ type Github struct {
 	requestToken string
 }
 
-/// NewGithubClient
-/// create a new github client
+// NewGithubClient  create a new github client
 func NewGithubClient(clientID, clientSecret string) (github *Github) {
 	github = &Github{
 		ClientID:     clientID,
@@ -39,8 +38,7 @@ type githubAccessTokenResponse struct {
 	TokenType   string `json:"token_type"`
 }
 
-/// GetAccessToken
-/// use the requestToken to get the access token which will be used to get the github user information
+// getAccessToken  use the requestToken to get the access token which will be used to get the github user information
 func (github *Github) getAccessToken(requestToken string) (accessToken string, err error) {
 	u, _ := url.Parse(
 		fmt.Sprintf(
@@ -74,9 +72,8 @@ func (github *Github) getAccessToken(requestToken string) (accessToken string, e
 	return
 }
 
-/// GithubUserProfile
-/// response of api.github.com/user
-/// this struct implement the ceres/session/OauthAccount interface
+// GithubUserProfile  response of api.github.com/user
+// this struct implement the ceres/session/OauthAccount interface
 type GithubUserProfile struct {
 	Login  string `json:"login"`
 	ID     uint64 `json:"id"`
@@ -84,23 +81,22 @@ type GithubUserProfile struct {
 	Avatar string `json:"avatar_url"`
 }
 
-/// implement the OauthAccount interface
+// GetUserID implement the OauthAccount interface
 func (account *GithubUserProfile) GetUserID() string {
 	return account.Login
 }
 
-/// implement the OauthAccount interface
+// GetUserAvatar implement the OauthAccount interface
 func (account *GithubUserProfile) GetUserAvatar() string {
 	return account.Avatar
 }
 
-/// implement the OauthAccount interface
+// GetUserNick implement the OauthAccount interface
 func (account *GithubUserProfile) GetUserNick() string {
 	return account.Name
 }
 
-/// GetUserProfile
-/// get user profile information from api.github.com/user
+// GetUserProfile  get user profile information from api.github.com/user
 func (github *Github) GetUserProfile() (account OauthAccount, err error) {
 	accessToken, err := github.getAccessToken(github.requestToken)
 	if err != nil {

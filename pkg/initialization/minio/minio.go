@@ -7,10 +7,13 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
+// Client minio client
 var Client *minio.Client
+
+// Bucket bucket name
 var Bucket string
 
-/// minio configuration from the configuration files
+// minio configuration from the configuration files
 type config struct {
 	AccessKey string
 	SecretKey string
@@ -18,6 +21,7 @@ type config struct {
 	Bucket    string
 }
 
+// Init the minio
 func Init() (err error) {
 	// init the minio client
 

@@ -12,9 +12,8 @@ import (
 	"github.com/gotomicro/ego/core/elog"
 )
 
-/// GetPresignedURLForUpload
-/// to generate the presigned url with the file url
-/// and the frontend using this URL to upload
+// GetPresignedURLForUpload  to generate the presigned url with the file url
+// and the frontend using this URL to upload
 func GetPresignedURLForUpload(ctx *router.Context) {
 	name := ctx.Query("file_name")
 	if name == "" {
@@ -25,7 +24,8 @@ func GetPresignedURLForUpload(ctx *router.Context) {
 	}
 	uin := ctx.Keys[middleware.ComerUinContextKey]
 	if uin == nil {
-		ctx.ERROR( //FIXME: should change to the HTTP status to redirect the FE re login ?
+		//FIXME: should change to the HTTP status to redirect the FE re login
+		ctx.ERROR(
 			router.ErrForbidden,
 			"should login again",
 		)

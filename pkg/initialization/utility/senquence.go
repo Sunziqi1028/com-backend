@@ -12,9 +12,13 @@ import (
 // Snowflake init logic, have to first check the ip
 // use the database id as the
 
-// AccountSequnece which will generate the Comer UIN
+// AccountSequnece generate the comer uin sequence
 var AccountSequnece sequence.Senquence
+
+// ProfileSequence generate the profile sequence
 var ProfileSequence sequence.Senquence
+
+// BountySeqnence generate the bounty sequence
 var BountySeqnence sequence.Senquence
 
 func initSequnece() (err error) {
