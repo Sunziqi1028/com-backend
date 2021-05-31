@@ -1,7 +1,8 @@
 package sequence
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"sync"
 	"time"
 )
@@ -31,10 +32,11 @@ type Snowflake struct {
 }
 
 func NewSnowflake(epoch, workerID uint64) (snowflake *Snowflake) {
+	centerId, _ := rand.Int(rand.Reader, big.NewInt(int64(10)))
 	return &Snowflake{
 		epoch:        epoch,
 		workerID:     workerID,
-		detacenterID: uint64(rand.Int63()),
+		detacenterID: uint64(centerId.Bit(32)),
 	}
 }
 
