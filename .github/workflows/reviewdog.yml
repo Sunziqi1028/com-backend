@@ -12,7 +12,7 @@ jobs:
       - name: golangci-lint
         uses: reviewdog/action-golangci-lint@v1
         with:
-          golangci_lint_flags: "--enable-all --timeout=10m --exclude-use-default=false --tests=false --disable=gochecknoinits,gochecknoglobals,exhaustive,nakedret,exhaustivestruct"
+          golangci_lint_flags: "--timeout=10m --exclude-use-default=false --tests=false --enable=deadcode,govet,errcheck,gosimple,ineffassign,structcheck,staticcheck,unused,varcheck"
           workdir: pkg
 
   test:

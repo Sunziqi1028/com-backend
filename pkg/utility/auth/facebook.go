@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gotomicro/ego/core/elog"
 )
 
 // Facebook REST client
@@ -44,12 +46,16 @@ func (facebook *Facebook) getAccessToken() (accessToken string, err error) {
 	if err != nil {
 		return
 	}
-	defer response.Body.Close()
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
 	r := facebookAccessTokenResponse{}
+	err = response.Body.Close()
+	if err != nil {
+		elog.Warnf("close the response body failed %v", err)
+	}
 	err = json.Unmarshal(body, &r)
 	if err != nil {
 		return
@@ -109,13 +115,17 @@ func (facebook *Facebook) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		return
 	}
-	defer response.Body.Close()
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
 
 	r := facebookInspectResposne{}
+	err = response.Body.Close()
+	if err != nil {
+		elog.Warnf("close the body failed %v", err)
+	}
 	err = json.Unmarshal(body, &r)
 	if err != nil {
 		return
