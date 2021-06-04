@@ -1,10 +1,14 @@
 package account
 
 import (
+	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
+	"ceres/pkg/utility/auth"
+	"encoding/hex"
 	"strconv"
+	"strings"
 )
 
 // ListAccounts list all accounts of the Comer
@@ -37,11 +41,82 @@ func UnlinkAccount(ctx *router.Context) {
 }
 
 // LinkWithGithub link current account with github
-func LinkWithGithub(_ *router.Context) {
+func LinkWithGithub(ctx *router.Context) {
+	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	requestToken := ctx.Query("request_token")
+	if requestToken == "" {
+		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
+		return
+	}
+	client := auth.NewGithubOauthClient(requestToken)
+	err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
+	if err != nil {
+		ctx.ERROR(router.ErrBuisnessError, err.Error())
+		return
 
+	}
+	ctx.OK(nil)
 }
 
 // LinkWithGithub link current account with github
-func LinkWithMetamask(_ *router.Context) {
+// FIXME: should eliminate the duplicate code in the login api
+func LinkWithMetamask(ctx *router.Context) {
+	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	signature := &model.EthSignatureObject{}
+	err := ctx.BindJSON(signature)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrParametersInvaild,
+			"wrong metamask login parameter",
+		)
+		return
+	}
 
+	// Replace the 0x prefix
+
+	a := strings.Replace(signature.Address, "0x", "", 1)
+	s := strings.Replace(signature.Signature, "0x", "", 1)
+	m := strings.Replace(signature.MessageHash, "0x", "", 1)
+
+	address, err := hex.DecodeString(a)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrParametersInvaild,
+			"illegal address",
+		)
+		return
+	}
+	sign, err := hex.DecodeString(s)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrParametersInvaild,
+			"illegal signature",
+		)
+	}
+	message, err := hex.DecodeString(m)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrParametersInvaild,
+			"illegal message",
+		)
+		return
+	}
+
+	err = service.LinkEthAccountToComer(
+		uin,
+		address,
+		message,
+		sign,
+		model.MetamaskEth,
+	)
+
+	if err != nil {
+		ctx.ERROR(
+			router.ErrBuisnessError,
+			err.Error(),
+		)
+		return
+	}
+
+	ctx.OK(nil)
 }
