@@ -115,6 +115,9 @@ func (github *Github) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		return
 	}
+
+	resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return

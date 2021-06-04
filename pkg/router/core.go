@@ -8,6 +8,7 @@ const (
 	ErrForbidden         = 403
 	ErrTokenExpired      = 401
 	ErrBuisnessError     = 500
+	Ok = 200
 )
 
 // Response http base response
@@ -36,7 +37,7 @@ func Wrap(h HandlerFunc) gin.HandlerFunc {
 // OK return with 200
 func (ctx *Context) OK(data interface{}) {
 	ctx.JSON(
-		200,
+		Ok,
 		data,
 	)
 }
@@ -44,7 +45,7 @@ func (ctx *Context) OK(data interface{}) {
 // ERROR with message
 func (ctx *Context) ERROR(code int, message string) {
 	ctx.Context.JSON(
-		200,
+		Ok,
 		&Response{
 			Code:    code,
 			Message: message,
@@ -56,7 +57,7 @@ func (ctx *Context) ERROR(code int, message string) {
 // JSON return data with code
 func (ctx *Context) JSON(code int, data interface{}) {
 	ctx.Context.JSON(
-		200,
+		Ok,
 		&Response{
 			Code:    code,
 			Message: "Success",

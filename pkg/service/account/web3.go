@@ -38,6 +38,7 @@ func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceRespon
 		elog.Debugf("NONCE test is %s", nonce)
 		return
 	}
+
 	if nonce == "" {
 		nonce = createNonce()
 		err = redis.Client.Set(context.TODO(), address, nonce, expire)
@@ -45,7 +46,9 @@ func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceRespon
 			return
 		}
 	}
+
 	response = &account.WalletNonceResponse{Nonce: nonce}
+	
 	return
 }
 
@@ -120,17 +123,17 @@ func VerifyEthLogin(address []byte, message []byte, signatures []byte, walletTyp
 
 // LinkEthAccountToComer link a new eth wallet account to comer
 func LinkEthAccountToComer(uin uint64, address []byte, message []byte, signatures []byte, walletType int) (err error) {
-	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+	err = mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
 		comer, err := account.GetComerByAccountUIN(tx, uin)
 		if err != nil {
-			return err
+			return
 		}
 		if comer.ID == 0 {
 			return errors.New("comer is not exists")
 		}
 		publicKey, err := secp256k1.RecoverPubkey(message, signatures)
 		if err != nil {
-			return err
+			return
 		}
 
 		o := hex.EncodeToString(address)

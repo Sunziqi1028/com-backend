@@ -57,7 +57,6 @@ func (facebook *Facebook) getAccessToken() (accessToken string, err error) {
 	accessToken = r.AccessToken
 
 	return
-
 }
 
 type facebookInspectBody struct {
