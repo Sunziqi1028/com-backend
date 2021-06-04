@@ -119,6 +119,6 @@ func (github *Github) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		return
 	}
-	json.Unmarshal(body, &account)
+	err = json.Unmarshal(body, &account)
 	return
 }

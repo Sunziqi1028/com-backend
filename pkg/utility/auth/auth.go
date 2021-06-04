@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"ceres/pkg/config/auth"
+	"ceres/pkg/config"
 	"crypto/tls"
 	"net/http"
 )
@@ -42,8 +42,8 @@ var httpClient = &http.Client{
 // NewGithubOauthClient  build a new Github client with the request token from login
 func NewGithubOauthClient(requestToken string) (client OauthClient) {
 	return &Github{
-		ClientID:     auth.GithubClientID,
-		ClientSecret: auth.GithubClientSecret,
+		ClientID:     config.Github.ClientID,
+		ClientSecret: config.Github.ClientSecret,
 		client:       httpClient,
 		requestToken: requestToken,
 	}
@@ -52,9 +52,9 @@ func NewGithubOauthClient(requestToken string) (client OauthClient) {
 // NewFacebookClient build a new Facebook client with the request token from login
 func NewFacebookClient(requestToken string) (client OauthClient) {
 	return &Facebook{
-		ClientID:     auth.FacebookClientID,
-		ClientSecret: auth.FacebookClientSecret,
-		RedirectURI:  auth.FacebookCallbackURL,
+		ClientID:     config.Facebook.ClientID,
+		ClientSecret: config.Facebook.ClientSecret,
+		RedirectURI:  config.Facebook.CallbackURL,
 		client:       httpClient,
 		RequestToken: requestToken,
 	}

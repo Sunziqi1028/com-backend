@@ -36,3 +36,4 @@ ceres
 run.script
 logs
 comunion.secret.toml
+comunion.local.toml

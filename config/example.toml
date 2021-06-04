@@ -7,7 +7,6 @@
 [server.governor]
     port = 9003
 
-
 [ceres.mysql]
     connMaxLifetime = "300s"
     debug = true
@@ -26,15 +25,24 @@
     endpoint = ""
     bucket = ""
 
-[ceres.oauth]
-    [github]
-        clientID = ""
-        clientSecret = ""
-        callbackURL = ""
-    [facebook]
-        clientID = ""
-        clientSecret = ""
-        callbackURL = ""
+[ceres.logger]
+    debug = false
+    level = "debug"
 
-[ceres.snowflake]
+[ceres.oauth.github]
+    clientID = ""
+    clientSecret = ""
+    callbackURL = ""
+    
+[ceres.oauth.facebook]
+    clientID = ""
+    clientSecret = ""
+    callbackURL = ""
+
+[ceres.sequence]
     epoch = 1
+
+[ceres.jwt]
+    # expired in 72 hours
+    expired = 259200
+    secret = "Comunion-Ceres"

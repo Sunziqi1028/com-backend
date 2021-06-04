@@ -7,6 +7,6 @@ var DB *egorm.Component
 
 // Init the mysql
 func Init() error {
-	DB = egorm.Load("mysql.user").Build()
+	DB = egorm.Load("ceres.mysql").Build()
 	return nil
 }

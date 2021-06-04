@@ -9,16 +9,11 @@ import (
 
 const (
 	timestampBits   = uint(41)
-	datacenterBits  = uint(5)
 	workerBits      = uint(5)
 	sequenceBits    = uint(12)
-	timestampMax    = uint64(-1 ^ (-1 << timestampBits))
-	datacenterMax   = uint64(-1 ^ (-1 << datacenterBits))
-	workerMax       = uint64(-1 ^ (-1 << workerBits))
 	sequenceMask    = uint64(-1 ^ (-1 << sequenceBits))
 	workeridShift   = sequenceBits
 	datacenterShift = sequenceBits + workerBits
-	timestampShift  = sequenceBits + workerBits + datacenterBits
 )
 
 // Snowflake algorithm implementation

@@ -1,12 +1,11 @@
 package utility
 
 import (
+	"ceres/pkg/config"
 	"ceres/pkg/utility/net"
 	"ceres/pkg/utility/sequence"
 	"strconv"
 	"strings"
-
-	"github.com/gotomicro/ego/core/econf"
 )
 
 // Snowflake init logic, have to first check the ip
@@ -29,10 +28,9 @@ func initSequnece() (err error) {
 		return
 	}
 	machineID %= 32
-	epoch, _ := econf.Get("ceres.snowflake.epoch").(int) //TODO: should check if this is correct
 	// Create snowflake sequences
-	AccountSequnece = sequence.NewSnowflake(uint64(epoch), uint64(machineID))
-	ProfileSequence = sequence.NewSnowflake(uint64(epoch), uint64(machineID))
-	BountySeqnence = sequence.NewSnowflake(uint64(epoch), uint64(machineID))
+	AccountSequnece = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
+	ProfileSequence = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
+	BountySeqnence = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
 	return
 }

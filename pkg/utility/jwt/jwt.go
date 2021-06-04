@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"ceres/pkg/config/auth"
+	"ceres/pkg/config"
 	"fmt"
 	"strconv"
 	"time"
@@ -13,18 +13,18 @@ import (
 func Sign(uin uint64) (token string) {
 	jwt := JWT.New(JWT.SigningMethodHS256)
 	claims := make(JWT.MapClaims)
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(72)).Unix()
+	claims["exp"] = time.Now().Add(time.Duration(config.JWT.Expired) * time.Duration(72)).Unix()
 	claims["iat"] = time.Now().Unix()
 	claims["comer_uin"] = fmt.Sprintf("%d", uin)
 	jwt.Claims = claims
-	token, _ = jwt.SignedString(auth.JWTSecret)
+	token, _ = jwt.SignedString(config.JWT.Secret)
 	return
 }
 
 // Verify jwt token if success then return the uin
 func Verify(token string) (uin uint64, err error) {
 	auth, err := JWT.Parse(token, func(t *JWT.Token) (interface{}, error) {
-		return auth.JWTSecret, nil
+		return []byte(config.JWT.Secret), nil
 	})
 	if err != nil {
 		return
