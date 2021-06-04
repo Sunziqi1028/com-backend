@@ -44,6 +44,7 @@ func (facebook *Facebook) getAccessToken() (accessToken string, err error) {
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
@@ -54,6 +55,7 @@ func (facebook *Facebook) getAccessToken() (accessToken string, err error) {
 		return
 	}
 	accessToken = r.AccessToken
+
 	return
 
 }
@@ -108,6 +110,7 @@ func (facebook *Facebook) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		return
 	}
+	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return

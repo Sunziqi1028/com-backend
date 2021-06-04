@@ -43,5 +43,6 @@ func GetPresignedURLForUpload(ctx *router.Context) {
 		)
 		return
 	}
+
 	ctx.OK(signed)
 }

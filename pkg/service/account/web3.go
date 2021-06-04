@@ -49,8 +49,8 @@ func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceRespon
 	return
 }
 
-// VerifyEthSignatureAndLogin verify the signature and login with the eth wallet
-func VerifyEthSignatureAndLogin(address []byte, message []byte, signatures []byte, walletType int) (response *account.ComerLoginResponse, err error) {
+// VerifyEthLogin verify the signature and login with the eth wallet
+func VerifyEthLogin(address []byte, message []byte, signatures []byte, walletType int) (response *account.ComerLoginResponse, err error) {
 
 	publicKey, err := secp256k1.RecoverPubkey(message, signatures)
 	if err != nil {

@@ -11,7 +11,7 @@ func GetStartupTagList() (response model.ListResponse, err error) {
 	if err != nil {
 		return
 	}
-	var list []model.SingleTag
+	list := make([]model.SingleTag, 0)
 	for _, tag := range tags {
 		t := model.SingleTag{
 			Name: tag.Name,

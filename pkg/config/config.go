@@ -2,19 +2,19 @@ package config
 
 // Ceres configuration from the .toml file
 
-// Minio configuration for ceres to access the minio server
+// Minio configuration for ceres to access the minio server.
 var Minio *MinioConfig
 
-// Github Oauth configuration
+// Github Oauth configuration.
 var Github *GithubOauth
 
-// Facebook Oauth configuration
+// Facebook Oauth configuration.
 var Facebook *FacebookOauth
 
-// JWT configuration
+// JWT configuration.
 var JWT *JWTConfig
 
-// Seq configuration
+// Seq configuration.
 var Seq *Sequence
 
 // MinioConfig from the .toml file

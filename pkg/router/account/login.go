@@ -114,7 +114,7 @@ func LoginWithMetamask(ctx *router.Context) {
 		return
 	}
 
-	resposne, err := service.VerifyEthSignatureAndLogin(
+	resposne, err := service.VerifyEthLogin(
 		address,
 		message,
 		sign,

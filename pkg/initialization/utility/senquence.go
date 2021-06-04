@@ -24,10 +24,10 @@ func initSequnece() (err error) {
 	machineIP := net.GetDomianIP()
 	machineSignature := strings.Replace(machineIP, ".", "", 4)
 	machineID, err := strconv.ParseInt(machineSignature, 10, 64)
+	machineID %= 32
 	if err != nil {
 		return
 	}
-	machineID %= 32
 	// Create snowflake sequences
 	AccountSequnece = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
 	ProfileSequence = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))

@@ -28,7 +28,7 @@ type OauthAccount interface {
 
 // OauthClient  Abstraction of Oauth Login logic
 type OauthClient interface {
-	// GetUserProfile
+	// GetUserProfile return oauth account profile from third website
 	GetUserProfile() (account OauthAccount, err error)
 }
 
@@ -62,12 +62,10 @@ func NewFacebookClient(requestToken string) (client OauthClient) {
 
 // NewTwitterClient  build a new Twitter client with the request token from login
 func NewTwitterClient() (client OauthClient) {
-
 	return
 }
 
 // NewLinkedinClient  build a new LinkedIn client with the request token from login
 func NewLinkedinClient() (client OauthClient) {
-
 	return
 }

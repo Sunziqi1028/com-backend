@@ -15,6 +15,7 @@ func GetStartupTagList(ctx *router.Context) {
 		)
 		return
 	}
+
 	ctx.OK(response)
 }
 
@@ -28,5 +29,6 @@ func GetSkillTagList(ctx *router.Context) {
 		)
 		return
 	}
+
 	ctx.OK(response)
 }

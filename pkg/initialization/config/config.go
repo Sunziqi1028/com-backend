@@ -9,7 +9,6 @@ import (
 // Init the config structure from the .toml
 func Init() error {
 	// Logger = elog.DefaultLogger
-
 	C.Github = &C.GithubOauth{}
 	C.Facebook = &C.FacebookOauth{}
 	C.Minio = &C.MinioConfig{}

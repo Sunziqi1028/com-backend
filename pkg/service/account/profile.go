@@ -22,7 +22,7 @@ func GetComerProfile(uin uint64) (response *model.ComerProfileResponse, err erro
 	if profile.ID == 0 {
 		return
 	}
-	var skillIds []uint64
+	skillIds := make([]uint64, 0)
 	for _, v := range strings.Split(profile.Skills, ",") {
 		id, _ := strconv.ParseInt(v, 10, 64)
 		skillIds = append(skillIds, uint64(id))
