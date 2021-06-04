@@ -41,7 +41,6 @@ func UnlinkComerAccount(uin, identifier uint64) (err error) {
 		if err != nil {
 			return err
 		}
-		account.UIN = 0 // remove the uin linked with this comer
 		err = model.UnlinkComerAccount(tx, &account)
 		if err != nil {
 			return err

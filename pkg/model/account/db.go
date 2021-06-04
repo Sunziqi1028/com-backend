@@ -150,15 +150,10 @@ func LinkComerWithAccount(db *gorm.DB, uin uint64, account *Account) (err error)
 	return
 }
 
-// UnlinkAllComerAndAccounts  unlink the account with oin ref to the comer with uin
-func UnlinkAllComerAndAccounts(db *gorm.DB, uin uint64, account *Account) {
-	account.IsLinked = false
-	account.UIN = 0
-	db.Where("uin = ?", uin).Save(account)
-}
-
 // UnlinkComerAccount unlink one account of comer
 func UnlinkComerAccount(db *gorm.DB, account *Account) (err error) {
+	account.IsLinked = false
+	account.UIN = 0
 	db = db.Save(account)
 	err = db.Error
 	return
