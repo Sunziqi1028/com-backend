@@ -1,5 +1,7 @@
 package auth
 
+/// TODO: need help to complete the twitter oauth login logic
+
 // Twitter
 type Twitter struct {
 	ConsumerKey    string
