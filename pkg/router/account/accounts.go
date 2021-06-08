@@ -120,3 +120,18 @@ func LinkWithMetamask(ctx *router.Context) {
 
 	ctx.OK(nil)
 }
+
+// CheckComerExists
+func CheckComerExists(ctx *router.Context) {
+	oin := ctx.Query("oin")
+	result, err := service.CheckComerExists(oin)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrBuisnessError,
+			err.Error(),
+		)
+		return
+	}
+
+	ctx.OK(result)
+}
