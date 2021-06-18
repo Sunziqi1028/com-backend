@@ -1,10 +1,3 @@
-create table if not exists meta_snowflake_ip_tbl(
-    id bigint not null auto_increament,
-    ip varchar(30) not null default '' comment 'current machine runtime local IP',
-    create_at datetime not null default current_timestamp,
-    primary key(id) 
-);
-
 create table if not exists comer_tbl(
     id bigint not null auto_increament,
     uin bigint not null comment 'comunion comer unique identifier',
@@ -20,6 +13,7 @@ create table if not exists comer_tbl(
 
 create table if not exists account_tbl(
     id bigint not null auto_increament,
+    identifier bigint not null comment 'comunion comer outer account identifier',
     uin bigint not null comment 'comunion comer unique identifier',
     oin varchar(100) not null comment 'comunion comer outer account unique identifier, wallet will be public key and Oauth is the OauthID',
     main smallint not null default 0 comment 'comunion comer use this account as main account',
@@ -40,9 +34,10 @@ create table if not exists comer_profile_tbl(
     uin bigint not null default 0 comment 'comunion comer uin',
     remark varchar(30) not null default '' comment 'comunion profile name',
     identifier bigint not null comment 'comunion comer profile',
-    name varchar(50) not null comment 'comunion comer which name comer wanna displaying to other',
-    description varchar(255) not null comment 'comunion comer profile description',
-    email varchar(100) not null comment 'comunion comer profile email',
+    name varchar(50) not null default '' comment 'comunion comer which name comer wanna displaying to other',
+    about varchar(255) not null default '' comment 'comunion comer about information',
+    description varchar(255) not null default '' comment 'comunion comer profile description',
+    email varchar(100) not null  default '' comment 'comunion comer profile email',
     version int not null default 1 comment 'comunion comer profile version',
     skills varchar(30) not null default '' comment 'comunion comer skills list split by comma',
     create_at datetime not null default current_timestamp,
@@ -51,16 +46,6 @@ create table if not exists comer_profile_tbl(
     index profile_identifier_idx(identifier) using btree,
     index comer_uin_index(uin) using btree
 );
-
-create table if not exists comer_profile_skill_tag_tbl(
-    id bigint not null auto_increament,
-    name varchar(50) not null comment 'comer skill tag name',
-    valid smallint not null default 1 comment 'if this skill tag is avlidable',
-    create_at datetime not null default current_timestamp,
-    update_at datetime not null default current_timestamp on update current_timestamp,
-    primary key(id)
-);
-
 
 create table if not exists bounty_tbl(
     id bigint not null auto_increament,
@@ -93,4 +78,16 @@ create table if not exists bounty_comer_rel_tbl(
     update_at datetime not null default current_timestamp on update current_timestamp,
     primary key(id),
     index bounty_identifier_comer_idx(bounty_identifier, comer_uin, state, type) using btree
+);
+
+create table if not exists comunion_tags_tbl(
+    id bigint not null auto_increament,
+    name varchar(55) not null default '' comment 'comunion tag name',
+    code int not null default 0 comment 'comunion tag code have to be unique',
+    category smallint not null default 0 comment '',
+    create_at datetime not null default current_timestamp,
+    update_at datetime not null default current_timestamp on update current_timestamp,
+    primary key(id),
+    index code_index(code) using btree,
+    unique key(code, category)
 );

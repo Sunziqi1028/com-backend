@@ -3,6 +3,7 @@
 package main
 
 import (
+	"ceres/pkg/initialization/config"
 	"ceres/pkg/initialization/http"
 	"ceres/pkg/initialization/logger"
 	"ceres/pkg/initialization/metrics"
@@ -16,6 +17,7 @@ import (
 
 func main() {
 	// Order
+	// init the config file
 	// init the logger
 	// init the gorm
 	// init the redis
@@ -25,6 +27,7 @@ func main() {
 	// init the gin
 
 	if err := ego.New().Invoker(
+		config.Init,
 		logger.Init,
 		mysql.Init,
 		redis.Init,

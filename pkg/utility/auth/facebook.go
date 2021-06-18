@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gotomicro/ego/core/elog"
 )
 
-/// Facebook REST client
-/// implemnetes the OauthClient interface
-/// https://developers.facebook.com/docs/facebook-login/advanced
+// Facebook REST client
+// implemnetes the OauthClient interface
+// https://developers.facebook.com/docs/facebook-login/advanced
 type Facebook struct {
 	ClientID     string
 	ClientSecret string
@@ -25,8 +27,8 @@ type facebookAccessTokenResponse struct {
 	ExpiresIn   uint64 `json:"expires_in"`
 }
 
-/// GetAccessToken
-/// use the requestToken to get the access token which will be used to get the github user information
+// GetAccessToken
+// use the requestToken to get the access token which will be used to get the github user information
 func (facebook *Facebook) getAccessToken() (accessToken string, err error) {
 	u := fmt.Sprintf(
 		"https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s&client_secret=%s&code=%s",
@@ -44,18 +46,23 @@ func (facebook *Facebook) getAccessToken() (accessToken string, err error) {
 	if err != nil {
 		return
 	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
 	r := facebookAccessTokenResponse{}
+	err = response.Body.Close()
+	if err != nil {
+		elog.Warnf("close the response body failed %v", err)
+	}
 	err = json.Unmarshal(body, &r)
 	if err != nil {
 		return
 	}
 	accessToken = r.AccessToken
-	return
 
+	return
 }
 
 type facebookInspectBody struct {
@@ -70,31 +77,29 @@ func (response *facebookInspectResposne) GetUserID() string {
 	return response.Data.UserID
 }
 
-/// FacebookOauthAccount
-/// Facebook Oauth account profile
+// FacebookOauthAccount  Facebook Oauth account profile
 type FacebookOauthAccount struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Picture string `json:"picture"`
 }
 
-/// implement the OauthAccount interface
+// GetUserID implement the OauthAccount interface
 func (account *FacebookOauthAccount) GetUserID() string {
 	return account.ID
 }
 
-/// implement the OauthAccount interface
+// GetUserAvatar implement the OauthAccount interface
 func (account *FacebookOauthAccount) GetUserAvatar() string {
 	return account.Picture
 }
 
-/// implement the OauthAccount interface
+// GetUserNick implement the OauthAccount interface
 func (account *FacebookOauthAccount) GetUserNick() string {
 	return account.Name
 }
 
-/// GetUserProfile
-/// Facebook Oauth get user profile logic
+// GetUserProfile  Facebook Oauth get user profile logic
 func (facebook *Facebook) GetUserProfile() (account OauthAccount, err error) {
 	accessToken, err := facebook.getAccessToken()
 	if err != nil {
@@ -110,12 +115,17 @@ func (facebook *Facebook) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		return
 	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
 
 	r := facebookInspectResposne{}
+	err = response.Body.Close()
+	if err != nil {
+		elog.Warnf("close the body failed %v", err)
+	}
 	err = json.Unmarshal(body, &r)
 	if err != nil {
 		return

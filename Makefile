@@ -5,9 +5,9 @@ GOFILES=`find . -name "*.go" -type f -not -path "./vendor/*"`
 
 
 gofmt:
-		echo "正在使用gofmt格式化文件..."
+		echo "formating with gofmt..."
 		gofmt -s -w ${GOFILES}
-		echo "格式化完成"
+		echo "complete with gofmt"
 govet:
-		echo "正在进行静态检测..."
+		echo "doing statics check..."
 		go vet $(VETPACKAGES)

@@ -2,7 +2,7 @@ package net
 
 import "net"
 
-/// GetDomianIP
+// GetDomianIP get current machine domain IP
 func GetDomianIP() string {
 	addrs, _ := net.InterfaceAddrs()
 	for _, addr := range addrs {

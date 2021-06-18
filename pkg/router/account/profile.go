@@ -1,15 +1,71 @@
 package account
 
-import "ceres/pkg/router"
+import (
+	model "ceres/pkg/model/account"
+	"ceres/pkg/router"
+	"ceres/pkg/router/middleware"
+	service "ceres/pkg/service/account"
+)
 
-func CreateProfile(_ *router.Context) {
+// CreateProfile create the profile
+func CreateProfile(ctx *router.Context) {
+	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	request := &model.CreateProfileRequest{}
+	err := ctx.BindJSON(request)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrParametersInvaild,
+			"wrong metamask login parameter",
+		)
+		return
+	}
+	err = service.CreateComerProfile(uin, request)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrBuisnessError,
+			"wrong metamask login parameter",
+		)
+		return
+	}
 
+	ctx.OK(nil)
 }
 
-func GetProfile(_ *router.Context) {
+// GetProfile get current Comer profile
+func GetProfile(ctx *router.Context) {
+	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	response, err := service.GetComerProfile(uin)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrBuisnessError,
+			"wrong metamask login parameter",
+		)
+		return
+	}
 
+	ctx.OK(response)
 }
 
-func UpdateProfile(_ *router.Context) {
+// UpdateProfile update the profile
+func UpdateProfile(ctx *router.Context) {
+	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	request := &model.UpdateProfileRequest{}
+	err := ctx.BindJSON(request)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrParametersInvaild,
+			"wrong metamask login parameter",
+		)
+		return
+	}
+	err = service.UpdateComerProfile(uin, request)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrBuisnessError,
+			"wrong metamask login parameter",
+		)
+		return
+	}
 
+	ctx.OK(nil)
 }
