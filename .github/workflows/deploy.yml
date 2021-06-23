@@ -26,7 +26,6 @@ jobs:
           port: ${{ secrets.DEV_PORT }}
           source: "main"
           target: ${{ secrets.DEV_BIN_PATH }}
-          strip_components: 2
       - name: Restart server
         uses: appleboy/ssh-action@master
         with:
