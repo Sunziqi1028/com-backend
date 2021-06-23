@@ -1,5 +1,5 @@
 create table if not exists comer_tbl(
-    id bigint not null auto_increament,
+    id bigint not null auto_increment,
     uin bigint not null comment 'comunion comer unique identifier',
     address varchar(50) not null default '' comment 'comunion comer could save some useful info on block chain with this address',
     comer_id varchar(35) not null default '' comment 'comunion comer UUID',
@@ -12,7 +12,7 @@ create table if not exists comer_tbl(
 );
 
 create table if not exists account_tbl(
-    id bigint not null auto_increament,
+    id bigint not null auto_increment,
     identifier bigint not null comment 'comunion comer outer account identifier',
     uin bigint not null comment 'comunion comer unique identifier',
     oin varchar(100) not null comment 'comunion comer outer account unique identifier, wallet will be public key and Oauth is the OauthID',
@@ -30,7 +30,7 @@ create table if not exists account_tbl(
 );
 
 create table if not exists comer_profile_tbl(
-    id bigint not null auto_increament,
+    id bigint not null auto_increment,
     uin bigint not null default 0 comment 'comunion comer uin',
     remark varchar(30) not null default '' comment 'comunion profile name',
     identifier bigint not null comment 'comunion comer profile',
@@ -48,8 +48,8 @@ create table if not exists comer_profile_tbl(
 );
 
 create table if not exists bounty_tbl(
-    id bigint not null auto_increament,
-    ifentifier bigint not null comment 'comunion bounty identifier',
+    id bigint not null auto_increment,
+    identifier bigint not null comment 'comunion bounty identifier',
     startup_identifier bigint not null comment 'comunion startup identifier',
     name varchar(50) not null comment 'comunion bounty name',
     description varchar(255) not null comment 'comunion shorter description of this bounty',
@@ -64,11 +64,11 @@ create table if not exists bounty_tbl(
     primary key(id),
     index bounty_identifier_idx(identifier) using btree,
     index bounty_startup_idx(startup_identifier) using btree,
-    index bounty_creator_idx(created_by) using btree,
+    index bounty_creator_idx(created_by) using btree
 );
 
 create table if not exists bounty_comer_rel_tbl(
-    id bigint not null auto_increament,
+    id bigint not null auto_increment,
     bounty_identifier bigint not null comment 'comunion bounty identifier',
     comer_uin bigint not null comment 'comunion comer UIN',
     state smallint not null default 0 comment 'comer active state 1 for submit 2 for start work 3 for end work',
@@ -81,7 +81,7 @@ create table if not exists bounty_comer_rel_tbl(
 );
 
 create table if not exists comunion_tags_tbl(
-    id bigint not null auto_increament,
+    id bigint not null auto_increment,
     name varchar(55) not null default '' comment 'comunion tag name',
     code int not null default 0 comment 'comunion tag code have to be unique',
     category smallint not null default 0 comment '',
