@@ -33,16 +33,16 @@ jobs:
         port: ${{ secrets.PORT }}
         script: sytemctl restart ceres
     - name: Notification
-        uses: erguotou520/instant-access-action@0.0.4
-        if: ${{ success() }}
-        with:
-          channel: '71c28249ce744d73b2af16b7c5364e45'
-          head: '{{branchName}}部署完成'
-          body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
-      - name: Notification
-        uses: erguotou520/instant-access-action@0.0.4
-        if: ${{ failure() }}
-        with:
-          channel: '71c28249ce744d73b2af16b7c5364e45'
-          head: '{{branchName}}部署失败'
-          body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
+      uses: erguotou520/instant-access-action@0.0.4
+      if: ${{ success() }}
+      with:
+        channel: '71c28249ce744d73b2af16b7c5364e45'
+        head: '{{branchName}}部署完成'
+        body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
+    - name: Notification
+      uses: erguotou520/instant-access-action@0.0.4
+      if: ${{ failure() }}
+      with:
+        channel: '71c28249ce744d73b2af16b7c5364e45'
+        head: '{{branchName}}部署失败'
+        body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
