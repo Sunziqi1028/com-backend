@@ -110,6 +110,7 @@ func CreateComerWithAccount(db *gorm.DB, comer *Comer, account *Account) (err er
 		}
 		return nil
 	})
+
 	return
 }
 
@@ -122,6 +123,7 @@ func DeleteComer(db *gorm.DB, comer *Comer) {
 func UpdateComer(db *gorm.DB, comer *Comer) (err error) {
 	r := db.Save(comer)
 	err = r.Error
+
 	return
 }
 
@@ -129,6 +131,7 @@ func UpdateComer(db *gorm.DB, comer *Comer) (err error) {
 func GetAccountByOIN(db *gorm.DB, oin string) (account Account, err error) {
 	db = db.Where("oin = ?", oin).First(&account)
 	err = db.Error
+
 	return
 }
 
@@ -136,6 +139,7 @@ func GetAccountByOIN(db *gorm.DB, oin string) (account Account, err error) {
 func GetAccountByIdentifier(db *gorm.DB, identifier uint64) (account Account, err error) {
 	db = db.Where("identifier = ?", identifier).First(&account)
 	err = db.Error
+
 	return
 }
 
@@ -147,6 +151,7 @@ func LinkComerWithAccount(db *gorm.DB, uin uint64, account *Account) (err error)
 	}
 	r := db.Save(account)
 	err = r.Error
+
 	return
 }
 
@@ -163,6 +168,7 @@ func UnlinkComerAccount(db *gorm.DB, account *Account) (err error) {
 func ListAllAccountsOfComer(db *gorm.DB, uin uint64) (list []Account, err error) {
 	res := db.Where("uin = ?", uin).Find(&list)
 	err = res.Error
+
 	return
 }
 
@@ -170,6 +176,7 @@ func ListAllAccountsOfComer(db *gorm.DB, uin uint64) (list []Account, err error)
 func GetComerByAccountUIN(db *gorm.DB, uin uint64) (comer Comer, err error) {
 	db = db.Where("uin = ?", uin).First(&comer)
 	err = db.Error
+
 	return
 }
 
@@ -187,6 +194,7 @@ func GetComerByAccountOIN(db *gorm.DB, oin string) (comer Comer, err error) {
 	if err != nil {
 		return
 	}
+
 	return
 }
 
@@ -195,6 +203,7 @@ func GetComerByAccountOIN(db *gorm.DB, oin string) (comer Comer, err error) {
 func GetComerProfile(db *gorm.DB, uin uint64) (profile Profile, err error) {
 	db = db.Where("uin = ?", uin).First(&profile)
 	err = db.Error
+
 	return
 }
 
@@ -202,6 +211,7 @@ func GetComerProfile(db *gorm.DB, uin uint64) (profile Profile, err error) {
 func GetComerProfileByIdentifier(db *gorm.DB, identifier uint64) (profile Profile, err error) {
 	db = db.Where("identifier = ?", identifier).First(&profile)
 	err = db.Error
+
 	return
 }
 
@@ -209,6 +219,7 @@ func GetComerProfileByIdentifier(db *gorm.DB, identifier uint64) (profile Profil
 func CreateComerProfile(db *gorm.DB, profile *Profile) (err error) {
 	db = db.Save(profile)
 	err = db.Error
+
 	return
 }
 
@@ -216,6 +227,7 @@ func CreateComerProfile(db *gorm.DB, profile *Profile) (err error) {
 func UpdateComerProfile(db *gorm.DB, profile *Profile) (err error) {
 	db = db.Save(profile)
 	err = db.Error
+
 	return
 }
 
@@ -223,5 +235,6 @@ func UpdateComerProfile(db *gorm.DB, profile *Profile) (err error) {
 func GetSkillList(db *gorm.DB, ids []uint64) (skills []ProfileSkillTag, err error) {
 	db = db.Where("id in ?", ids).Find(&skills)
 	err = db.Error
+	
 	return
 }

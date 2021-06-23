@@ -47,7 +47,6 @@ func (flake *Snowflake) Next() (seq uint64) {
 				now = time.Now().UnixNano() / 1000000
 			}
 		}
-
 	} else {
 		flake.sequence = 0
 	}

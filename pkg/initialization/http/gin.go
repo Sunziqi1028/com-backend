@@ -18,6 +18,12 @@ func Init() (err error) {
 	Gin = egin.Load("server.http").Build()
 	// register the router at this
 
+	// account without token
+	accountWhite := Gin.Group("/account/white")
+	{
+		accountWhite.GET("/check", router.Wrap(account.CheckComerExists))
+	}
+
 	// oauth login router
 	oauthLogin := Gin.Group("/account/oauth/login")
 	{

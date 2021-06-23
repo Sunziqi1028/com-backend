@@ -9,7 +9,7 @@ import (
 	JWT "github.com/dgrijalva/jwt-go"
 )
 
-// Sign jwt token for current uin
+// Sign jwt token for current uin.
 func Sign(uin uint64) (token string) {
 	jwt := JWT.New(JWT.SigningMethodHS256)
 	claims := make(JWT.MapClaims)
@@ -18,10 +18,11 @@ func Sign(uin uint64) (token string) {
 	claims["comer_uin"] = fmt.Sprintf("%d", uin)
 	jwt.Claims = claims
 	token, _ = jwt.SignedString(config.JWT.Secret)
+	
 	return
 }
 
-// Verify jwt token if success then return the uin
+// Verify jwt token if success then return the uin.
 func Verify(token string) (uin uint64, err error) {
 	auth, err := JWT.Parse(token, func(t *JWT.Token) (interface{}, error) {
 		return []byte(config.JWT.Secret), nil
@@ -35,5 +36,6 @@ func Verify(token string) (uin uint64, err error) {
 	if err != nil {
 		return
 	}
+	
 	return
 }

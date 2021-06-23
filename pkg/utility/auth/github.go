@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/gotomicro/ego/core/elog"
 )
 
 // Github REST client
@@ -115,10 +117,16 @@ func (github *Github) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		return
 	}
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}
+	err = resp.Body.Close()
+	if err != nil {
+		elog.Warnf("close the response body false %v", err)
+	}
 	err = json.Unmarshal(body, &account)
+
 	return
 }

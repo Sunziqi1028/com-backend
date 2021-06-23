@@ -49,3 +49,15 @@ func UnlinkComerAccount(uin, identifier uint64) (err error) {
 	})
 	return
 }
+
+// CheckComerExists check if the comer is exists with this outer account
+func CheckComerExists(oin string) (exists bool, err error) {
+	comer, err := model.GetAccountByOIN(mysql.DB, oin)
+	if err != nil {
+		exists = false
+	}
+	if comer.ID == 0 {
+		exists = false
+	}
+	return
+}

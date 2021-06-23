@@ -15,7 +15,6 @@ import (
 
 // LoginWithOauth common oauth login logic in comunion
 func LoginWithOauth(client auth.OauthClient, oauthType int) (response *account.ComerLoginResponse, err error) {
-
 	oauth, err := client.GetUserProfile()
 	if err != nil {
 		return
