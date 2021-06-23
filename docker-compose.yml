@@ -1,0 +1,17 @@
+version: '3.7'
+services:
+  comunion-redis:
+    image: redis
+    container_name: comunion-redis
+    restart: always
+    ports:
+      - 6379:6379
+  comunion-mysql:
+    image: mysql:5.7
+    container_name: comunion-mysql
+    restart: always
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD} 
