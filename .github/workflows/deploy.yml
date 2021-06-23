@@ -5,44 +5,45 @@ on:
       - main
 
 jobs:
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
-    - name: Install dependencies
-      run: go mod download
-    - name: Test
-      run: make govet
-    - name: Build
-      run: go build main.go
-    - name: Deploy
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        source: "main"
-        target: ${{ secrets.BIN_PATH }}
-    - name: Rerun
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        script: sytemctl restart ceres
-    - name: Notification
-      uses: erguotou520/instant-access-action@0.0.4
-      if: ${{ success() }}
-      with:
-        channel: '71c28249ce744d73b2af16b7c5364e45'
-        head: '{{branchName}}部署完成'
-        body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
-    - name: Notification
-      uses: erguotou520/instant-access-action@0.0.4
-      if: ${{ failure() }}
-      with:
-        channel: '71c28249ce744d73b2af16b7c5364e45'
-        head: '{{branchName}}部署失败'
-        body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - name: Install dependencies
+        run: go mod download
+      - name: Test
+        run: make govet
+      - name: Build
+        run: go build main.go
+      - name: Deploy
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "main"
+          target: ${{ secrets.BIN_PATH }}
+      - name: Rerun
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: sytemctl restart ceres
+      - name: Notification
+        uses: erguotou520/instant-access-action@0.0.4
+        if: ${{ success() }}
+        with:
+          channel: "71c28249ce744d73b2af16b7c5364e45"
+          head: "{{branchName}}部署完成"
+          body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
+      - name: Notification
+        uses: erguotou520/instant-access-action@0.0.4
+        if: ${{ failure() }}
+        with:
+          channel: "71c28249ce744d73b2af16b7c5364e45"
+          head: "{{branchName}}部署失败"
+          body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
