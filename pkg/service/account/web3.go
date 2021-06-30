@@ -35,15 +35,14 @@ func createNonce() string {
 func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceResponse, err error) {
 	nonce, err := redis.Client.Get(context.TODO(), address)
 	if err != nil {
-		elog.Debugf("NONCE test is %s", nonce)
-		return
+		elog.Debugf("NONCE test is %s", err.Error())
 	}
 
 	if nonce == "" {
 		nonce = createNonce()
 		err = redis.Client.Set(context.TODO(), address, nonce, expire)
 		if err != nil {
-			return
+			elog.Warnf("NONCE set fail %s", err.Error())
 		}
 	}
 
