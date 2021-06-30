@@ -7,6 +7,8 @@ import (
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
 	"errors"
+	"strings"
+	"time"
 
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/jinzhu/gorm"
@@ -28,10 +30,13 @@ func LoginWithOauth(client auth.OauthClient, oauthType int) (response *account.C
 
 	if comer.ID == 0 {
 		// create comer with account
+		now := time.Now()
 		comer.UIN = utility.AccountSequnece.Next()
 		comer.Avatar = oauth.GetUserAvatar()
 		comer.Nick = oauth.GetUserNick()
-		comer.ComerID = uuid.Must(uuid.NewV4(), nil).String()
+		comer.ComerID = strings.Replace(uuid.Must(uuid.NewV4(), nil).String(), "-", "", -1)
+		comer.CreateAt = now
+		comer.UpdateAt = now
 		if comer.Avatar == "" {
 			comer.Avatar = comer.ComerID
 		}
@@ -46,6 +51,8 @@ func LoginWithOauth(client auth.OauthClient, oauthType int) (response *account.C
 		outer.Avatar = comer.Avatar
 		outer.Category = account.OauthAccount
 		outer.Type = oauthType
+		outer.CreateAt = now
+		outer.UpdateAt = now
 		// Create the account and comer within transaction
 		err = account.CreateComerWithAccount(mysql.DB, &comer, outer)
 		if err != nil {
@@ -97,6 +104,7 @@ func LinkOauthAccountToComer(uin uint64, client auth.OauthClient, oauthType int)
 				// if current account is not exists then create now
 				outer.Identifier = utility.AccountSequnece.Next()
 			}
+			now := time.Now()
 			outer.OIN = oauth.GetUserID()
 			outer.UIN = comer.UIN
 			outer.IsMain = false
@@ -105,6 +113,8 @@ func LinkOauthAccountToComer(uin uint64, client auth.OauthClient, oauthType int)
 			outer.Avatar = comer.Avatar
 			outer.Category = account.OauthAccount
 			outer.Type = oauthType
+			outer.CreateAt = now
+			outer.UpdateAt = now
 			err = account.LinkComerWithAccount(mysql.DB, uin, &outer)
 			if err != nil {
 				return err

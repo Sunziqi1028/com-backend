@@ -24,14 +24,14 @@ const (
 
 // Comer the comer model of comunion inner account
 type Comer struct {
-	ID       uint64    `gorm:"id"`
-	UIN      uint64    `gorm:"uin"`
-	Address  string    `gorm:"address"`
-	ComerID  string    `gorm:"comer_id"`
-	Nick     string    `gorm:"nick"`
-	Avatar   string    `gorm:"avatar"`
-	CreateAt time.Time `gorm:"create_at"`
-	UpdateAt time.Time `gorm:"update_at"`
+	ID       uint64    `gorm:"column:id"`
+	UIN      uint64    `gorm:"column:uin"`
+	Address  string    `gorm:"column:address"`
+	ComerID  string    `gorm:"column:comer_id"`
+	Nick     string    `gorm:"column:nick"`
+	Avatar   string    `gorm:"column:avatar"`
+	CreateAt time.Time `gorm:"column:create_at"`
+	UpdateAt time.Time `gorm:"column:update_at"`
 }
 
 // TableName Comer table name for gorm
@@ -41,18 +41,18 @@ func (Comer) TableName() string {
 
 // Account the account model of outer account
 type Account struct {
-	ID         uint64    `gorm:"id"`
-	Identifier uint64    `gorm:"identifier"`
-	UIN        uint64    `gorm:"uin"`
-	OIN        string    `gorm:"oin"`
-	IsMain     bool      `gorm:"main"`
-	Nick       string    `gorm:"nick"`
-	Avatar     string    `gorm:"avatar"`
-	Category   int       `gorm:"category"`
-	Type       int       `gorm:"type"`
-	IsLinked   bool      `gorm:"linked"`
-	CreateAt   time.Time `gorm:"create_at"`
-	UpdateAt   time.Time `gorm:"update_at"`
+	ID         uint64    `gorm:"column:id"`
+	Identifier uint64    `gorm:"column:identifier"`
+	UIN        uint64    `gorm:"column:uin"`
+	OIN        string    `gorm:"column:oin"`
+	IsMain     bool      `gorm:"column:main"`
+	Nick       string    `gorm:"column:nick"`
+	Avatar     string    `gorm:"column:avatar"`
+	Category   int       `gorm:"column:category"`
+	Type       int       `gorm:"column:type"`
+	IsLinked   bool      `gorm:"column:linked"`
+	CreateAt   time.Time `gorm:"column:create_at"`
+	UpdateAt   time.Time `gorm:"column:update_at"`
 }
 
 // TableName the Account table name for gorm
@@ -62,18 +62,18 @@ func (Account) TableName() string {
 
 // Profile the comer profile model
 type Profile struct {
-	ID          uint64    `gorm:"id"`
-	UIN         uint64    `gorm:"uin"`
-	Remark      string    `gorm:"remark"`
-	Identifier  uint64    `gorm:"identifier"`
-	Name        string    `gorm:"name"`
-	About       string    `gorm:"about"`
-	Description string    `gorm:"description"`
-	Email       string    `gorm:"email"`
-	Skills      string    `gorm:"skills"`
-	Version     int       `gorm:"version"`
-	CreateAt    time.Time `gorm:"create_at"`
-	UpdateAt    time.Time `gorm:"update_at"`
+	ID          uint64    `gorm:"column:id"`
+	UIN         uint64    `gorm:"column:uin"`
+	Remark      string    `gorm:"column:remark"`
+	Identifier  uint64    `gorm:"column:identifier"`
+	Name        string    `gorm:"column:name"`
+	About       string    `gorm:"column:about"`
+	Description string    `gorm:"column:description"`
+	Email       string    `gorm:"column:email"`
+	Skills      string    `gorm:"column:skills"`
+	Version     int       `gorm:"column:version"`
+	CreateAt    time.Time `gorm:"column:create_at"`
+	UpdateAt    time.Time `gorm:"column:update_at"`
 }
 
 // TableName the Profile table name for gorm
@@ -83,11 +83,11 @@ func (Profile) TableName() string {
 
 // ProfileSkillTag profile skill tag model
 type ProfileSkillTag struct {
-	ID       uint64    `gorm:"id"`
-	Name     string    `gorm:"name"`
-	Vaild    bool      `gorm:"vaild"`
-	CreateAt time.Time `gorm:"create_at"`
-	UpdateAt time.Time `gorm:"update_at"`
+	ID       uint64    `gorm:"column:id"`
+	Name     string    `gorm:"column:name"`
+	Vaild    bool      `gorm:"column:vaild"`
+	CreateAt time.Time `gorm:"column:create_at"`
+	UpdateAt time.Time `gorm:"column:update_at"`
 }
 
 // TableName the ProfileSkillTag table name for gorm
@@ -98,12 +98,12 @@ func (ProfileSkillTag) TableName() string {
 // CreateComerWithAccount  using the outer acccount to create a comer
 func CreateComerWithAccount(db *gorm.DB, comer *Comer, account *Account) (err error) {
 	err = db.Transaction(func(tx *gorm.DB) error {
-		r := tx.Create(comer)
+		r := tx.Save(comer)
 		e := r.Error
 		if e != nil {
 			return e
 		}
-		r = tx.Create(account)
+		r = tx.Save(account)
 		e = r.Error
 		if e != nil {
 			return e
@@ -183,15 +183,16 @@ func GetComerByAccountUIN(db *gorm.DB, uin uint64) (comer Comer, err error) {
 // GetComerByAccountOIN  get comer entity by the account oin
 func GetComerByAccountOIN(db *gorm.DB, oin string) (comer Comer, err error) {
 	account := &Account{}
-	db = db.Where("oin = ?", oin).Find(account)
-	err = db.Error
-	if err != nil {
+	if err = db.Where("oin = ?", oin).Find(account).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = nil
+		}
 		return
 	}
-	uin := account.UIN
-	db = db.Where("uin = ?", uin).Find(&comer)
-	err = db.Error
-	if err != nil {
+	if err = db.Where("uin = ?", account.UIN).Find(&comer).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = nil
+		}
 		return
 	}
 
@@ -235,6 +236,6 @@ func UpdateComerProfile(db *gorm.DB, profile *Profile) (err error) {
 func GetSkillList(db *gorm.DB, ids []uint64) (skills []ProfileSkillTag, err error) {
 	db = db.Where("id in ?", ids).Find(&skills)
 	err = db.Error
-	
+
 	return
 }

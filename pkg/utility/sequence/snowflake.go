@@ -1,8 +1,6 @@
 package sequence
 
 import (
-	"crypto/rand"
-	"math/big"
 	"sync"
 	"time"
 )
@@ -12,8 +10,8 @@ const (
 	workerBits      = uint(5)
 	sequenceBits    = uint(12)
 	sequenceMask    = uint64(-1 ^ (-1 << sequenceBits))
-	workeridShift   = sequenceBits
-	datacenterShift = sequenceBits + workerBits
+	workeridShift   = sequenceBits + timestampBits
+	datacenterShift = sequenceBits + workerBits + timestampBits
 )
 
 // Snowflake algorithm implementation
@@ -28,23 +26,22 @@ type Snowflake struct {
 
 // NewSnowflake create a new Snowflake algorithm
 func NewSnowflake(epoch, workerID uint64) (snowflake *Snowflake) {
-	centerID, _ := rand.Int(rand.Reader, big.NewInt(int64(10)))
 	return &Snowflake{
 		epoch:        epoch,
 		workerID:     workerID,
-		detacenterID: uint64(centerID.Bit(32)),
+		detacenterID: uint64(1),
 	}
 }
 
 // Next implementa the Sequence interface
 func (flake *Snowflake) Next() (seq uint64) {
 	flake.Lock()
-	now := time.Now().UnixNano() / 1000000
+	now := time.Now().UnixNano() / 1e9
 	if flake.timestamp == uint64(now) {
 		flake.sequence = (flake.sequence + 1) & uint64(sequenceMask)
 		if flake.sequence == 0 {
 			for now <= int64(flake.timestamp) {
-				now = time.Now().UnixNano() / 1000000
+				now = time.Now().UnixNano() / 1e9
 			}
 		}
 	} else {
@@ -53,7 +50,7 @@ func (flake *Snowflake) Next() (seq uint64) {
 	t := now - int64(flake.epoch)
 	flake.timestamp = uint64(now)
 	seq = uint64(
-		(t << int64(timestampBits)) |
+		(t) |
 			(int64(flake.detacenterID) << int64(datacenterShift)) |
 			(int64(flake.workerID) << int64(workeridShift)) |
 			int64(flake.sequence))

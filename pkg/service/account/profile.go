@@ -7,6 +7,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -50,10 +51,13 @@ func CreateComerProfile(uin uint64, post *model.CreateProfileRequest) (err error
 			return err
 		}
 		if profile.ID == 0 {
+			now := time.Now()
 			profile.About = post.About
 			profile.Description = post.Description
 			profile.Email = post.Email
 			profile.Identifier = utility.ProfileSequence.Next()
+			profile.CreateAt = now
+			profile.UpdateAt = now
 			var skillIds []string
 			for _, id := range post.SKills {
 				skillIds = append(skillIds, strconv.FormatInt(int64(id), 10))
@@ -99,6 +103,7 @@ func UpdateComerProfile(uin uint64, post *model.UpdateProfileRequest) (err error
 		if profile.About != post.About && post.About != "" {
 			profile.About = post.About
 		}
+		profile.UpdateAt = time.Now()
 		err = model.UpdateComerProfile(tx, &profile)
 		if err != nil {
 			return err
