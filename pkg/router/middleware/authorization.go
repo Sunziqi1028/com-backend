@@ -27,6 +27,7 @@ func ComerAuthorizationMiddleware() gin.HandlerFunc {
 // GuestAuthorizationMiddleware return the guest authorization middleware
 func GuestAuthorizationMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		ctx.Keys = make(map[string]interface{})
 		ctx.Keys[ComerUinContextKey] = 0
 		ctx.Keys[ComerRoleContextKey] = ComerGuestRole
 		ctx.Next()
@@ -44,8 +45,9 @@ func JwtAuthorizationMiddleware(ctx *gin.Context) {
 		if err != nil {
 			elog.Warnf("Verify the request token failed %v", err)
 			ctx.Header(AuthorizationErrorHeader, err.Error()) // return the error to the client
-			ctx.JSON(router.ErrForbidden, nil)
+			ctx.AbortWithStatusJSON(router.ErrForbidden, nil)
 		} else {
+			ctx.Keys = make(map[string]interface{})
 			ctx.Keys[ComerUinContextKey] = uin
 			ctx.Keys[ComerRoleContextKey] = ComerLoginedRole
 			ctx.Next()
