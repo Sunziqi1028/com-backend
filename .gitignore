@@ -37,3 +37,4 @@ run.script
 logs
 comunion.secret.toml
 comunion.local.toml
+__debug_bin
