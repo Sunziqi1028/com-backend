@@ -6,9 +6,7 @@ import (
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
-	"encoding/hex"
 	"strconv"
-	"strings"
 )
 
 // ListAccounts list all accounts of the Comer
@@ -72,41 +70,11 @@ func LinkWithMetamask(ctx *router.Context) {
 		return
 	}
 
-	// Replace the 0x prefix
-
-	a := strings.Replace(signature.Address, "0x", "", 1)
-	s := strings.Replace(signature.Signature, "0x", "", 1)
-	m := strings.Replace(signature.MessageHash, "0x", "", 1)
-
-	address, err := hex.DecodeString(a)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"illegal address",
-		)
-		return
-	}
-	sign, err := hex.DecodeString(s)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"illegal signature",
-		)
-	}
-	message, err := hex.DecodeString(m)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"illegal message",
-		)
-		return
-	}
-
 	err = service.LinkEthAccountToComer(
 		uin,
-		address,
-		message,
-		sign,
+		signature.Address,
+		signature.MessageHash,
+		signature.Signature,
 		model.MetamaskEth,
 	)
 

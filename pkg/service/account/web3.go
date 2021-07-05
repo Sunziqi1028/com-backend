@@ -7,13 +7,15 @@ import (
 	"ceres/pkg/model/account"
 	"ceres/pkg/utility/jwt"
 	"context"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gotomicro/ego/core/elog"
 	"github.com/jinzhu/gorm"
 	uuid "github.com/satori/go.uuid"
@@ -47,30 +49,34 @@ func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceRespon
 	}
 
 	response = &account.WalletNonceResponse{Nonce: nonce}
-	
+
 	return
 }
 
 // VerifyEthLogin verify the signature and login with the eth wallet
-func VerifyEthLogin(address []byte, message []byte, signatures []byte, walletType int) (response *account.ComerLoginResponse, err error) {
+// FIXME: have to check the address nonce in redis to keep the request is vaild 
+func VerifyEthLogin(address, messageHash, signature string, walletType int) (response *account.ComerLoginResponse, err error) {
+	addrKey := common.HexToAddress(address)
+	sig := hexutil.MustDecode(signature)
+	if sig[64] == 27 || sig[64] == 28 {
+		sig[64] -= 27
+	}
+	// if not end with 27 then will be error in message in the response
+	hash := hexutil.MustDecode(messageHash)
 
-	publicKey, err := secp256k1.RecoverPubkey(message, signatures)
+	pubKey, err := crypto.SigToPub(hash, sig)
 	if err != nil {
 		return
 	}
 
-	o := hex.EncodeToString(address)
-	n := hex.EncodeToString(publicKey)
+	recoverAddr := crypto.PubkeyToAddress(*pubKey)
 
-	if o != n {
-		err = errors.New("illegal login request because the recover failed from the signature")
+	if recoverAddr != addrKey {
+		err = errors.New("Not match the origin public key")
 		return
 	}
 
-	// origin address passed from the frontend is the 0x prefix
-	// but in this logic ceres will move the 0x predix in the router to do next
-
-	comer, err := account.GetComerByAccountOIN(mysql.DB, o)
+	comer, err := account.GetComerByAccountOIN(mysql.DB, address)
 	if err != nil {
 		elog.Error(err.Error())
 		return
@@ -79,13 +85,16 @@ func VerifyEthLogin(address []byte, message []byte, signatures []byte, walletTyp
 	if comer.ID == 0 {
 		// create a new comer with the origin ID
 		// create comer with account
+		now := time.Now()
 		comer.UIN = utility.AccountSequnece.Next()
-		comer.ComerID = uuid.Must(uuid.NewV4(), nil).String()
+		comer.ComerID = strings.Replace(uuid.Must(uuid.NewV4(), nil).String(), "-", "", -1)
 		comer.Avatar = comer.ComerID
-		comer.Nick = "0x" + o
+		comer.Nick = address
+		comer.CreateAt = now
+		comer.UpdateAt = now
 		outer := &account.Account{}
 		outer.Identifier = utility.AccountSequnece.Next()
-		outer.OIN = o
+		outer.OIN = address
 		outer.UIN = comer.UIN
 		outer.IsMain = true
 		outer.IsLinked = true
@@ -93,16 +102,17 @@ func VerifyEthLogin(address []byte, message []byte, signatures []byte, walletTyp
 		outer.Avatar = comer.Avatar
 		outer.Category = account.EthAccount
 		outer.Type = walletType
+		outer.CreateAt = now
+		outer.UpdateAt = now
 		// Create the account and comer within transaction
 		err = account.CreateComerWithAccount(mysql.DB, &comer, outer)
 		if err != nil {
 			elog.Errorf("Comunion Eth login faild, because of %v", err)
 			return
 		}
-		_, err = redis.Client.Del(context.TODO(), "0x"+o)
+		_, err = redis.Client.Del(context.TODO(), address)
 		if err != nil {
 			elog.Errorf("Comunion redis remove key failed %v", err)
-			return
 		}
 	}
 
@@ -121,7 +131,8 @@ func VerifyEthLogin(address []byte, message []byte, signatures []byte, walletTyp
 }
 
 // LinkEthAccountToComer link a new eth wallet account to comer
-func LinkEthAccountToComer(uin uint64, address []byte, message []byte, signatures []byte, walletType int) (err error) {
+// FIXME: have to check the address nonce in redis to keep the request is vaild 
+func LinkEthAccountToComer(uin uint64, address, messageHash, signature string, walletType int) (err error) {
 	err = mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
 		comer, err := account.GetComerByAccountUIN(tx, uin)
 		if err != nil {
@@ -130,35 +141,43 @@ func LinkEthAccountToComer(uin uint64, address []byte, message []byte, signature
 		if comer.ID == 0 {
 			return errors.New("comer is not exists")
 		}
-		publicKey, err := secp256k1.RecoverPubkey(message, signatures)
+		addrKey := common.HexToAddress(address)
+		sig := hexutil.MustDecode(signature)
+		if sig[64] == 27 || sig[64] == 28 {
+			sig[64] -= 27
+		}
+		// if not end with 27 then will be error in message in the response
+		hash := hexutil.MustDecode(messageHash)
+
+		pubKey, err := crypto.SigToPub(hash, sig)
 		if err != nil {
 			return
 		}
 
-		o := hex.EncodeToString(address)
-		n := hex.EncodeToString(publicKey)
+		recoverAddr := crypto.PubkeyToAddress(*pubKey)
 
-		if o != n {
-			err = errors.New("illegal login request because the recover failed from the signature")
-			return err
+		if recoverAddr != addrKey {
+			err = errors.New("Not match the origin public key")
+			return
 		}
 		// origin address passed from the frontend is the 0x prefix
 		// but in this logic ceres will move the 0x predix in the router to do next
-		refComer, err := account.GetComerByAccountOIN(mysql.DB, o)
+		refComer, err := account.GetComerByAccountOIN(mysql.DB, address)
 		if err != nil {
 			elog.Error(err.Error())
 			return err
 		}
 
 		if refComer.ID == 0 {
-			outer, err := account.GetAccountByOIN(tx, o)
+			outer, err := account.GetAccountByOIN(tx, address)
 			if err != nil {
 				return err
 			}
 			if outer.ID == 0 {
 				outer.Identifier = utility.AccountSequnece.Next()
 			}
-			outer.OIN = o
+			now := time.Now()
+			outer.OIN = address
 			outer.UIN = comer.UIN
 			outer.IsMain = false
 			outer.IsLinked = true
@@ -166,12 +185,14 @@ func LinkEthAccountToComer(uin uint64, address []byte, message []byte, signature
 			outer.Avatar = comer.Avatar
 			outer.Category = account.EthAccount
 			outer.Type = walletType
+			outer.CreateAt = now
+			outer.UpdateAt = now
 			// Create the account and comer within transaction
 			err = account.LinkComerWithAccount(mysql.DB, uin, &outer)
 			if err != nil {
 				return err
 			}
-			_, err = redis.Client.Del(context.TODO(), "0x"+o)
+			_, err = redis.Client.Del(context.TODO(), address)
 			if err != nil {
 				elog.Errorf("Comunion redis remove key failed %v", err)
 				return nil
