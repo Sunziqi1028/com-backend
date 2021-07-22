@@ -3,7 +3,7 @@ package account
 // ComerLoginResposne
 type ComerLoginResponse struct {
 	Nick    string `json:"nick"`
-	Avatar  string `json:"avtar"`
+	Avatar  string `json:"avatar"`
 	ComerID string `json:"comer_id"`
 	Address string `json:"address"`
 	Token   string `json:"token"`
