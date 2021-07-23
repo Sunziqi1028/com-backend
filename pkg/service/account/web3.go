@@ -88,7 +88,6 @@ func VerifyEthLogin(address, messageHash, signature string, walletType int) (res
 		now := time.Now()
 		comer.UIN = utility.AccountSequnece.Next()
 		comer.ComerID = strings.Replace(uuid.Must(uuid.NewV4(), nil).String(), "-", "", -1)
-		comer.Avatar = comer.ComerID
 		comer.Nick = address
 		comer.CreateAt = now
 		comer.UpdateAt = now
