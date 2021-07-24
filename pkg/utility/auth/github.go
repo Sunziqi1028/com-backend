@@ -41,10 +41,11 @@ type githubAccessTokenResponse struct {
 }
 
 // getAccessToken  use the requestToken to get the access token which will be used to get the github user information
-func (github *Github) getAccessToken(requestToken string) (accessToken string, err error) {
+func (github *Github) GetAccessToken(requestToken string) (accessToken string, err error) {
+	github.requestToken = requestToken
 	u, _ := url.Parse(
 		fmt.Sprintf(
-			"https://github.com/login/oauth/access_token?%s&%s&%s",
+			"https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s",
 			github.ClientID,
 			github.ClientSecret,
 			requestToken,
@@ -100,7 +101,7 @@ func (account *GithubUserProfile) GetUserNick() string {
 
 // GetUserProfile  get user profile information from api.github.com/user
 func (github *Github) GetUserProfile() (account OauthAccount, err error) {
-	accessToken, err := github.getAccessToken(github.requestToken)
+	accessToken, err := github.GetAccessToken(github.requestToken)
 	if err != nil {
 		return
 	}
@@ -126,7 +127,8 @@ func (github *Github) GetUserProfile() (account OauthAccount, err error) {
 	if err != nil {
 		elog.Warnf("close the response body false %v", err)
 	}
-	err = json.Unmarshal(body, &account)
 
+	account = &GithubUserProfile{}
+	err = json.Unmarshal(body, &account)
 	return
 }
