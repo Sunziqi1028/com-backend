@@ -39,4 +39,4 @@ comunion.secret.toml
 comunion.local.toml
 __debug_bin
 
-./hack/config/config.*.toml
+hack/config/config.*.toml
