@@ -1,0 +1,91 @@
+#!/bin/bash
+set -e
+
+BDIR=`cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd`
+cd ${BDIR}
+
+mysql_docker_run(){
+    docker run --rm --network host -e MYSQL_PWD=${MYSQLPASSWORD} -v `pwd`/hack/files:/files mysql:5.7 "${@}"
+}
+
+function compile() {
+    version=${1:-ci-`date +%s`}
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build/app
+    docker build  -t app:${version} -f ./hack/docker/app
+    .Dockerfile .
+    echo ${version}------------------------------------------------
+}
+
+function start(){
+    export RUN_MODE=${RUN_MODE:-test}
+    case "${RUN_MODE}" in
+        test)
+            EGO_DEBUG=true go run main.go --config=./hack/config/config.test.toml
+            ;;
+        dev)
+            EGO_DEBUG=true go run main.go --config=./hack/config/config.dev.toml
+            ;;
+        pro)
+            go run main.go --config=./hack/config/config.toml
+            ;;
+    esac
+}
+
+function database(){
+    action=${1/.*/}
+    name=${2}
+    dump_host=${DATABASE_DUMP_HOST:-127.0.0.1}
+    echo "mysql host is "${dump_host}
+    case "${name}" in
+        dump.db)
+            MYSQLPASSWORD=Comunion2021 mysql_docker_run mysqldump  -h ${dump_host} -P 3306 -u root -d comunion > hack/files/database.sql
+            ;;
+        init)
+            MYSQLPASSWORD=Comunion2021 mysql_docker_run mysql -h ${dump_host} -P 3306 -u root --execute="DROP DATABASE IF EXISTS comunion;CREATE DATABASE comunion;USE comunion;"
+            MYSQLPASSWORD=Comunion2021 mysql_docker_run mysql -h ${dump_host} -P 3306 -u root comunion --execute="SOURCE /files/database.sql"
+            ;;
+        *)
+            show_help "no command ${name}"
+            ;;
+    esac
+}
+
+function gen() {
+    cd ${BDIR}/hack/gnorm && gnorm gen
+}
+
+function show_help(){
+    cat <<-EOF
+${@}
+USAGE: ./hack/run [COMMANDS]
+COMMANDS:
+    database [PROGRAM]
+    start    [app
+EOF
+    exit 1
+}
+
+case "${1}" in
+    database)
+        # shellcheck disable=SC2068
+        database ${1} ${@:2}
+        ;;
+    start)
+        # shellcheck disable=SC2068
+        start ${@:2}
+        ;;
+    compile)
+        # shellcheck disable=SC2068
+        compile ${@:2}
+        ;;
+    gen)
+         gen
+         ;;
+    -h)
+        show_help
+        ;;
+    *)
+        show_help "no command ${1}"
+        exit 1
+        ;;
+esac

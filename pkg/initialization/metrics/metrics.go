@@ -7,7 +7,6 @@ var Vernor *egovernor.Component
 
 // Init the vernor
 func Init() (err error) {
-
 	Vernor = egovernor.Load("server.governor").Build()
 
 	return

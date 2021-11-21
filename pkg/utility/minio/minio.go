@@ -10,7 +10,6 @@ import (
 )
 
 func PreSignUpload(client *minio.Client, file string) (url string, err error) {
-
 	u, err := client.PresignedPutObject(
 		context.TODO(),
 		config.Minio.Bucket,

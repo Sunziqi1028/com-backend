@@ -25,7 +25,6 @@ func main() {
 	// init the utility
 	// init the grpc
 	// init the gin
-
 	if err := ego.New().Invoker(
 		config.Init,
 		logger.Init,

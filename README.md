@@ -20,10 +20,31 @@ Comunion Backend Service
 
 #### GORM
 [HomePage](https://gorm.io/)
-## Running the app
-```bash
-# development
-$ go run main.go
+
+## Quick Start
+
+- run docker-compose
+
+```shell
+ docker-compose -f docker-compose.yml up -d
+```
+
+- init database
+
+```shell
+./hack/run database init
+```
+
+- copy the config file
+
+```shell
+cp ./hack/config/config.toml ./hack/config/config.dev.toml
+```
+
+- running the app
+
+```shell
+./hack/run start
 ```
 
 ## Project structure
