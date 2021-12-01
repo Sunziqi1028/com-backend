@@ -190,11 +190,14 @@ DROP TABLE IF EXISTS `comer_skill_rel`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `comer_skill_rel` (
+  `id` bigint(20) NOT NULL,
   `comer_id` bigint(20) NOT NULL COMMENT 'comer id',
   `skill_id` bigint(20) NOT NULL COMMENT 'skill id',
+  `is_delete` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Delete',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`comer_id`,`skill_id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `comer_id_skill_id` (`comer_id`,`skill_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -376,18 +379,20 @@ CREATE TABLE `proposal_vote` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `skill`
+-- Table structure for table `comer_skill`
 --
 
-DROP TABLE IF EXISTS `skill`;
+DROP TABLE IF EXISTS `comer_skill`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `skill` (
+CREATE TABLE `comer_skill` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(55) NOT NULL COMMENT 'name',
+  `name` varchar(64) NOT NULL COMMENT 'name',
+  `is_delete` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Delete',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -547,6 +552,105 @@ CREATE TABLE `transaction` (
   PRIMARY KEY (`hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `comer_wallet`
+--
+
+DROP TABLE IF EXISTS `comer_wallet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `comer_wallet` (
+    `id` bigint(20) NOT NULL,
+    `address` varchar(55) NOT NULL COMMENT 'name',
+    `is_delete` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Delete',
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `address` (`address`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `comer_wallet_rel`
+--
+
+DROP TABLE IF EXISTS `comer_wallet_rel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `comer_wallet_rel` (
+    `id` bigint(20) NOT NULL,
+    `comer_id` bigint(20) NOT NULL COMMENT 'comer id',
+    `wallet_id` bigint(20) NOT NULL COMMENT 'wallet id',
+    `is_delete` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Delete',
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `comer_id_wallet_id` (`comer_id`,`wallet_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `comer_social`
+--
+
+DROP TABLE IF EXISTS `comer_social`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `comer_social` (
+    `id` bigint(20) NOT NULL,
+    `type` int NOT NULL DEFAULT 0 COMMENT '0 GitHub 1 Google',
+    `account` varchar(64) NOT NULL COMMENT 'Social Account',
+    `is_delete` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Delete',
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `account` (`account`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `comer_wallet_rel`
+--
+
+DROP TABLE IF EXISTS `comer_social_rel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `comer_social_rel` (
+    `id` bigint(20) NOT NULL,
+    `comer_id` bigint(20) NOT NULL COMMENT 'comer id',
+    `social_id` bigint(20) NOT NULL COMMENT 'social id',
+    `is_delete` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Delete',
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `comer_id_social_id` (`comer_id`,`social_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `comer_profile`
+--
+
+DROP TABLE IF EXISTS `comer_profile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `comer_profile` (
+    `id` bigint(20) NOT NULL,
+    `comer_id` char(40) NOT NULL COMMENT 'comerId',
+    `name` varchar(50) NOT NULL COMMENT 'Name',
+    `location` varchar(100) DEFAULT NULL COMMENT 'Location',
+    `website` varchar(100) DEFAULT NULL COMMENT 'Website',
+    `bio` text DEFAULT NULL COMMENT 'Bio',
+    `is_delete` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Delete',
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `comer_id` (`comer_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
