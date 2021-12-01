@@ -12,13 +12,8 @@ import (
 // use the database id as the
 
 // AccountSequnece generate the comer uin sequence
+var ComerSequnece sequence.Senquence
 var AccountSequnece sequence.Senquence
-
-// ProfileSequence generate the profile sequence
-var ProfileSequence sequence.Senquence
-
-// BountySeqnence generate the bounty sequence
-var BountySeqnence sequence.Senquence
 
 func initSequnece() (err error) {
 	machineIP := net.GetDomianIP()
@@ -29,8 +24,7 @@ func initSequnece() (err error) {
 		return
 	}
 	// Create snowflake sequences
+	ComerSequnece = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
 	AccountSequnece = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
-	ProfileSequence = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
-	BountySeqnence = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
 	return
 }

@@ -97,8 +97,8 @@ DROP TABLE IF EXISTS `comer`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `comer` (
   `id` bigint(20) NOT NULL,
-  `address` char(40) NOT NULL COMMENT 'comer could save some useful info on block chain with this address',
-  `nickname` varchar(50) NOT NULL COMMENT 'nickname',
+  `address` char(42) NOT NULL COMMENT 'comer could save some useful info on block chain with this address',
+  `nick` varchar(50) NOT NULL COMMENT 'nick',
   `city` varchar(50) DEFAULT NULL COMMENT 'city',
   `avatar` varchar(255) DEFAULT NULL COMMENT 'avatar link address',
   `blog` text COMMENT 'blog address',
@@ -113,19 +113,18 @@ CREATE TABLE `comer` (
 -- Table structure for table `comer_account`
 --
 
-DROP TABLE IF EXISTS `comer_account`;
+DROP TABLE IF EXISTS `account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `comer_account` (
+CREATE TABLE `account` (
   `id` bigint(20) NOT NULL,
   `comer_id` bigint(20) NOT NULL COMMENT 'comer unique identifier',
   `oin` varchar(100) NOT NULL COMMENT 'comer outer account unique identifier, wallet will be public key and Oauth is the OauthID',
-  `is_primary` smallint(6) NOT NULL COMMENT 'comer use this account as primay account',
+  `is_primary` boolean NOT NULL COMMENT 'comer use this account as primay account',
   `nick` varchar(50) NOT NULL COMMENT 'comer nick name',
   `avatar` varchar(255) NOT NULL COMMENT 'avatar link address',
-  `category` int(11) NOT NULL COMMENT 'outer account type 1 for eth 2 for Oauth',
-  `type` int(11) NOT NULL COMMENT '1 for github 2 for metamask 3 for twitter 4 for facebook 5 for likedin 6 for iamtoken 7 for google',
-  `is_linked` smallint(6) NOT NULL COMMENT '0 for unlink 1 for linked',
+  `type` int(11) NOT NULL COMMENT '1 for github 2 for twitter 3 for facebook 4 for likedin 5 for google',
+  `is_linked` boolean NOT NULL COMMENT '0 for unlink 1 for linked',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -226,7 +225,7 @@ CREATE TABLE `disco` (
   `id` bigint(20) NOT NULL,
   `startup_id` bigint(20) NOT NULL,
   `comer_id` bigint(20) NOT NULL,
-  `wallet_address` char(40) NOT NULL,
+  `wallet_address` char(42) NOT NULL,
   `etherenum_token_id` bigint(20) NOT NULL,
   `description` text NOT NULL,
   `fund_raising_started_at` datetime NOT NULL,
@@ -238,7 +237,7 @@ CREATE TABLE `disco` (
   `add_liquidity_pool` bigint(20) NOT NULL,
   `total_deposit_token` bigint(20) NOT NULL,
   `state` int(11) NOT NULL,
-  `fund_raising_address` char(40) DEFAULT NULL,
+  `fund_raising_address` char(42) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -278,7 +277,7 @@ CREATE TABLE `ethereum_token` (
   `id` bigint(20) NOT NULL,
   `standard_type` tinyint(4) NOT NULL COMMENT 'standard type 1 for erc-20',
   `name` varchar(10) NOT NULL COMMENT 'name',
-  `contract_address` char(40) NOT NULL COMMENT 'contract address',
+  `contract_address` char(42) NOT NULL COMMENT 'contract address',
   `symbol` varchar(10) NOT NULL COMMENT 'symbol',
   `decimals` int(11) NOT NULL COMMENT 'decimal',
   PRIMARY KEY (`id`)
@@ -296,8 +295,8 @@ CREATE TABLE `proposal` (
   `id` bigint(20) NOT NULL,
   `startup_id` bigint(20) NOT NULL,
   `comer_id` bigint(20) NOT NULL,
-  `wallet_address` char(40) NOT NULL,
-  `contract_address` char(40) NOT NULL,
+  `wallet_address` char(42) NOT NULL,
+  `contract_address` char(42) NOT NULL,
   `status` int(11) NOT NULL DEFAULT '0',
   `title` varchar(255) NOT NULL,
   `type` int(11) NOT NULL,

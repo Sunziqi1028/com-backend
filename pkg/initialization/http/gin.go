@@ -37,7 +37,7 @@ func Init() (err error) {
 	{
 		web3Login.Use(middleware.GuestAuthorizationMiddleware())
 		web3Login.GET("/nonce", router.Wrap(account.GetBlockchainLoginNonce))
-		web3Login.POST("/metamask", router.Wrap(account.LoginWithMetamask))
+		web3Login.POST("/wallet", router.Wrap(account.LoginWithWallet))
 	}
 
 	// accounts operation router
@@ -47,7 +47,7 @@ func Init() (err error) {
 		// basic operations
 		accounts.GET("/list", router.Wrap(account.ListAccounts))
 		accounts.POST("/oauth/link/gihub", router.Wrap(account.LinkWithGithub))
-		accounts.POST("/eth/link/metamask", router.Wrap(account.LinkWithMetamask))
+		accounts.POST("/eth/link/metamask", router.Wrap(account.LinkWithWallet))
 		accounts.DELETE("/unlink", router.Wrap(account.UnlinkAccount))
 		// profile operations
 		accounts.POST("/profile", router.Wrap(account.CreateProfile))

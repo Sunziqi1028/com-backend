@@ -1,13 +1,11 @@
 package account
 
-// ComerLoginResposne
+// ComerLoginResponse comer login response
 type ComerLoginResponse struct {
 	Nick    string `json:"nick"`
 	Avatar  string `json:"avatar"`
-	ComerID string `json:"comer_id"`
 	Address string `json:"address"`
 	Token   string `json:"token"`
-	UIN     uint64 `json:"uin"`
 }
 
 // WalletNonceResponse wrap the nonce for formating rule in resposne

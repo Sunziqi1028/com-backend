@@ -39,5 +39,4 @@ func main() {
 	).Run(); err != nil {
 		elog.Panic(err.Error())
 	}
-
 }

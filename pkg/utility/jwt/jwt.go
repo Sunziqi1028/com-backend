@@ -17,8 +17,7 @@ func Sign(uin uint64) (token string) {
 	claims["iat"] = time.Now().Unix()
 	claims["comer_uin"] = fmt.Sprintf("%d", uin)
 	jwt.Claims = claims
-	token, _ = jwt.SignedString(config.JWT.Secret)
-	
+	token, _ = jwt.SignedString([]byte(config.JWT.Secret))
 	return
 }
 
@@ -33,9 +32,5 @@ func Verify(token string) (uin uint64, err error) {
 	claims, _ := auth.Claims.(JWT.MapClaims)
 	uinStr, _ := claims["comer_uin"].(string)
 	uin, err = strconv.ParseUint(uinStr, 10, 64)
-	if err != nil {
-		return
-	}
-	
 	return
 }

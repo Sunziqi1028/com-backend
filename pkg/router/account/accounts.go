@@ -1,12 +1,15 @@
 package account
 
 import (
+	"ceres/pkg/initialization/redis"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
-	"ceres/pkg/utility/auth"
+	"context"
 	"strconv"
+
+	"github.com/gotomicro/ego/core/elog"
 )
 
 // ListAccounts list all accounts of the Comer
@@ -40,26 +43,26 @@ func UnlinkAccount(ctx *router.Context) {
 
 // LinkWithGithub link current account with github
 func LinkWithGithub(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	requestToken := ctx.Query("request_token")
-	if requestToken == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
-		return
-	}
-	client := auth.NewGithubOauthClient(requestToken)
-	err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
-	if err != nil {
-		ctx.ERROR(router.ErrBuisnessError, err.Error())
-		return
-
-	}
+	//uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	//requestToken := ctx.Query("request_token")
+	//if requestToken == "" {
+	//	ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
+	//	return
+	//}
+	//client := auth.NewGithubOauthClient(requestToken)
+	//err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
+	//if err != nil {
+	//	ctx.ERROR(router.ErrBuisnessError, err.Error())
+	//	return
+	//
+	//}
 	ctx.OK(nil)
 }
 
 // LinkWithGithub link current account with github
 // FIXME: should eliminate the duplicate code in the login api
-func LinkWithMetamask(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+func LinkWithWallet(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	signature := &model.EthSignatureObject{}
 	err := ctx.BindJSON(signature)
 	if err != nil {
@@ -70,12 +73,18 @@ func LinkWithMetamask(ctx *router.Context) {
 		return
 	}
 
+	//get nonce
+	nonce, err := redis.Client.Get(context.TODO(), signature.Address)
+	if err != nil {
+		elog.Errorf("Comunion redis get key failed %v", err)
+		return
+	}
+
 	err = service.LinkEthAccountToComer(
-		uin,
+		comerID,
 		signature.Address,
-		signature.MessageHash,
 		signature.Signature,
-		model.MetamaskEth,
+		nonce,
 	)
 
 	if err != nil {

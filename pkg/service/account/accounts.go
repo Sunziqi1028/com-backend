@@ -11,26 +11,26 @@ import (
 
 // GetComerAccounts get current comer accounts
 func GetComerAccounts(uin uint64) (response *model.ComerOuterAccountListResponse, err error) {
-	accounts, err := model.ListAllAccountsOfComer(mysql.DB, uin)
-	if err != nil {
-		return
-	}
-	response = &model.ComerOuterAccountListResponse{
-		List:  []model.ComerOuterAccountObject{},
-		Total: 0,
-	}
-	for _, account := range accounts {
-		response.List = append(response.List, model.ComerOuterAccountObject{
-			Identifier: account.Identifier,
-			UIN:        account.UIN,
-			OIN:        account.OIN,
-			Nick:       account.Nick,
-			Avatar:     account.Avatar,
-			IsMain:     account.IsMain,
-			IsLinked:   account.IsLinked,
-			Type:       account.Type,
-		})
-	}
+	//accounts, err := model.ListAllAccountsOfComer(mysql.DB, uin)
+	//if err != nil {
+	//	return
+	//}
+	//response = &model.ComerOuterAccountListResponse{
+	//	List:  []model.ComerOuterAccountObject{},
+	//	Total: 0,
+	//}
+	//for _, account := range accounts {
+	//	response.List = append(response.List, model.ComerOuterAccountObject{
+	//		Identifier: account.Identifier,
+	//		UIN:        account.UIN,
+	//		OIN:        account.OIN,
+	//		Nick:       account.Nick,
+	//		Avatar:     account.Avatar,
+	//		IsMain:     account.IsMain,
+	//		IsLinked:   account.IsLinked,
+	//		Type:       account.Type,
+	//	})
+	//}
 	return
 }
 

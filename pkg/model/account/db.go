@@ -7,68 +7,72 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Account Database models and operations
-
-// constraints of the category and account
-const (
-	EthAccount   = 1
-	OauthAccount = 2
-
-	GithubOauth   = 1
-	MetamaskEth   = 2
-	TwitterOauth  = 3
-	FacbookOauth  = 4
-	LinkedInOauth = 5
-	ImtokenEth    = 6
-)
-
 // Comer the comer model of comunion inner account
 type Comer struct {
-	ID       uint64    `gorm:"column:id"`
-	UIN      uint64    `gorm:"column:uin"`
-	Address  string    `gorm:"column:address"`
-	ComerID  string    `gorm:"column:comer_id"`
-	Nick     string    `gorm:"column:nick"`
-	Avatar   string    `gorm:"column:avatar"`
-	CreateAt time.Time `gorm:"column:create_at"`
-	UpdateAt time.Time `gorm:"column:update_at"`
+	ID        uint64    `gorm:"column:id"`
+	Address   string    `gorm:"column:address"`
+	Nick      string    `gorm:"column:nick"`
+	City      string    `gorm:"column:city"`
+	Avatar    string    `gorm:"column:avatar"`
+	Blog      string    `gorm:"column:blog"`
+	Intro     string    `gorm:"column:intro"`
+	CreatedAt time.Time `gorm:"column:created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at"`
 }
 
 // TableName Comer table name for gorm
 func (Comer) TableName() string {
-	return "comer_tbl"
+	return "comer"
 }
+
+type AccountType int
+
+const (
+	GithubOauth   AccountType = 1
+	TwitterOauth  AccountType = 2
+	FacebookOauth AccountType = 3
+	LikedinOauth  AccountType = 4
+	GoogleOauth   AccountType = 5
+)
+
+type AccountCategory int
+
+const (
+	OauthAccount AccountCategory = 1
+)
 
 // Account the account model of outer account
 type Account struct {
-	ID         uint64    `gorm:"column:id"`
-	Identifier uint64    `gorm:"column:identifier"`
-	UIN        uint64    `gorm:"column:uin"`
-	OIN        string    `gorm:"column:oin"`
-	IsMain     bool      `gorm:"column:main"`
-	Nick       string    `gorm:"column:nick"`
-	Avatar     string    `gorm:"column:avatar"`
-	Category   int       `gorm:"column:category"`
-	Type       int       `gorm:"column:type"`
-	IsLinked   bool      `gorm:"column:linked"`
-	CreateAt   time.Time `gorm:"column:create_at"`
-	UpdateAt   time.Time `gorm:"column:update_at"`
+	ID        uint64          `gorm:"column:id"`
+	ComerID   uint64          `gorm:"column:comer_id"`
+	OIN       string          `gorm:"column:oin"`
+	IsPrimary bool            `gorm:"column:is_primary"`
+	Nick      string          `gorm:"column:nick"`
+	Avatar    string          `gorm:"column:avatar"`
+	Category  AccountCategory `gorm:"column:category"`
+	Type      AccountType     `gorm:"column:type"`
+	IsLinked  bool            `gorm:"column:linked"`
+	CreatedAt time.Time       `gorm:"column:created_at"`
+	UpdatedAt time.Time       `gorm:"column:updated_at"`
 }
 
 // TableName the Account table name for gorm
 func (Account) TableName() string {
-	return "account_tbl"
+	return "account"
 }
 
 // Profile the comer profile model
 type Profile struct {
-	ID          uint64    `gorm:"primary_key;column:id"`
-	ComerID     uint64    `gorm:"column:comer_id"`
+	ID          uint64    `gorm:"column:id"`
+	UIN         uint64    `gorm:"column:uin"`
+	Remark      string    `gorm:"column:remark"`
+	Identifier  uint64    `gorm:"column:identifier"`
 	Name        string    `gorm:"column:name"`
-	Location    string    `gorm:"column:location"`
-	Website     string    `gorm:"column:website"`
-	Bio         string    `gorm:"column:bio"`
-	IsDelete     int      `gorm:"column:is_delete"`
+	About       string    `gorm:"column:about"`
+	Description string    `gorm:"column:description"`
+	Email       string    `gorm:"column:email"`
+	Skills      string    `gorm:"column:skills"`
+	Version     int       `gorm:"column:version"`
 	CreateAt    time.Time `gorm:"column:create_at"`
 	UpdateAt    time.Time `gorm:"column:update_at"`
 }
@@ -78,89 +82,51 @@ func (Profile) TableName() string {
 	return "comer_profile"
 }
 
-// Skill model
-type Skill struct {
-	ID       uint64    `gorm:"primary_key;column:id"`
+// ProfileSkillTag profile skill tag model
+type ProfileSkillTag struct {
+	ID       uint64    `gorm:"column:id"`
 	Name     string    `gorm:"column:name"`
-	IsDelete  int      `gorm:"column:is_delete"`
+	Vaild    bool      `gorm:"column:vaild"`
 	CreateAt time.Time `gorm:"column:create_at"`
 	UpdateAt time.Time `gorm:"column:update_at"`
 }
 
-// TableName the Skill table name for gorm
-func (Skill) TableName() string {
-	return "comer_skill"
+// TableName the ProfileSkillTag table name for gorm
+func (ProfileSkillTag) TableName() string {
+	return "comer_profile_skill_tag_tbl"
 }
 
-// ComerSkillRel model
-type ComerSkillRel struct {
-	ID       uint64    `gorm:"primary_key;column:id"`
-	ComerID  uint64    `gorm:"column:comer_id"`
-	SkillID  uint64    `gorm:"column:skill_id"`
-	IsDelete  int      `gorm:"column:is_delete"`
-	CreateAt time.Time `gorm:"column:create_at"`
-	UpdateAt time.Time `gorm:"column:update_at"`
+// GetComerByAddress  get comer entity by comer's address
+func GetComerByAddress(db *gorm.DB, address string) (comer Comer, err error) {
+	if err = db.Where("address = ?", address).Find(&comer).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = nil
+		}
+		return
+	}
+	return
 }
 
-func (ComerSkillRel) TableName() string {
-	return "comer_skill_rel"
+// GetComerByID  get comer entity by comer's ID
+func GetComerByID(db *gorm.DB, comerID uint64) (comer Comer, err error) {
+	if err = db.Where("id = ?", comerID).Find(&comer).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = nil
+		}
+		return
+	}
+	return
 }
 
-// Social model
-type Social struct {
-	ID       uint64    `gorm:"primary_key;column:id"`
-	Type     string    `gorm:"column:type"`
-	Account  string    `gorm:"column:account"`
-	IsDelete  int      `gorm:"column:is_delete"`
-	CreateAt time.Time `gorm:"column:create_at"`
-	UpdateAt time.Time `gorm:"column:update_at"`
+// CreateComer create a comer
+func CreateComer(db *gorm.DB, comer *Comer) (err error) {
+	r := db.Save(comer)
+	return r.Error
 }
 
-// TableName the Social table name for gorm
-func (Social) TableName() string {
-	return "comer_social"
-}
-
-// ComerSocialRel model
-type ComerSocialRel struct {
-	ID       uint64    `gorm:"primary_key;column:id"`
-	ComerID  uint64    `gorm:"column:comer_id"`
-	SocialID uint64    `gorm:"column:social_id"`
-	IsDelete  int      `gorm:"column:is_delete"`
-	CreateAt time.Time `gorm:"column:create_at"`
-	UpdateAt time.Time `gorm:"column:update_at"`
-}
-
-func (ComerSocialRel) TableName() string {
-	return "comer_social_rel"
-}
-
-// Wallet model
-type Wallet struct {
-	ID       uint64    `gorm:"primary_key;column:id"`
-	Address  string    `gorm:"column:address"`
-	IsDelete  int      `gorm:"column:is_delete"`
-	CreateAt time.Time `gorm:"column:create_at"`
-	UpdateAt time.Time `gorm:"column:update_at"`
-}
-
-// TableName the Wallet table name for gorm
-func (Wallet) TableName() string {
-	return "comer_wallet"
-}
-
-// ComerWalletRel model
-type ComerWalletRel struct {
-	ID       uint64    `gorm:"primary_key;column:id"`
-	ComerID  uint64    `gorm:"column:comer_id"`
-	WalletID uint64    `gorm:"column:wallet_id"`
-	IsDelete  int      `gorm:"column:is_delete"`
-	CreateAt time.Time `gorm:"column:create_at"`
-	UpdateAt time.Time `gorm:"column:update_at"`
-}
-
-func (ComerWalletRel) TableName() string {
-	return "comer_wallet_rel"
+//UpdateComerAddress update the comer address
+func UpdateComerAddress(db *gorm.DB, comerID uint64, address string) (err error) {
+	return db.Model(&Comer{ID: comerID}).Update("address", address).Error
 }
 
 // CreateComerWithAccount  using the outer acccount to create a comer
@@ -213,22 +179,22 @@ func GetAccountByIdentifier(db *gorm.DB, identifier uint64) (account Account, er
 
 // LinkComerWithAccount  link a new account to an existed comer
 func LinkComerWithAccount(db *gorm.DB, uin uint64, account *Account) (err error) {
-	if account.UIN != uin {
-		err = errors.New("illegal comer UIN to link") // double check but this logic also implement in the router module
-		return
-	}
-	r := db.Save(account)
-	err = r.Error
+	//if account.UIN != uin {
+	//	err = errors.New("illegal comer UIN to link") // double check but this logic also implement in the router module
+	//	return
+	//}
+	//r := db.Save(account)
+	//err = r.Error
 
 	return
 }
 
 // UnlinkComerAccount unlink one account of comer
 func UnlinkComerAccount(db *gorm.DB, account *Account) (err error) {
-	account.IsLinked = false
-	account.UIN = 0
-	db = db.Save(account)
-	err = db.Error
+	//account.IsLinked = false
+	//account.UIN = 0
+	//db = db.Save(account)
+	//err = db.Error
 	return
 }
 
@@ -249,204 +215,21 @@ func GetComerByAccountUIN(db *gorm.DB, uin uint64) (comer Comer, err error) {
 }
 
 // GetComerByAccountOIN  get comer entity by the account oin
-func GetComerByAccountOIN(db *gorm.DB, oin string) (comer Comer, err error) {
-	account := &Account{}
-	if err = db.Where("oin = ?", oin).Find(account).Error; err != nil {
+func GetComerByAccountOIN(db *gorm.DB, accountType AccountType, oin string) (account Account, err error) {
+	if err = db.Where("oin = ? and type = ?", oin, accountType).Find(&account).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			err = nil
 		}
 		return
 	}
-	if err = db.Where("uin = ?", account.UIN).Find(&comer).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = nil
-		}
-		return
-	}
-
 	return
 }
 
 // GetComerProfile by the uin
 // FIXME: should change the function name
 func GetComerProfile(db *gorm.DB, uin uint64) (profile Profile, err error) {
-	db = db.Where("comer_id = ?", uin).First(&profile)
+	db = db.Where("uin = ?", uin).First(&profile)
 	err = db.Error
 
 	return
 }
-
-
-// GetComerProfileByIdentifier by identifier
-func GetComerProfileByIdentifier(db *gorm.DB, identifier uint64) (profile Profile, err error) {
-	db = db.Where("identifier = ?", identifier).First(&profile)
-	err = db.Error
-
-	return
-}
-
-// CreateComerProfile create a new comer profile
-func CreateComerProfile(db *gorm.DB, profile *Profile) (err error) {
-	db = db.Save(profile)
-	err = db.Error
-
-	return
-}
-
-// UpdateComerProfile update the comer profile
-func UpdateComerProfile(db *gorm.DB, profile *Profile) (err error) {
-	db = db.Save(profile)
-	err = db.Error
-
-	return
-}
-
-// GetSkillList by the ids
-func GetSkillList(db *gorm.DB, ids []uint64) (skills []Skill, err error) {
-	db = db.Where("id in ?", ids).Find(&skills)
-	err = db.Error
-
-	return
-}
-
-// GetSkillListByNames by the names
-func GetSkillListByNames(db *gorm.DB, names []string) (skills []Skill, err error) {
-	db = db.Where("name in ?", names).Find(&skills)
-	err = db.Error
-
-	return
-}
-
-// CreateSkill create a new
-func CreateSkill(db *gorm.DB, skill *Skill) (err error) {
-	db = db.Save(skill)
-	err = db.Error
-	return
-}
-
-func GetSkillRels(db *gorm.DB, comer_id uint64) (skillRels []ComerSkillRel, err error) {
-	db = db.Where("comer_id = ?", comer_id).Find(&skillRels)
-	err = db.Error
-
-	return
-}
-
-// CreateSkillRel create a new
-func CreateSkillRel(db *gorm.DB, skillRel *ComerSkillRel) (err error) {
-	db = db.Save(skillRel)
-	err = db.Error
-	return
-}
-
-func FirstOrCreateSkill(db *gorm.DB, skill *Skill) (err error) {
-	db = db.Where(skill).FirstOrCreate(&skill)
-	err = db.Error
-	return
-}
-
-// FirstOrCreateSkillRel create a new
-func FirstOrCreateSkillRel(db *gorm.DB, skillRel *ComerSkillRel) (err error) {
-	db = db.Where(skillRel).FirstOrCreate(&skillRel)
-	err = db.Error
-	return
-}
-
-
-func GetSocialList(db *gorm.DB, ids []uint64) (socials []Social, err error) {
-	db = db.Where("id in ?", ids).Find(&socials)
-	err = db.Error
-
-	return
-}
-
-func GetSocialListByAccount(db *gorm.DB, accounts []string) (socials []Social, err error) {
-	db = db.Where("account in ?", accounts).Find(&socials)
-	err = db.Error
-
-	return
-}
-
-// CreateSocial create a new
-func CreateSocial(db *gorm.DB, social *Social) (err error) {
-	db = db.Save(social)
-	err = db.Error
-	return
-}
-
-func GetSocialRels(db *gorm.DB, comer_id uint64) (socialRels []ComerSocialRel, err error) {
-	db = db.Where("comer_id = ?", comer_id).Find(&socialRels)
-	err = db.Error
-
-	return
-}
-
-// CreateSocialRel create a new
-func CreateSocialRel(db *gorm.DB, socialRel *ComerSocialRel) (err error) {
-	db = db.Save(socialRel)
-	err = db.Error
-	return
-}
-
-func FirstOrCreateSocial(db *gorm.DB, social *Social) (err error) {
-	db = db.Where(social).FirstOrCreate(&social)
-	err = db.Error
-	return
-}
-
-// FirstOrCreateSocialRel create a new
-func FirstOrCreateSocialRel(db *gorm.DB, socialRel *ComerSocialRel) (err error) {
-	db = db.Where(socialRel).FirstOrCreate(&socialRel)
-	err = db.Error
-	return
-}
-
-
-func GetWalletList(db *gorm.DB, ids []uint64) (wallets []Wallet, err error) {
-	db = db.Where("id in ?", ids).Find(&wallets)
-	err = db.Error
-
-	return
-}
-
-func GetWalletListByAddress(db *gorm.DB, addesss []string) (wallets []Wallet, err error) {
-	db = db.Where("address in ?", addesss).Find(&wallets)
-	err = db.Error
-
-	return
-}
-
-// CreateWallet create a new
-func CreateWallet(db *gorm.DB, wallet *Wallet) (err error) {
-	db = db.Save(wallet)
-	err = db.Error
-	return
-}
-
-func GetWalletRels(db *gorm.DB, comer_id uint64) (walletRels []ComerWalletRel, err error) {
-	db = db.Where("comer_id = ?", comer_id).Find(&walletRels)
-	err = db.Error
-
-	return
-}
-
-// CreateWalletRel create a new
-func CreateWalletRel(db *gorm.DB, walletRel *ComerWalletRel) (err error) {
-	db = db.Save(walletRel)
-	err = db.Error
-	return
-}
-
-func FirstOrCreateWallet(db *gorm.DB, wallet *Wallet) (err error) {
-	db = db.Where(wallet).FirstOrCreate(&wallet)
-	err = db.Error
-	return
-}
-
-// FirstOrCreateWalletRel create a new
-func FirstOrCreateWalletRel(db *gorm.DB, walletRel *ComerWalletRel) (err error) {
-	db = db.Where(walletRel).FirstOrCreate(&walletRel)
-	err = db.Error
-	return
-}
-
-
