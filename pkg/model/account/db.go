@@ -62,37 +62,105 @@ func (Account) TableName() string {
 
 // Profile the comer profile model
 type Profile struct {
-	ID          uint64    `gorm:"column:id"`
-	UIN         uint64    `gorm:"column:uin"`
-	Remark      string    `gorm:"column:remark"`
-	Identifier  uint64    `gorm:"column:identifier"`
+	ID          uint64    `gorm:"primary_key;column:id"`
+	ComerID     uint64    `gorm:"column:comer_id"`
 	Name        string    `gorm:"column:name"`
-	About       string    `gorm:"column:about"`
-	Description string    `gorm:"column:description"`
-	Email       string    `gorm:"column:email"`
-	Skills      string    `gorm:"column:skills"`
-	Version     int       `gorm:"column:version"`
+	Location    string    `gorm:"column:location"`
+	Website     string    `gorm:"column:website"`
+	Bio         string    `gorm:"column:bio"`
+	IsDelete     int      `gorm:"column:is_delete"`
 	CreateAt    time.Time `gorm:"column:create_at"`
 	UpdateAt    time.Time `gorm:"column:update_at"`
 }
 
 // TableName the Profile table name for gorm
 func (Profile) TableName() string {
-	return "comer_profile_tbl"
+	return "comer_profile"
 }
 
-// ProfileSkillTag profile skill tag model
-type ProfileSkillTag struct {
-	ID       uint64    `gorm:"column:id"`
+// Skill model
+type Skill struct {
+	ID       uint64    `gorm:"primary_key;column:id"`
 	Name     string    `gorm:"column:name"`
-	Vaild    bool      `gorm:"column:vaild"`
+	IsDelete  int      `gorm:"column:is_delete"`
 	CreateAt time.Time `gorm:"column:create_at"`
 	UpdateAt time.Time `gorm:"column:update_at"`
 }
 
-// TableName the ProfileSkillTag table name for gorm
-func (ProfileSkillTag) TableName() string {
-	return "comer_profile_skill_tag_tbl"
+// TableName the Skill table name for gorm
+func (Skill) TableName() string {
+	return "comer_skill"
+}
+
+// ComerSkillRel model
+type ComerSkillRel struct {
+	ID       uint64    `gorm:"primary_key;column:id"`
+	ComerID  uint64    `gorm:"column:comer_id"`
+	SkillID  uint64    `gorm:"column:skill_id"`
+	IsDelete  int      `gorm:"column:is_delete"`
+	CreateAt time.Time `gorm:"column:create_at"`
+	UpdateAt time.Time `gorm:"column:update_at"`
+}
+
+func (ComerSkillRel) TableName() string {
+	return "comer_skill_rel"
+}
+
+// Social model
+type Social struct {
+	ID       uint64    `gorm:"primary_key;column:id"`
+	Type     string    `gorm:"column:type"`
+	Account  string    `gorm:"column:account"`
+	IsDelete  int      `gorm:"column:is_delete"`
+	CreateAt time.Time `gorm:"column:create_at"`
+	UpdateAt time.Time `gorm:"column:update_at"`
+}
+
+// TableName the Social table name for gorm
+func (Social) TableName() string {
+	return "comer_social"
+}
+
+// ComerSocialRel model
+type ComerSocialRel struct {
+	ID       uint64    `gorm:"primary_key;column:id"`
+	ComerID  uint64    `gorm:"column:comer_id"`
+	SocialID uint64    `gorm:"column:social_id"`
+	IsDelete  int      `gorm:"column:is_delete"`
+	CreateAt time.Time `gorm:"column:create_at"`
+	UpdateAt time.Time `gorm:"column:update_at"`
+}
+
+func (ComerSocialRel) TableName() string {
+	return "comer_social_rel"
+}
+
+// Wallet model
+type Wallet struct {
+	ID       uint64    `gorm:"primary_key;column:id"`
+	Address  string    `gorm:"column:address"`
+	IsDelete  int      `gorm:"column:is_delete"`
+	CreateAt time.Time `gorm:"column:create_at"`
+	UpdateAt time.Time `gorm:"column:update_at"`
+}
+
+// TableName the Wallet table name for gorm
+func (Wallet) TableName() string {
+	return "comer_wallet"
+}
+
+// ComerWalletRel model
+type ComerWalletRel struct {
+	ID       uint64    `gorm:"primary_key;column:id"`
+	ComerID  uint64    `gorm:"column:comer_id"`
+	WalletID uint64    `gorm:"column:wallet_id"`
+	IsDelete  int      `gorm:"column:is_delete"`
+	CreateAt time.Time `gorm:"column:create_at"`
+	UpdateAt time.Time `gorm:"column:update_at"`
+}
+
+func (ComerWalletRel) TableName() string {
+	return "comer_wallet_rel"
 }
 
 // CreateComerWithAccount  using the outer acccount to create a comer
@@ -202,11 +270,12 @@ func GetComerByAccountOIN(db *gorm.DB, oin string) (comer Comer, err error) {
 // GetComerProfile by the uin
 // FIXME: should change the function name
 func GetComerProfile(db *gorm.DB, uin uint64) (profile Profile, err error) {
-	db = db.Where("uin = ?", uin).First(&profile)
+	db = db.Where("comer_id = ?", uin).First(&profile)
 	err = db.Error
 
 	return
 }
+
 
 // GetComerProfileByIdentifier by identifier
 func GetComerProfileByIdentifier(db *gorm.DB, identifier uint64) (profile Profile, err error) {
@@ -233,9 +302,151 @@ func UpdateComerProfile(db *gorm.DB, profile *Profile) (err error) {
 }
 
 // GetSkillList by the ids
-func GetSkillList(db *gorm.DB, ids []uint64) (skills []ProfileSkillTag, err error) {
+func GetSkillList(db *gorm.DB, ids []uint64) (skills []Skill, err error) {
 	db = db.Where("id in ?", ids).Find(&skills)
 	err = db.Error
 
 	return
 }
+
+// GetSkillListByNames by the names
+func GetSkillListByNames(db *gorm.DB, names []string) (skills []Skill, err error) {
+	db = db.Where("name in ?", names).Find(&skills)
+	err = db.Error
+
+	return
+}
+
+// CreateSkill create a new
+func CreateSkill(db *gorm.DB, skill *Skill) (err error) {
+	db = db.Save(skill)
+	err = db.Error
+	return
+}
+
+func GetSkillRels(db *gorm.DB, comer_id uint64) (skillRels []ComerSkillRel, err error) {
+	db = db.Where("comer_id = ?", comer_id).Find(&skillRels)
+	err = db.Error
+
+	return
+}
+
+// CreateSkillRel create a new
+func CreateSkillRel(db *gorm.DB, skillRel *ComerSkillRel) (err error) {
+	db = db.Save(skillRel)
+	err = db.Error
+	return
+}
+
+func FirstOrCreateSkill(db *gorm.DB, skill *Skill) (err error) {
+	db = db.Where(skill).FirstOrCreate(&skill)
+	err = db.Error
+	return
+}
+
+// FirstOrCreateSkillRel create a new
+func FirstOrCreateSkillRel(db *gorm.DB, skillRel *ComerSkillRel) (err error) {
+	db = db.Where(skillRel).FirstOrCreate(&skillRel)
+	err = db.Error
+	return
+}
+
+
+func GetSocialList(db *gorm.DB, ids []uint64) (socials []Social, err error) {
+	db = db.Where("id in ?", ids).Find(&socials)
+	err = db.Error
+
+	return
+}
+
+func GetSocialListByAccount(db *gorm.DB, accounts []string) (socials []Social, err error) {
+	db = db.Where("account in ?", accounts).Find(&socials)
+	err = db.Error
+
+	return
+}
+
+// CreateSocial create a new
+func CreateSocial(db *gorm.DB, social *Social) (err error) {
+	db = db.Save(social)
+	err = db.Error
+	return
+}
+
+func GetSocialRels(db *gorm.DB, comer_id uint64) (socialRels []ComerSocialRel, err error) {
+	db = db.Where("comer_id = ?", comer_id).Find(&socialRels)
+	err = db.Error
+
+	return
+}
+
+// CreateSocialRel create a new
+func CreateSocialRel(db *gorm.DB, socialRel *ComerSocialRel) (err error) {
+	db = db.Save(socialRel)
+	err = db.Error
+	return
+}
+
+func FirstOrCreateSocial(db *gorm.DB, social *Social) (err error) {
+	db = db.Where(social).FirstOrCreate(&social)
+	err = db.Error
+	return
+}
+
+// FirstOrCreateSocialRel create a new
+func FirstOrCreateSocialRel(db *gorm.DB, socialRel *ComerSocialRel) (err error) {
+	db = db.Where(socialRel).FirstOrCreate(&socialRel)
+	err = db.Error
+	return
+}
+
+
+func GetWalletList(db *gorm.DB, ids []uint64) (wallets []Wallet, err error) {
+	db = db.Where("id in ?", ids).Find(&wallets)
+	err = db.Error
+
+	return
+}
+
+func GetWalletListByAddress(db *gorm.DB, addesss []string) (wallets []Wallet, err error) {
+	db = db.Where("address in ?", addesss).Find(&wallets)
+	err = db.Error
+
+	return
+}
+
+// CreateWallet create a new
+func CreateWallet(db *gorm.DB, wallet *Wallet) (err error) {
+	db = db.Save(wallet)
+	err = db.Error
+	return
+}
+
+func GetWalletRels(db *gorm.DB, comer_id uint64) (walletRels []ComerWalletRel, err error) {
+	db = db.Where("comer_id = ?", comer_id).Find(&walletRels)
+	err = db.Error
+
+	return
+}
+
+// CreateWalletRel create a new
+func CreateWalletRel(db *gorm.DB, walletRel *ComerWalletRel) (err error) {
+	db = db.Save(walletRel)
+	err = db.Error
+	return
+}
+
+func FirstOrCreateWallet(db *gorm.DB, wallet *Wallet) (err error) {
+	db = db.Where(wallet).FirstOrCreate(&wallet)
+	err = db.Error
+	return
+}
+
+// FirstOrCreateWalletRel create a new
+func FirstOrCreateWalletRel(db *gorm.DB, walletRel *ComerWalletRel) (err error) {
+	db = db.Where(walletRel).FirstOrCreate(&walletRel)
+	err = db.Error
+	return
+}
+
+

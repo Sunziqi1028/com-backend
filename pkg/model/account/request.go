@@ -13,17 +13,22 @@ type EthSignatureObject struct {
 
 // CreateProfileRequest create a new profile then will let the entity to backend
 type CreateProfileRequest struct {
-	SKills      []uint64 `json:"skills"`
-	Description string   `json:"description"`
-	About       string   `json:"about"`
-	Email       string   `json:"email"`
+	Name        string    		`json:"column:name"`
+	Location    string    		`json:"column:location"`
+	Website     string    		`json:"column:website"`
+	Bio         string    		`json:"column:bio"`
+	Socials     []SocialEntity  `json:"socials"`
+	Skills      []string 		`json:"skills"`
+	Wallets     []string 		`json:"wallets"`
 }
 
 // UpdateProfileRequest  update the comer profile
 type UpdateProfileRequest struct {
-	Identifier  uint64   `json:"identifier"`
-	SKills      []uint64 `json:"skills"`
-	Description string   `json:"description"`
-	About       string   `json:"about"`
-	Email       string   `json:"email"`
+	Name        string    		`json:"column:name"`
+	Location    string    		`json:"column:location"`
+	Website     string    		`json:"column:website"`
+	Bio         string    		`json:"column:bio"`
+	Socials     []SocialEntity  `json:"socials"`
+	Skills      []string 		`json:"skills"`
+	Wallets     []string 		`json:"wallets"`
 }

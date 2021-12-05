@@ -17,10 +17,13 @@ type WalletNonceResponse struct {
 
 // ComerProfileResponse return the profile of some comer
 type ComerProfileResponse struct {
+	Name        string    `gorm:"column:name"`
+	Location    string    `gorm:"column:location"`
+	Website     string    `gorm:"column:website"`
+	Bio         string    `gorm:"column:bio"`
+	Socials     []SocialEntity `json:"socials"`
 	Skills      []string `json:"skills"`
-	About       string   `json:"about"`
-	Description string   `json:"description"`
-	Email       string   `json:"email"`
+	Wallets     []string `json:"wallets"`
 }
 
 // ComerOuterAccountObject comer outer account object
