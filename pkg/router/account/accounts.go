@@ -1,68 +1,17 @@
 package account
 
 import (
-	"ceres/pkg/config"
 	"ceres/pkg/initialization/redis"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
-	"ceres/pkg/utility/auth"
 	"context"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gotomicro/ego/core/elog"
 )
-
-// LinkWithGithub link current account with github
-func LinkWithGithub(ctx *router.Context) {
-	//uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	//requestToken := ctx.Query("request_token")
-	//if requestToken == "" {
-	//	ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
-	//	return
-	//}
-	//client := auth.NewGithubOauthClient(requestToken)
-	//err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
-	//if err != nil {
-	//	ctx.ERROR(router.ErrBuisnessError, err.Error())
-	//	return
-	//
-	//}
-	ctx.OK(nil)
-}
-
-// LinkWithGoogle link current account with google
-func LinkWithGoogle(ctx *router.Context) {
-	client := auth.NewGoogleClient(config.Google.LinkCallbackURL, "", "")
-	url := client.AuthCodeURL(client.OauthState)
-	ctx.Redirect(http.StatusTemporaryRedirect, url)
-}
-
-// LinkWithGoogleCallback link current account with google callback
-func LinkWithGoogleCallback(ctx *router.Context) {
-	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	state := ctx.Query("state")
-	if state == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "state missed")
-		return
-	}
-	code := ctx.Query("code")
-	if code == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "code missed")
-		return
-	}
-	client := auth.NewGoogleClient(config.Google.LinkCallbackURL, "", "")
-	err := service.LinkOauthAccountToComer(comerID, client, model.GoogleOauth)
-	if err != nil {
-		ctx.ERROR(router.ErrBuisnessError, err.Error())
-		return
-
-	}
-	ctx.OK(nil)
-}
 
 // ListAccounts list all accounts of the Comer
 func ListAccounts(ctx *router.Context) {

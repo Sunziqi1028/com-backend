@@ -64,7 +64,6 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType)
 	token := jwt.Sign(comer.ID)
 
 	address := ""
-
 	if comer.Address != nil {
 		address = *comer.Address
 	}

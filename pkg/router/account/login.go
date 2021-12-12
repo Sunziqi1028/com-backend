@@ -5,6 +5,7 @@ import (
 	"ceres/pkg/initialization/redis"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
+	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
 	"context"
@@ -14,23 +15,39 @@ import (
 
 // LoginWithGithub login with github oauth
 func LoginWithGithub(ctx *router.Context) {
-	requestToken := ctx.Query("request_token")
-	if requestToken == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
+	url := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%v&redirect_uri=%v", config.Github.ClientID, config.Github.CallbackURL)
+	ctx.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+// LoginWithGithubCallback login with github oauth
+func LoginWithGithubCallback(ctx *router.Context) {
+	code := ctx.Query("code")
+	if code == "" {
+		ctx.ERROR(router.ErrParametersInvaild, "code missed")
 		return
 	}
-	client := auth.NewGithubOauthClient(requestToken)
-	response, err := service.LoginWithOauth(client, model.GithubOauth)
-	if err != nil {
-		ctx.ERROR(router.ErrBuisnessError, err.Error())
-		return
+	client := auth.NewGithubOauthClient(code)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	if comerID == 0 {
+		response, err := service.LoginWithOauth(client, model.GithubOauth)
+		if err != nil {
+			ctx.ERROR(router.ErrBuisnessError, err.Error())
+			return
+		}
+		ctx.OK(response)
+	} else {
+		err := service.LinkOauthAccountToComer(comerID, client, model.GithubOauth)
+		if err != nil {
+			ctx.ERROR(router.ErrBuisnessError, err.Error())
+			return
+		}
+		ctx.OK(nil)
 	}
-	ctx.OK(response)
 }
 
 // LoginWithGoogle login with google oauth
 func LoginWithGoogle(ctx *router.Context) {
-	client := auth.NewGoogleClient(config.Google.CallbackURL, "", "")
+	client := auth.NewGoogleClient("", "")
 	url := client.AuthCodeURL(client.OauthState)
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
@@ -47,14 +64,23 @@ func LoginWithGoogleCallback(ctx *router.Context) {
 		ctx.ERROR(router.ErrParametersInvaild, "code missed")
 		return
 	}
-	client := auth.NewGoogleClient(config.Google.CallbackURL, state, code)
-	response, err := service.LoginWithOauth(client, model.GoogleOauth)
-	if err != nil {
-		ctx.ERROR(router.ErrBuisnessError, err.Error())
-		return
+	client := auth.NewGoogleClient(state, code)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	if comerID == 0 {
+		response, err := service.LoginWithOauth(client, model.GoogleOauth)
+		if err != nil {
+			ctx.ERROR(router.ErrBuisnessError, err.Error())
+			return
+		}
+		ctx.OK(response)
+	} else {
+		err := service.LinkOauthAccountToComer(comerID, client, model.GoogleOauth)
+		if err != nil {
+			ctx.ERROR(router.ErrBuisnessError, err.Error())
+			return
+		}
+		ctx.OK(nil)
 	}
-	fmt.Println(response)
-	ctx.OK(response)
 }
 
 // GetBlockchainLoginNonce get the blockchain login nonce.

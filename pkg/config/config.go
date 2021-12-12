@@ -46,10 +46,9 @@ type GithubOauth struct {
 
 // GoogleOauth from the .toml file
 type GoogleOauth struct {
-	ClientID        string
-	ClientSecret    string
-	CallbackURL     string
-	LinkCallbackURL string
+	ClientID     string
+	ClientSecret string
+	CallbackURL  string
 }
 
 // FacebookOauth from the .toml file

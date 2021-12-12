@@ -28,7 +28,8 @@ func Init() (err error) {
 	oauthLogin := Gin.Group("/account/oauth")
 	{
 		oauthLogin.Use(middleware.GuestAuthorizationMiddleware())
-		oauthLogin.POST("/github/login", router.Wrap(account.LoginWithGithub))
+		oauthLogin.GET("/github/login", router.Wrap(account.LoginWithGithub))
+		oauthLogin.GET("/github/login/callback", router.Wrap(account.LoginWithGithubCallback))
 		oauthLogin.GET("/google/login", router.Wrap(account.LoginWithGoogle))
 		oauthLogin.GET("/google/login/callback", router.Wrap(account.LoginWithGoogleCallback))
 	}
@@ -47,9 +48,6 @@ func Init() (err error) {
 		accounts.Use(middleware.ComerAuthorizationMiddleware())
 		// basic operations
 		accounts.GET("/list", router.Wrap(account.ListAccounts))
-		accounts.POST("/oauth/github/link", router.Wrap(account.LinkWithGithub))
-		accounts.POST("/oauth/google/link", router.Wrap(account.LinkWithGoogle))
-		accounts.POST("/oauth/google/link/callback", router.Wrap(account.LinkWithGoogleCallback))
 		accounts.POST("/eth/wallet/link", router.Wrap(account.LinkWithWallet))
 		accounts.DELETE("/:accountID/unlink", router.Wrap(account.UnlinkAccount))
 		// profile operations
