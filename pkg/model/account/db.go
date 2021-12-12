@@ -51,6 +51,16 @@ func GetComerAccount(db *gorm.DB, accountType ComerAccountType, oin string) (com
 	return
 }
 
+func ListAccount(db *gorm.DB, comerID uint64) (accountList []ComerAccount, err error) {
+	if err = db.Where("comer_id = ? ", comerID).Find(&accountList).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = nil
+		}
+		return
+	}
+	return
+}
+
 func CreateAccount(db *gorm.DB, comerAccount *ComerAccount) (err error) {
 	return db.Create(comerAccount).Error
 }

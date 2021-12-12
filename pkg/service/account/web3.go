@@ -96,6 +96,8 @@ func LoginWithEthWallet(address, signature, nonce string) (response *account.Com
 	// sign with jwt
 	token := jwt.Sign(comer.ID)
 
+	fmt.Println("comer.ID", comer.ID)
+
 	response = &account.ComerLoginResponse{
 		Address:    address,
 		Token:      token,

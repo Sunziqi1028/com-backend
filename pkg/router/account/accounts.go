@@ -9,6 +9,7 @@ import (
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -65,8 +66,9 @@ func LinkWithGoogleCallback(ctx *router.Context) {
 
 // ListAccounts list all accounts of the Comer
 func ListAccounts(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	response, err := service.GetComerAccounts(uin)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	fmt.Println(comerID)
+	response, err := service.GetComerAccounts(comerID)
 	if err != nil {
 		ctx.ERROR(router.ErrBuisnessError, err.Error())
 		return
