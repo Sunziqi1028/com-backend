@@ -35,7 +35,6 @@ func main() {
 		metrics.Init,
 		utility.Init,
 		http.Init,
-		//web3.Init,
 	).Serve(
 		metrics.Vernor,
 		http.Gin,
