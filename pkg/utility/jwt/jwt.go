@@ -13,7 +13,7 @@ import (
 func Sign(uin uint64) (token string) {
 	jwt := JWT.New(JWT.SigningMethodHS256)
 	claims := make(JWT.MapClaims)
-	claims["exp"] = time.Now().Add(time.Duration(config.JWT.Expired) * time.Duration(72)).Unix()
+	claims["exp"] = time.Now().Add(time.Duration(config.JWT.Expired) * time.Second).Unix()
 	claims["iat"] = time.Now().Unix()
 	claims["comer_uin"] = fmt.Sprintf("%d", uin)
 	jwt.Claims = claims

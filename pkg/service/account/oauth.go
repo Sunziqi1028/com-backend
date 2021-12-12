@@ -1,69 +1,59 @@
 package account
 
 import (
-	"ceres/pkg/initialization/mysql"
-	"ceres/pkg/initialization/utility"
 	"ceres/pkg/model/account"
 	"ceres/pkg/utility/auth"
-	"ceres/pkg/utility/jwt"
-	"time"
-
-	"github.com/gotomicro/ego/core/elog"
 )
 
 // LoginWithOauth common oauth login logic in comunion
-func LoginWithOauth(client auth.OauthClient, oauthType account.AccountType) (response *account.ComerLoginResponse, err error) {
-	oauth, err := client.GetUserProfile()
-	if err != nil {
-		return
-	}
-	// try to find account
-	comerAccount, err := account.GetComerByAccountOIN(mysql.DB, oauthType, oauth.GetUserID())
-	if err != nil {
-		elog.Errorf("Comunion Oauth login faild, because of %v", err)
-		return
-	}
-	var comer account.Comer
-
-	if comerAccount.ID == 0 {
-		now := time.Now()
-		comer = account.Comer{
-			ID:        utility.ComerSequnece.Next(),
-			Nick:      oauth.GetUserNick(),
-			Avatar:    oauth.GetUserAvatar(),
-			CreatedAt: now,
-			UpdatedAt: now,
-		}
-		comerAccount = account.Account{
-			ID:        utility.AccountSequnece.Next(),
-			ComerID:   utility.ComerSequnece.Next(),
-			OIN:       oauth.GetUserID(),
-			IsPrimary: true,
-			Nick:      oauth.GetUserNick(),
-			Avatar:    oauth.GetUserAvatar(),
-			Category:  account.OauthAccount,
-			Type:      oauthType,
-			IsLinked:  true,
-			CreatedAt: now,
-			UpdatedAt: now,
-		}
-		// Create the account and comer within transaction
-		err = account.CreateComerWithAccount(mysql.DB, &comer, &comerAccount)
-		if err != nil {
-			elog.Errorf("Comunion Oauth login faild, because of %v", err)
-			return
-		}
-	}
-
-	// sign with jwt using the comer UIN
-	token := jwt.Sign(comer.ID)
-
-	response = &account.ComerLoginResponse{
-		Address: comer.Address,
-		Nick:    comer.Nick,
-		Avatar:  comer.Avatar,
-		Token:   token,
-	}
+func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType) (response *account.ComerLoginResponse, err error) {
+	//oauth, err := client.GetUserProfile()
+	//if err != nil {
+	//	return
+	//}
+	//// try to find account
+	//comerAccount, err := account.GetComerByAccountOIN(mysql.DB, oauthType, oauth.GetUserID())
+	//if err != nil {
+	//	elog.Errorf("Comunion Oauth login faild, because of %v", err)
+	//	return
+	//}
+	//var comer account.Comer
+	//
+	//if comerAccount.ID == 0 {
+	//	now := time.Now()
+	//	comer = account.Comer{
+	//		ID:        utility.ComerSequnece.Next(),
+	//		CreatedAt: now,
+	//		UpdatedAt: now,
+	//	}
+	//	comerAccount = account.ComerAccount{
+	//		ID:        utility.AccountSequnece.Next(),
+	//		ComerID:   utility.ComerSequnece.Next(),
+	//		OIN:       oauth.GetUserID(),
+	//		IsPrimary: true,
+	//		Nick:      oauth.GetUserNick(),
+	//		Avatar:    oauth.GetUserAvatar(),
+	//		Category:  account.OauthAccount,
+	//		Type:      oauthType,
+	//		IsLinked:  true,
+	//		CreatedAt: now,
+	//		UpdatedAt: now,
+	//	}
+	//	// Create the account and comer within transaction
+	//	err = account.CreateComerWithAccount(mysql.DB, &comer, &comerAccount)
+	//	if err != nil {
+	//		elog.Errorf("Comunion Oauth login faild, because of %v", err)
+	//		return
+	//	}
+	//}
+	//
+	//// sign with jwt using the comer UIN
+	//token := jwt.Sign(comer.ID)
+	//
+	//response = &account.ComerLoginResponse{
+	//	Address: comer.Address,
+	//	Token:   token,
+	//}
 
 	return
 }

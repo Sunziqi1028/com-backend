@@ -17,6 +17,9 @@ var JWT *JWTConfig
 // Seq configuration.
 var Seq *Sequence
 
+// Mysql configuration.
+var Mysql *MysqlConfig
+
 // MinioConfig from the .toml file
 type MinioConfig struct {
 	AccessKey string
@@ -48,4 +51,19 @@ type FacebookOauth struct {
 // Sequence from .toml file
 type Sequence struct {
 	Epoch int64
+}
+
+//Contract eth's Contract from .toml file
+type Contract struct {
+	Epoch int64
+}
+
+//MysqlConfig from .toml file
+type MysqlConfig struct {
+	ConnMaxLifetime int
+	Debug           bool
+	Dsn             string
+	Level           string
+	MaxIdleConns    int
+	MaxOpenConns    int
 }

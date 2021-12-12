@@ -11,7 +11,7 @@ import (
 	"ceres/pkg/model/account"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 func TestSeq(t *testing.T) {

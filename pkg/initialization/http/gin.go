@@ -25,19 +25,19 @@ func Init() (err error) {
 	}
 
 	// oauth login router
-	oauthLogin := Gin.Group("/account/oauth/login")
+	oauthLogin := Gin.Group("/account/oauth")
 	{
 		oauthLogin.Use(middleware.GuestAuthorizationMiddleware())
-		oauthLogin.POST("/github", router.Wrap(account.LoginWithGithub))
-		oauthLogin.POST("/facebook", router.Wrap(account.LoginWithFacebook))
+		oauthLogin.POST("/github/login", router.Wrap(account.LoginWithGithub))
+		oauthLogin.POST("/google/login", router.Wrap(account.LoginWithGoogle))
 	}
 
 	// web3 login router
-	web3Login := Gin.Group("/account/eth/login")
+	web3Login := Gin.Group("/account/eth")
 	{
 		web3Login.Use(middleware.GuestAuthorizationMiddleware())
 		web3Login.GET("/nonce", router.Wrap(account.GetBlockchainLoginNonce))
-		web3Login.POST("/wallet", router.Wrap(account.LoginWithWallet))
+		web3Login.POST("/wallet/login", router.Wrap(account.LoginWithWallet))
 	}
 
 	// accounts operation router
@@ -46,14 +46,37 @@ func Init() (err error) {
 		accounts.Use(middleware.ComerAuthorizationMiddleware())
 		// basic operations
 		accounts.GET("/list", router.Wrap(account.ListAccounts))
-		accounts.POST("/oauth/link/gihub", router.Wrap(account.LinkWithGithub))
-		accounts.POST("/eth/link/metamask", router.Wrap(account.LinkWithWallet))
-		accounts.DELETE("/unlink", router.Wrap(account.UnlinkAccount))
+		accounts.POST("/oauth/link/github", router.Wrap(account.LinkWithGithub))
+		accounts.POST("/oauth/link/google", router.Wrap(account.LinkWithGoogle))
+		accounts.POST("/eth/link/wallet", router.Wrap(account.LinkWithWallet))
+		accounts.DELETE("/unlink/:accountId", router.Wrap(account.UnlinkAccount))
 		// profile operations
-		accounts.POST("/profile", router.Wrap(account.CreateProfile))
 		accounts.GET("/profile", router.Wrap(account.GetProfile))
+		accounts.POST("/profile", router.Wrap(account.CreateProfile))
 		accounts.PUT("/profile", router.Wrap(account.UpdateProfile))
 	}
+
+	//coresPriv := Gin.Group("/cores")
+	//{
+	//	coresPriv.Use(middleware.ComerAuthorizationMiddleware())
+	//	coresPriv.GET("/startups/me", router.Wrap(account.ListAccounts))
+	//	coresPriv.GET("/startups/:startupId/bounties/me", router.Wrap(account.ListAccounts))
+	//}
+
+	// startups operation router
+	//coresPub := Gin.Group("/cores")
+	//{
+	//	coresPub.Use(middleware.GuestAuthorizationMiddleware())
+	//	// basic operations
+	//	coresPub.GET("/startups", router.Wrap(account.ListAccounts))
+	//	coresPub.GET("/startups/:startupId", router.Wrap(account.LinkWithGithub))
+	//	coresPub.GET("/startups/:startupId/bounties/", router.Wrap(account.ListAccounts))
+	//	coresPub.GET("/bounties/:bountyId", router.Wrap(account.ListAccounts))
+	//	coresPub.GET("/bounties", router.Wrap(account.ListAccounts))
+	//	coresPub.GET("/dios/:dioId", router.Wrap(account.ListAccounts))
+	//	coresPub.GET("/startups/:startupId/dios", router.Wrap(account.ListAccounts))
+	//	coresPub.GET("/startups/:startupId/dios/:dioId", router.Wrap(account.ListAccounts))
+	//}
 
 	// misc operation router
 	misc := Gin.Group("/misc")

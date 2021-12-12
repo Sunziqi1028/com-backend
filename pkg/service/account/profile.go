@@ -1,106 +1,138 @@
 package account
 
 import (
+	"ceres/pkg/initialization/mysql"
 	model "ceres/pkg/model/account"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
 // GetComerProfile get current comer profile
 // if profile is not exists then will let the router return 404
-func GetComerProfile(uin uint64) (response *model.ComerProfileResponse, err error) {
-	//profile, err := model.GetComerProfile(mysql.DB, uin)
-	//if err != nil {
-	//	return
-	//}
-	//// current comer is no profile saved then the router should return some code for frontend
-	//if profile.ID == 0 {
-	//	return
-	//}
-	//skillIds := make([]uint64, 0)
-	//for _, v := range strings.Split(profile.Skills, ",") {
-	//	id, _ := strconv.ParseInt(v, 10, 64)
-	//	skillIds = append(skillIds, uint64(id))
-	//}
-	//tags, err := model.GetSkillList(mysql.DB, skillIds)
-	//var skills []string
-	//for _, v := range tags {
-	//	skills = append(skills, v.Name)
-	//}
-	//response = &model.ComerProfileResponse{
-	//	Skills:      skills,
-	//	About:       profile.About,
-	//	Description: profile.Description,
-	//	Email:       profile.Email,
-	//}
+func GetComerProfile(comerID uint64) (response *model.ComerProfileResponse, err error) {
+	profile, err := model.GetComerProfile(mysql.DB, comerID)
+	if err != nil {
+		return
+	}
+	// current comer is no profile saved then the router should return some code for frontend
+	if profile.ID == 0 {
+		return
+	}
+
+	skillRels, err := model.GetSkillRelListByComerID(mysql.DB, comerID)
+	if err != nil {
+		return nil, err
+	}
+	skillIds := make([]uint64, 0)
+	for _, skillRel := range skillRels {
+		skillIds = append(skillIds, skillRel.SkillID)
+	}
+	skills, err := model.GetSkillByIds(mysql.DB, skillIds)
+	if err != nil {
+		return nil, err
+	}
+	response = &model.ComerProfileResponse{
+		ComerProfile: profile,
+		Skills:       skills,
+	}
 	return
 }
 
 // CreateComerProfile  create a new profil for comer
 // current comer should not be exists now
-func CreateComerProfile(uin uint64, post *model.CreateProfileRequest) (err error) {
-	//err = mysql.DB.Transaction(func(tx *gorm.DB) error {
-	//	profile, err := model.GetComerProfile(tx, uin)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	if profile.ID == 0 {
-	//		now := time.Now()
-	//		profile.About = post.About
-	//		profile.Description = post.Description
-	//		profile.Email = post.Email
-	//		profile.Identifier = utility.ProfileSequence.Next()
-	//		profile.CreateAt = now
-	//		profile.UpdateAt = now
-	//		var skillIds []string
-	//		for _, id := range post.SKills {
-	//			skillIds = append(skillIds, strconv.FormatInt(int64(id), 10))
-	//		}
-	//		profile.Skills = strings.Join(skillIds, ",")
-	//		err = model.CreateComerProfile(tx, &profile)
-	//		if err != nil {
-	//			return err
-	//		}
-	//		return nil
-	//	}
-	//	return errors.New("comer profile is exists now")
-	//})
-	return
+func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err error) {
+	profile, err := model.GetComerProfile(mysql.DB, comerID)
+	if err != nil {
+		return err
+	}
+	if profile.ID != 0 {
+		return errors.New("comer profile has exist")
+	}
+	var comerSkillRelList []model.ComerSkillRel
+	profile = model.ComerProfile{
+		ComerID:  comerID,
+		Name:     post.Name,
+		Avatar:   post.Avatar,
+		Location: post.Location,
+		Website:  post.Website,
+		BIO:      post.BIO,
+	}
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		//create skill
+		for _, skillName := range post.SKills {
+			skill := model.Skill{
+				Name: skillName,
+			}
+			if err = model.FirstOrCreateSkill(tx, &skill); err != nil {
+				return err
+			}
+			comerSkillRelList = append(comerSkillRelList, model.ComerSkillRel{
+				ComerID: comerID,
+				SkillID: skill.ID,
+			})
+		}
+		//batch create comer skill relation
+		if err = model.BatchCreateComerSkillRel(tx, comerSkillRelList); err != nil {
+			return err
+		}
+		//create comer profile
+		if err = model.CreateComerProfile(tx, &profile); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
 }
 
 // UpdateComerProfile update the comer profile
 // if profile is not exists then will return the not exits error
-func UpdateComerProfile(uin uint64, post *model.UpdateProfileRequest) (err error) {
-	//err = mysql.DB.Transaction(func(tx *gorm.DB) error {
-	//	profile, err := model.GetComerProfileByIdentifier(tx, post.Identifier)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	if profile.ID == 0 {
-	//		return errors.New("comer profile is not exists")
-	//	}
-	//
-	//	var skillIds []string
-	//	for _, id := range post.SKills {
-	//		skillIds = append(skillIds, strconv.FormatInt(int64(id), 10))
-	//	}
-	//	skills := strings.Join(skillIds, ",")
-	//	if profile.Skills != skills {
-	//		profile.Skills = skills
-	//	}
-	//	if profile.Email != post.Email && post.Email != "" {
-	//		profile.Email = post.Email
-	//	}
-	//	if profile.Description != post.Description && post.Description != "" {
-	//		profile.Description = post.Description
-	//	}
-	//	if profile.About != post.About && post.About != "" {
-	//		profile.About = post.About
-	//	}
-	//	profile.UpdateAt = time.Now()
-	//	err = model.UpdateComerProfile(tx, &profile)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	return nil
-	//})
+func UpdateComerProfile(comerID uint64, post *model.UpdateProfileRequest) (err error) {
+	profile, err := model.GetComerProfile(mysql.DB, comerID)
+	if err != nil {
+		return err
+	}
+	if profile.ID == 0 {
+		return errors.New("comer does not exist")
+	}
+	var skillIds []uint64
+	var comerSkillRelList []model.ComerSkillRel
+	profile = model.ComerProfile{
+		ComerID:  comerID,
+		Name:     post.Name,
+		Avatar:   post.Avatar,
+		Location: post.Location,
+		Website:  post.Website,
+		BIO:      post.BIO,
+	}
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		//create skill
+		for _, skillName := range post.SKills {
+			skill := model.Skill{
+				Name: skillName,
+			}
+			if err = model.FirstOrCreateSkill(tx, &skill); err != nil {
+				return err
+			}
+			comerSkillRelList = append(comerSkillRelList, model.ComerSkillRel{
+				ComerID: comerID,
+				SkillID: skill.ID,
+			})
+			skillIds = append(skillIds, skill.ID)
+		}
+		//delete not used skills
+		if err = model.DeleteComerSkillRelByNotIds(tx, comerID, skillIds); err != nil {
+			return err
+		}
+		//batch create comer skill rel
+		if err = model.BatchCreateComerSkillRel(tx, comerSkillRelList); err != nil {
+			return err
+		}
+		//create profile
+		if err = model.UpdateComerProfile(tx, &profile); err != nil {
+			return err
+		}
+		return nil
+	})
 	return
 }

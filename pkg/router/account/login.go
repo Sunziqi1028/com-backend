@@ -25,8 +25,8 @@ func LoginWithGithub(ctx *router.Context) {
 	ctx.OK(response)
 }
 
-// LoginWithFacebook login with facebook oauth
-func LoginWithFacebook(ctx *router.Context) {
+// LoginWithGoogle login with google oauth
+func LoginWithGoogle(ctx *router.Context) {
 	requestToken := ctx.Query("request_token")
 	if requestToken == "" {
 		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
@@ -39,16 +39,6 @@ func LoginWithFacebook(ctx *router.Context) {
 		return
 	}
 	ctx.OK(response)
-}
-
-// LoginWithTwitter login with twitter oauth
-func LoginWithTwitter(_ *router.Context) {
-	// TODO: should complete the twitter logic
-}
-
-// LoginWithLinkedIn login with linkedin oauth
-func LoginWithLinkedIn(_ *router.Context) {
-	// TODO: should complete the linkedin logic
 }
 
 // GetBlockchainLoginNonce get the blockchain login nonce.

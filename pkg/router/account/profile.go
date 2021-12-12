@@ -9,7 +9,7 @@ import (
 
 // CreateProfile create the profile
 func CreateProfile(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	request := &model.CreateProfileRequest{}
 	err := ctx.BindJSON(request)
 	if err != nil {
@@ -19,11 +19,11 @@ func CreateProfile(ctx *router.Context) {
 		)
 		return
 	}
-	err = service.CreateComerProfile(uin, request)
+	err = service.CreateComerProfile(comerID, request)
 	if err != nil {
 		ctx.ERROR(
 			router.ErrBuisnessError,
-			"wrong metamask login parameter",
+			err.Error(),
 		)
 		return
 	}

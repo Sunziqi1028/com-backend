@@ -2,10 +2,11 @@ package account
 
 // ComerLoginResponse comer login response
 type ComerLoginResponse struct {
-	Nick    string `json:"nick"`
-	Avatar  string `json:"avatar"`
-	Address string `json:"address"`
-	Token   string `json:"token"`
+	Name       string `json:"name"`
+	Avatar     string `json:"avatar"`
+	Address    string `json:"address"`
+	Token      string `json:"token"`
+	IsProfiled bool   `json:"isProfiled"`
 }
 
 // WalletNonceResponse wrap the nonce for formating rule in resposne
@@ -15,13 +16,8 @@ type WalletNonceResponse struct {
 
 // ComerProfileResponse return the profile of some comer
 type ComerProfileResponse struct {
-	Name        string    `gorm:"column:name"`
-	Location    string    `gorm:"column:location"`
-	Website     string    `gorm:"column:website"`
-	Bio         string    `gorm:"column:bio"`
-	Socials     []SocialEntity `json:"socials"`
-	Skills      []string `json:"skills"`
-	Wallets     []string `json:"wallets"`
+	ComerProfile
+	Skills []Skill `json:"skills"`
 }
 
 // ComerOuterAccountObject comer outer account object

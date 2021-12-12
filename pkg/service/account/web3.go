@@ -3,7 +3,6 @@ package account
 import (
 	"ceres/pkg/initialization/mysql"
 	"ceres/pkg/initialization/redis"
-	"ceres/pkg/initialization/utility"
 	"ceres/pkg/model/account"
 	"ceres/pkg/utility/jwt"
 	"context"
@@ -12,9 +11,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gotomicro/ego/core/elog"
 )
 
@@ -62,21 +58,29 @@ func LoginWithEthWallet(address, signature, nonce string) (response *account.Com
 		elog.Error(err.Error())
 		return
 	}
+	//set default profile status
+	var isProfiled bool
+	var comerProfile account.ComerProfile
 
 	if comer.ID == 0 {
-		now := time.Now()
 		comer = account.Comer{
-			ID:        utility.ComerSequnece.Next(),
-			Address:   address,
-			Nick:      address,
-			CreatedAt: now,
-			UpdatedAt: now,
+			Address: address,
 		}
 		// create a new comer
 		err = account.CreateComer(mysql.DB, &comer)
 		if err != nil {
 			elog.Errorf("Comunion Eth login faild, because of %v", err)
 			return
+		}
+		isProfiled = false
+	} else {
+		comerProfile, err = account.GetComerProfile(mysql.DB, comer.ID)
+		if err != nil {
+			elog.Errorf("Comunion get comer profile fauld, because of %v", err)
+			return
+		}
+		if comerProfile.ID != 0 {
+			isProfiled = true
 		}
 	}
 
@@ -89,10 +93,11 @@ func LoginWithEthWallet(address, signature, nonce string) (response *account.Com
 	token := jwt.Sign(comer.ID)
 
 	response = &account.ComerLoginResponse{
-		Address: comer.Address,
-		Nick:    comer.Address,
-		Avatar:  comer.Avatar,
-		Token:   token,
+		Address:    comer.Address,
+		Token:      token,
+		Name:       comerProfile.Name,
+		Avatar:     comerProfile.Avatar,
+		IsProfiled: isProfiled,
 	}
 	return
 }
@@ -137,21 +142,21 @@ func LinkEthAccountToComer(comerID uint64, address, signature, nonce string) (er
 
 // VerifyEthWallet verify the signature and login with the wallet
 func VerifyEthWallet(address, nonce, signature string) (err error) {
-	addrKey := common.HexToAddress(address)
-	sig := hexutil.MustDecode(signature)
-	if sig[64] == 27 || sig[64] == 28 {
-		sig[64] -= 27
-	}
-	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(nonce), nonce)
-	msg256 := crypto.Keccak256([]byte(msg))
-	pubKey, err := crypto.SigToPub(msg256, sig)
-	if err != nil {
-		return
-	}
-	recoverAddr := crypto.PubkeyToAddress(*pubKey)
-	if recoverAddr != addrKey {
-		err = errors.New("Not match the origin public key")
-		return
-	}
+	//addrKey := common.HexToAddress(address)
+	//sig := hexutil.MustDecode(signature)
+	//if sig[64] == 27 || sig[64] == 28 {
+	//	sig[64] -= 27
+	//}
+	//msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(nonce), nonce)
+	//msg256 := crypto.Keccak256([]byte(msg))
+	//pubKey, err := crypto.SigToPub(msg256, sig)
+	//if err != nil {
+	//	return
+	//}
+	//recoverAddr := crypto.PubkeyToAddress(*pubKey)
+	//if recoverAddr != addrKey {
+	//	err = errors.New("Not match the origin public key")
+	//	return
+	//}
 	return
 }
