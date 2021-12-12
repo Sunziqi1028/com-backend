@@ -33,6 +33,11 @@
     clientID = ""
     clientSecret = ""
     callbackURL = ""
+
+[ceres.oauth.google]
+    clientID = ""
+    clientSecret = ""
+    callbackURL = ""
     
 [ceres.oauth.facebook]
     clientID = ""
