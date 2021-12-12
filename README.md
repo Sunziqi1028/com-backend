@@ -38,7 +38,7 @@ Comunion Backend Service
 - copy the config file
 
 ```shell
-cp ./hack/config/config.toml ./hack/config/config.test.toml
+cp ./hack/config/config.toml ./hack/config/config.dev.toml
 ```
 
 - running the app

@@ -18,6 +18,7 @@ import (
 func main() {
 	// Order
 	// init the config file
+	// init the config file
 	// init the logger
 	// init the gorm
 	// init the redis
@@ -25,6 +26,7 @@ func main() {
 	// init the utility
 	// init the grpc
 	// init the gin
+	// init the web3
 	if err := ego.New().Invoker(
 		config.Init,
 		logger.Init,
@@ -39,5 +41,4 @@ func main() {
 	).Run(); err != nil {
 		elog.Panic(err.Error())
 	}
-
 }

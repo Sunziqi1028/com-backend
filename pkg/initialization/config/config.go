@@ -14,6 +14,7 @@ func Init() error {
 	C.Minio = &C.MinioConfig{}
 	C.Seq = &C.Sequence{}
 	C.JWT = &C.JWTConfig{}
+	C.Mysql = &C.MysqlConfig{}
 
 	err := econf.UnmarshalKey("ceres.oauth.github", C.Github)
 	if err != nil {
@@ -36,6 +37,11 @@ func Init() error {
 	}
 
 	err = econf.UnmarshalKey("ceres.jwt", C.JWT)
+	if err != nil {
+		return err
+	}
+
+	err = econf.UnmarshalKey("ceres.mysql", C.Mysql)
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,7 @@ package tag
 import (
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // const tag category type

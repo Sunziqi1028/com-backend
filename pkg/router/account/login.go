@@ -1,10 +1,12 @@
 package account
 
 import (
+	"ceres/pkg/initialization/redis"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
+	"context"
 )
 
 // LoginWithGithub login with github oauth
@@ -23,8 +25,8 @@ func LoginWithGithub(ctx *router.Context) {
 	ctx.OK(response)
 }
 
-// LoginWithFacebook login with facebook oauth
-func LoginWithFacebook(ctx *router.Context) {
+// LoginWithGoogle login with google oauth
+func LoginWithGoogle(ctx *router.Context) {
 	requestToken := ctx.Query("request_token")
 	if requestToken == "" {
 		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
@@ -37,16 +39,6 @@ func LoginWithFacebook(ctx *router.Context) {
 		return
 	}
 	ctx.OK(response)
-}
-
-// LoginWithTwitter login with twitter oauth
-func LoginWithTwitter(_ *router.Context) {
-	// TODO: should complete the twitter logic
-}
-
-// LoginWithLinkedIn login with linkedin oauth
-func LoginWithLinkedIn(_ *router.Context) {
-	// TODO: should complete the linkedin logic
 }
 
 // GetBlockchainLoginNonce get the blockchain login nonce.
@@ -70,25 +62,31 @@ func GetBlockchainLoginNonce(ctx *router.Context) {
 	ctx.OK(nonce)
 }
 
-// LoginWithMetamask login with the metamask signature.
-func LoginWithMetamask(ctx *router.Context) {
+// LoginWithWallet login with the wallet signature.
+func LoginWithWallet(ctx *router.Context) {
 	signature := &model.EthSignatureObject{}
 	err := ctx.BindJSON(signature)
 	if err != nil {
 		ctx.ERROR(
 			router.ErrParametersInvaild,
-			"wrong metamask login parameter",
+			"wrong wallet login parameter",
 		)
 		return
 	}
 
+	nonce, err := redis.Client.Get(context.TODO(), signature.Address)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrParametersInvaild,
+			"wrong wallet login parameter",
+		)
+		return
+	}
 	// Replace the 0x prefix
-
-	resposne, err := service.VerifyEthLogin(
+	response, err := service.LoginWithEthWallet(
 		signature.Address,
-		signature.MessageHash,
 		signature.Signature,
-		model.MetamaskEth,
+		nonce,
 	)
 
 	if err != nil {
@@ -98,5 +96,5 @@ func LoginWithMetamask(ctx *router.Context) {
 		)
 		return
 	}
-	ctx.OK(resposne)
+	ctx.OK(response)
 }

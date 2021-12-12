@@ -3,22 +3,15 @@ package account
 import (
 	"ceres/pkg/initialization/mysql"
 	"ceres/pkg/initialization/redis"
-	"ceres/pkg/initialization/utility"
 	"ceres/pkg/model/account"
 	"ceres/pkg/utility/jwt"
 	"context"
 	"errors"
 	"fmt"
 	"math/rand"
-	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gotomicro/ego/core/elog"
-	"github.com/jinzhu/gorm"
-	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -53,152 +46,117 @@ func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceRespon
 	return
 }
 
-// VerifyEthLogin verify the signature and login with the eth wallet
-// FIXME: have to check the address nonce in redis to keep the request is vaild 
-func VerifyEthLogin(address, messageHash, signature string, walletType int) (response *account.ComerLoginResponse, err error) {
-	addrKey := common.HexToAddress(address)
-	sig := hexutil.MustDecode(signature)
-	if sig[64] == 27 || sig[64] == 28 {
-		sig[64] -= 27
-	}
-	// if not end with 27 then will be error in message in the response
-	hash := hexutil.MustDecode(messageHash)
-
-	pubKey, err := crypto.SigToPub(hash, sig)
-	if err != nil {
+// LoginWithEthWallet common eth wallet login
+func LoginWithEthWallet(address, signature, nonce string) (response *account.ComerLoginResponse, err error) {
+	//verify wallet and nonce
+	if err = VerifyEthWallet(address, nonce, signature); err != nil {
 		return
 	}
 
-	recoverAddr := crypto.PubkeyToAddress(*pubKey)
-
-	if recoverAddr != addrKey {
-		err = errors.New("Not match the origin public key")
-		return
-	}
-
-	comer, err := account.GetComerByAccountOIN(mysql.DB, address)
+	comer, err := account.GetComerByAddress(mysql.DB, address)
 	if err != nil {
 		elog.Error(err.Error())
 		return
 	}
+	//set default profile status
+	var isProfiled bool
+	var comerProfile account.ComerProfile
 
 	if comer.ID == 0 {
-		// create a new comer with the origin ID
-		// create comer with account
-		now := time.Now()
-		comer.UIN = utility.AccountSequnece.Next()
-		comer.ComerID = strings.Replace(uuid.Must(uuid.NewV4(), nil).String(), "-", "", -1)
-		comer.Nick = address
-		comer.CreateAt = now
-		comer.UpdateAt = now
-		outer := &account.Account{}
-		outer.Identifier = utility.AccountSequnece.Next()
-		outer.OIN = address
-		outer.UIN = comer.UIN
-		outer.IsMain = true
-		outer.IsLinked = true
-		outer.Nick = comer.Nick
-		outer.Avatar = comer.Avatar
-		outer.Category = account.EthAccount
-		outer.Type = walletType
-		outer.CreateAt = now
-		outer.UpdateAt = now
-		// Create the account and comer within transaction
-		err = account.CreateComerWithAccount(mysql.DB, &comer, outer)
+		comer = account.Comer{
+			Address: address,
+		}
+		// create a new comer
+		err = account.CreateComer(mysql.DB, &comer)
 		if err != nil {
 			elog.Errorf("Comunion Eth login faild, because of %v", err)
 			return
 		}
-		_, err = redis.Client.Del(context.TODO(), address)
+		isProfiled = false
+	} else {
+		comerProfile, err = account.GetComerProfile(mysql.DB, comer.ID)
 		if err != nil {
-			elog.Errorf("Comunion redis remove key failed %v", err)
+			elog.Errorf("Comunion get comer profile fauld, because of %v", err)
+			return
+		}
+		if comerProfile.ID != 0 {
+			isProfiled = true
 		}
 	}
 
+	_, err = redis.Client.Del(context.TODO(), address)
+	if err != nil {
+		elog.Errorf("Comunion redis remove key failed %v", err)
+	}
+
 	// sign with jwt
-	token := jwt.Sign(comer.UIN)
+	token := jwt.Sign(comer.ID)
 
 	response = &account.ComerLoginResponse{
-		ComerID: comer.ComerID,
-		Address: comer.Address,
-		Nick:    comer.Nick,
-		Avatar:  comer.Avatar,
-		Token:   token,
-		UIN:     comer.UIN,
+		Address:    comer.Address,
+		Token:      token,
+		Name:       comerProfile.Name,
+		Avatar:     comerProfile.Avatar,
+		IsProfiled: isProfiled,
 	}
 	return
 }
 
 // LinkEthAccountToComer link a new eth wallet account to comer
-// FIXME: have to check the address nonce in redis to keep the request is vaild 
-func LinkEthAccountToComer(uin uint64, address, messageHash, signature string, walletType int) (err error) {
-	err = mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
-		comer, err := account.GetComerByAccountUIN(tx, uin)
-		if err != nil {
-			return
-		}
-		if comer.ID == 0 {
-			return errors.New("comer is not exists")
-		}
-		addrKey := common.HexToAddress(address)
-		sig := hexutil.MustDecode(signature)
-		if sig[64] == 27 || sig[64] == 28 {
-			sig[64] -= 27
-		}
-		// if not end with 27 then will be error in message in the response
-		hash := hexutil.MustDecode(messageHash)
+func LinkEthAccountToComer(comerID uint64, address, signature, nonce string) (err error) {
+	//verify wallet and nonce
+	if err = VerifyEthWallet(address, nonce, signature); err != nil {
+		return
+	}
 
-		pubKey, err := crypto.SigToPub(hash, sig)
-		if err != nil {
-			return
-		}
+	refComer, err := account.GetComerByID(mysql.DB, comerID)
+	if err != nil {
+		elog.Error(err.Error())
+		return err
+	}
 
-		recoverAddr := crypto.PubkeyToAddress(*pubKey)
+	if refComer.Address != "" {
+		return errors.New("Current comer has linked with a wallet")
+	}
 
-		if recoverAddr != addrKey {
-			err = errors.New("Not match the origin public key")
-			return
-		}
-		// origin address passed from the frontend is the 0x prefix
-		// but in this logic ceres will move the 0x predix in the router to do next
-		refComer, err := account.GetComerByAccountOIN(mysql.DB, address)
-		if err != nil {
-			elog.Error(err.Error())
-			return err
-		}
+	refComer, err = account.GetComerByAddress(mysql.DB, address)
+	if err != nil {
+		elog.Error(err.Error())
+		return err
+	}
 
-		if refComer.ID == 0 {
-			outer, err := account.GetAccountByOIN(tx, address)
-			if err != nil {
-				return err
-			}
-			if outer.ID == 0 {
-				outer.Identifier = utility.AccountSequnece.Next()
-			}
-			now := time.Now()
-			outer.OIN = address
-			outer.UIN = comer.UIN
-			outer.IsMain = false
-			outer.IsLinked = true
-			outer.Nick = comer.Nick
-			outer.Avatar = comer.Avatar
-			outer.Category = account.EthAccount
-			outer.Type = walletType
-			outer.CreateAt = now
-			outer.UpdateAt = now
-			// Create the account and comer within transaction
-			err = account.LinkComerWithAccount(mysql.DB, uin, &outer)
-			if err != nil {
-				return err
-			}
-			_, err = redis.Client.Del(context.TODO(), address)
-			if err != nil {
-				elog.Errorf("Comunion redis remove key failed %v", err)
-				return nil
-			}
-			return nil
-		}
-		return errors.New("current eth wallet account is linked with a comer")
-	})
+	if refComer.Address != "" {
+		return errors.New("Current eth wallet account is linked with a comer")
+	}
+
+	if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
+		return
+	}
+
+	_, err = redis.Client.Del(context.TODO(), address)
+	if err != nil {
+		elog.Errorf("Comunion redis remove key failed %v", err)
+	}
+	return nil
+}
+
+// VerifyEthWallet verify the signature and login with the wallet
+func VerifyEthWallet(address, nonce, signature string) (err error) {
+	//addrKey := common.HexToAddress(address)
+	//sig := hexutil.MustDecode(signature)
+	//if sig[64] == 27 || sig[64] == 28 {
+	//	sig[64] -= 27
+	//}
+	//msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(nonce), nonce)
+	//msg256 := crypto.Keccak256([]byte(msg))
+	//pubKey, err := crypto.SigToPub(msg256, sig)
+	//if err != nil {
+	//	return
+	//}
+	//recoverAddr := crypto.PubkeyToAddress(*pubKey)
+	//if recoverAddr != addrKey {
+	//	err = errors.New("Not match the origin public key")
+	//	return
+	//}
 	return
 }

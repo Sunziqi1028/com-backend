@@ -1,13 +1,47 @@
 package account
 
 import (
-	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
-	"ceres/pkg/utility/auth"
 	"strconv"
 )
+
+// LinkWithGithub link current account with github
+func LinkWithGithub(ctx *router.Context) {
+	//uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	//requestToken := ctx.Query("request_token")
+	//if requestToken == "" {
+	//	ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
+	//	return
+	//}
+	//client := auth.NewGithubOauthClient(requestToken)
+	//err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
+	//if err != nil {
+	//	ctx.ERROR(router.ErrBuisnessError, err.Error())
+	//	return
+	//
+	//}
+	ctx.OK(nil)
+}
+
+// LinkWithGithub link current account with github
+func LinkWithGoogle(ctx *router.Context) {
+	//uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	//requestToken := ctx.Query("request_token")
+	//if requestToken == "" {
+	//	ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
+	//	return
+	//}
+	//client := auth.NewGithubOauthClient(requestToken)
+	//err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
+	//if err != nil {
+	//	ctx.ERROR(router.ErrBuisnessError, err.Error())
+	//	return
+	//
+	//}
+	ctx.OK(nil)
+}
 
 // ListAccounts list all accounts of the Comer
 func ListAccounts(ctx *router.Context) {
@@ -38,53 +72,40 @@ func UnlinkAccount(ctx *router.Context) {
 	ctx.OK(nil)
 }
 
-// LinkWithGithub link current account with github
-func LinkWithGithub(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	requestToken := ctx.Query("request_token")
-	if requestToken == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
-		return
-	}
-	client := auth.NewGithubOauthClient(requestToken)
-	err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
-	if err != nil {
-		ctx.ERROR(router.ErrBuisnessError, err.Error())
-		return
-
-	}
-	ctx.OK(nil)
-}
-
-// LinkWithGithub link current account with github
-// FIXME: should eliminate the duplicate code in the login api
-func LinkWithMetamask(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	signature := &model.EthSignatureObject{}
-	err := ctx.BindJSON(signature)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"wrong metamask login parameter",
-		)
-		return
-	}
-
-	err = service.LinkEthAccountToComer(
-		uin,
-		signature.Address,
-		signature.MessageHash,
-		signature.Signature,
-		model.MetamaskEth,
-	)
-
-	if err != nil {
-		ctx.ERROR(
-			router.ErrBuisnessError,
-			err.Error(),
-		)
-		return
-	}
+// LinkWithWallet link current account with wallet
+func LinkWithWallet(ctx *router.Context) {
+	//comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	//signature := &model.EthSignatureObject{}
+	//err := ctx.BindJSON(signature)
+	//if err != nil {
+	//	ctx.ERROR(
+	//		router.ErrParametersInvaild,
+	//		"wrong metamask login parameter",
+	//	)
+	//	return
+	//}
+	//
+	////get nonce
+	//nonce, err := redis.Client.Get(context.TODO(), signature.Address)
+	//if err != nil {
+	//	elog.Errorf("Comunion redis get key failed %v", err)
+	//	return
+	//}
+	//
+	//err = service.LinkEthAccountToComer(
+	//	comerID,
+	//	signature.Address,
+	//	signature.Signature,
+	//	nonce,
+	//)
+	//
+	//if err != nil {
+	//	ctx.ERROR(
+	//		router.ErrBuisnessError,
+	//		err.Error(),
+	//	)
+	//	return
+	//}
 
 	ctx.OK(nil)
 }
