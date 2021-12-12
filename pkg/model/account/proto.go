@@ -14,16 +14,10 @@ const (
 	GoogleOauth   ComerAccountType = 5
 )
 
-type ComerAccountCategory int
-
-const (
-	OauthAccount ComerAccountCategory = 1
-)
-
 // Comer the comer model of comunion inner account
 type Comer struct {
 	model.Base
-	Address string `gorm:"column:address"`
+	Address *string `gorm:"column:address"`
 }
 
 // TableName Comer table name for gorm
@@ -34,14 +28,13 @@ func (Comer) TableName() string {
 // ComerAccount the account model of comer
 type ComerAccount struct {
 	model.Base
-	ComerID   uint64               `gorm:"column:comer_id"`
-	OIN       string               `gorm:"column:oin"`
-	IsPrimary bool                 `gorm:"column:is_primary"`
-	Nick      string               `gorm:"column:nick"`
-	Avatar    string               `gorm:"column:avatar"`
-	Category  ComerAccountCategory `gorm:"column:category"`
-	Type      ComerAccountType     `gorm:"column:type"`
-	IsLinked  bool                 `gorm:"column:linked"`
+	ComerID   uint64           `gorm:"column:comer_id" json:"comerID"`
+	OIN       string           `gorm:"column:oin" json:"oin"`
+	IsPrimary bool             `gorm:"column:is_primary" json:"isPrimary"`
+	Nick      string           `gorm:"column:nick" json:"nick"`
+	Avatar    string           `gorm:"column:avatar" json:"avatar"`
+	Type      ComerAccountType `gorm:"column:type" json:"type"`
+	IsLinked  bool             `gorm:"column:is_linked" json:"isLinked"`
 }
 
 // TableName the ComerAccount table name for gorm

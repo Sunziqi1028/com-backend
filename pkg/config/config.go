@@ -8,6 +8,9 @@ var Minio *MinioConfig
 // Github Oauth configuration.
 var Github *GithubOauth
 
+// Google Oauth configuration.
+var Google *GoogleOauth
+
 // Facebook Oauth configuration.
 var Facebook *FacebookOauth
 
@@ -36,6 +39,13 @@ type JWTConfig struct {
 
 // GithubOauth from the .toml file
 type GithubOauth struct {
+	ClientID     string
+	ClientSecret string
+	CallbackURL  string
+}
+
+// GoogleOauth from the .toml file
+type GoogleOauth struct {
 	ClientID     string
 	ClientSecret string
 	CallbackURL  string

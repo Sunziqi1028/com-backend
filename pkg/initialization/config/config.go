@@ -10,6 +10,7 @@ import (
 func Init() error {
 	// Logger = elog.DefaultLogger
 	C.Github = &C.GithubOauth{}
+	C.Google = &C.GoogleOauth{}
 	C.Facebook = &C.FacebookOauth{}
 	C.Minio = &C.MinioConfig{}
 	C.Seq = &C.Sequence{}
@@ -22,6 +23,11 @@ func Init() error {
 	}
 
 	err = econf.UnmarshalKey("ceres.oauth.facebook", C.Facebook)
+	if err != nil {
+		return err
+	}
+
+	err = econf.UnmarshalKey("ceres.oauth.google", C.Google)
 	if err != nil {
 		return err
 	}

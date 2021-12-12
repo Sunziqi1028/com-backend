@@ -1,52 +1,23 @@
 package account
 
 import (
+	"ceres/pkg/initialization/redis"
+	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
+	"context"
+	"fmt"
 	"strconv"
+
+	"github.com/gotomicro/ego/core/elog"
 )
-
-// LinkWithGithub link current account with github
-func LinkWithGithub(ctx *router.Context) {
-	//uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	//requestToken := ctx.Query("request_token")
-	//if requestToken == "" {
-	//	ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
-	//	return
-	//}
-	//client := auth.NewGithubOauthClient(requestToken)
-	//err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
-	//if err != nil {
-	//	ctx.ERROR(router.ErrBuisnessError, err.Error())
-	//	return
-	//
-	//}
-	ctx.OK(nil)
-}
-
-// LinkWithGithub link current account with github
-func LinkWithGoogle(ctx *router.Context) {
-	//uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	//requestToken := ctx.Query("request_token")
-	//if requestToken == "" {
-	//	ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
-	//	return
-	//}
-	//client := auth.NewGithubOauthClient(requestToken)
-	//err := service.LinkOauthAccountToComer(uin, client, model.GithubOauth)
-	//if err != nil {
-	//	ctx.ERROR(router.ErrBuisnessError, err.Error())
-	//	return
-	//
-	//}
-	ctx.OK(nil)
-}
 
 // ListAccounts list all accounts of the Comer
 func ListAccounts(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	response, err := service.GetComerAccounts(uin)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	fmt.Println(comerID)
+	response, err := service.GetComerAccounts(comerID)
 	if err != nil {
 		ctx.ERROR(router.ErrBuisnessError, err.Error())
 		return
@@ -57,13 +28,13 @@ func ListAccounts(ctx *router.Context) {
 
 // UnlinkAccount unlink accounts for the Comer
 func UnlinkAccount(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	identifier, err := strconv.ParseInt(ctx.Query("identifier"), 10, 64)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	accountID, err := strconv.ParseUint(ctx.Param("accountID"), 0, 64)
 	if err != nil {
 		ctx.ERROR(router.ErrParametersInvaild, err.Error())
 		return
 	}
-	err = service.UnlinkComerAccount(uin, uint64(identifier))
+	err = service.UnlinkComerAccount(comerID, accountID)
 	if err != nil {
 		ctx.ERROR(router.ErrBuisnessError, err.Error())
 		return
@@ -74,38 +45,38 @@ func UnlinkAccount(ctx *router.Context) {
 
 // LinkWithWallet link current account with wallet
 func LinkWithWallet(ctx *router.Context) {
-	//comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	//signature := &model.EthSignatureObject{}
-	//err := ctx.BindJSON(signature)
-	//if err != nil {
-	//	ctx.ERROR(
-	//		router.ErrParametersInvaild,
-	//		"wrong metamask login parameter",
-	//	)
-	//	return
-	//}
-	//
-	////get nonce
-	//nonce, err := redis.Client.Get(context.TODO(), signature.Address)
-	//if err != nil {
-	//	elog.Errorf("Comunion redis get key failed %v", err)
-	//	return
-	//}
-	//
-	//err = service.LinkEthAccountToComer(
-	//	comerID,
-	//	signature.Address,
-	//	signature.Signature,
-	//	nonce,
-	//)
-	//
-	//if err != nil {
-	//	ctx.ERROR(
-	//		router.ErrBuisnessError,
-	//		err.Error(),
-	//	)
-	//	return
-	//}
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	signature := &model.EthSignatureObject{}
+	err := ctx.BindJSON(signature)
+	if err != nil {
+		ctx.ERROR(
+			router.ErrParametersInvaild,
+			"wrong metamask login parameter",
+		)
+		return
+	}
+
+	//get nonce
+	nonce, err := redis.Client.Get(context.TODO(), signature.Address)
+	if err != nil {
+		elog.Errorf("Comunion redis get key failed %v", err)
+		return
+	}
+
+	err = service.LinkEthAccountToComer(
+		comerID,
+		signature.Address,
+		signature.Signature,
+		nonce,
+	)
+
+	if err != nil {
+		ctx.ERROR(
+			router.ErrBuisnessError,
+			err.Error(),
+		)
+		return
+	}
 
 	ctx.OK(nil)
 }

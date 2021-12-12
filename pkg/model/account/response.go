@@ -20,21 +20,8 @@ type ComerProfileResponse struct {
 	Skills []Skill `json:"skills"`
 }
 
-// ComerOuterAccountObject comer outer account object
-type ComerOuterAccountObject struct {
-	Identifier uint64 `json:"identifier"`
-	UIN        uint64 `json:"uin"`
-	OIN        string `json:"oin"`
-	IsMain     bool   `json:"main"`
-	Nick       string `json:"nick"`
-	Avatar     string `json:"avatar"`
-	Category   int    `json:"category"`
-	Type       int    `json:"type"`
-	IsLinked   bool   `json:"linked"`
-}
-
 // ComerOuterAccountListResponse response of the comer outer account list
 type ComerOuterAccountListResponse struct {
-	List  []ComerOuterAccountObject `json:"list"`
-	Total uint64                    `json:"total"`
+	List  []ComerAccount `json:"list"`
+	Total uint64         `json:"total"`
 }

@@ -11,6 +11,10 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/gotomicro/ego/core/elog"
 )
 
@@ -64,7 +68,7 @@ func LoginWithEthWallet(address, signature, nonce string) (response *account.Com
 
 	if comer.ID == 0 {
 		comer = account.Comer{
-			Address: address,
+			Address: &address,
 		}
 		// create a new comer
 		err = account.CreateComer(mysql.DB, &comer)
@@ -92,8 +96,10 @@ func LoginWithEthWallet(address, signature, nonce string) (response *account.Com
 	// sign with jwt
 	token := jwt.Sign(comer.ID)
 
+	fmt.Println("comer.ID", comer.ID)
+
 	response = &account.ComerLoginResponse{
-		Address:    comer.Address,
+		Address:    address,
 		Token:      token,
 		Name:       comerProfile.Name,
 		Avatar:     comerProfile.Avatar,
@@ -109,23 +115,23 @@ func LinkEthAccountToComer(comerID uint64, address, signature, nonce string) (er
 		return
 	}
 
-	refComer, err := account.GetComerByID(mysql.DB, comerID)
+	comer, err := account.GetComerByID(mysql.DB, comerID)
 	if err != nil {
 		elog.Error(err.Error())
 		return err
 	}
 
-	if refComer.Address != "" {
+	if comer.Address != nil {
 		return errors.New("Current comer has linked with a wallet")
 	}
 
-	refComer, err = account.GetComerByAddress(mysql.DB, address)
+	comer, err = account.GetComerByAddress(mysql.DB, address)
 	if err != nil {
 		elog.Error(err.Error())
 		return err
 	}
 
-	if refComer.Address != "" {
+	if comer.ID != 0 {
 		return errors.New("Current eth wallet account is linked with a comer")
 	}
 
@@ -142,21 +148,21 @@ func LinkEthAccountToComer(comerID uint64, address, signature, nonce string) (er
 
 // VerifyEthWallet verify the signature and login with the wallet
 func VerifyEthWallet(address, nonce, signature string) (err error) {
-	//addrKey := common.HexToAddress(address)
-	//sig := hexutil.MustDecode(signature)
-	//if sig[64] == 27 || sig[64] == 28 {
-	//	sig[64] -= 27
-	//}
-	//msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(nonce), nonce)
-	//msg256 := crypto.Keccak256([]byte(msg))
-	//pubKey, err := crypto.SigToPub(msg256, sig)
-	//if err != nil {
-	//	return
-	//}
-	//recoverAddr := crypto.PubkeyToAddress(*pubKey)
-	//if recoverAddr != addrKey {
-	//	err = errors.New("Not match the origin public key")
-	//	return
-	//}
+	addrKey := common.HexToAddress(address)
+	sig := hexutil.MustDecode(signature)
+	if sig[64] == 27 || sig[64] == 28 {
+		sig[64] -= 27
+	}
+	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(nonce), nonce)
+	msg256 := crypto.Keccak256([]byte(msg))
+	pubKey, err := crypto.SigToPub(msg256, sig)
+	if err != nil {
+		return
+	}
+	recoverAddr := crypto.PubkeyToAddress(*pubKey)
+	if recoverAddr != addrKey {
+		err = errors.New("Not match the origin public key")
+		return
+	}
 	return
 }

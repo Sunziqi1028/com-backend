@@ -40,7 +40,7 @@ CREATE TABLE `comer` (
 DROP TABLE IF EXISTS `comer_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `comer_accounts` (
+CREATE TABLE `comer_account` (
   `id` bigint(20) NOT NULL,
   `comer_id` bigint(20) NOT NULL COMMENT 'comer unique identifier',
   `oin` varchar(100) NOT NULL COMMENT 'comer outer account unique identifier, wallet will be public key and Oauth is the OauthID',

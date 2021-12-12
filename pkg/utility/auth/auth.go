@@ -4,6 +4,8 @@ import (
 	"ceres/pkg/config"
 	"crypto/tls"
 	"net/http"
+
+	"golang.org/x/oauth2"
 )
 
 // Comunion Oauth interface
@@ -40,12 +42,12 @@ var httpClient = &http.Client{
 }
 
 // NewGithubOauthClient  build a new Github client with the request token from login
-func NewGithubOauthClient(requestToken string) (client OauthClient) {
+func NewGithubOauthClient(code string) (client OauthClient) {
 	return &Github{
 		ClientID:     config.Github.ClientID,
 		ClientSecret: config.Github.ClientSecret,
 		client:       httpClient,
-		requestToken: requestToken,
+		Code:         code,
 	}
 }
 
@@ -57,6 +59,23 @@ func NewFacebookClient(requestToken string) (client OauthClient) {
 		RedirectURI:  config.Facebook.CallbackURL,
 		client:       httpClient,
 		RequestToken: requestToken,
+	}
+}
+
+// NewGoogleClient build a new Google client with the request token from login
+func NewGoogleClient(currentState, code string) (client *Google) {
+	return &Google{
+		Config: oauth2.Config{
+			ClientID:     config.Google.ClientID,
+			ClientSecret: config.Google.ClientSecret,
+			RedirectURL:  config.Google.CallbackURL,
+			Endpoint:     googleEndpoint,
+			Scopes:       scopes,
+		},
+		OauthState:   googleOauthStateString,
+		client:       httpClient,
+		CurrentState: currentState,
+		Code:         code,
 	}
 }
 
