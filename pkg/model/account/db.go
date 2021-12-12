@@ -20,11 +20,6 @@ func GetComerByAddress(db *gorm.DB, address string) (comer Comer, err error) {
 	return
 }
 
-// CreateComer create a comer
-func CreateComer(db *gorm.DB, comer *Comer) (err error) {
-	return db.Create(comer).Error
-}
-
 // GetComerByID  get comer entity by comer's ID
 func GetComerByID(db *gorm.DB, comerID uint64) (comer Comer, err error) {
 	if err = db.Where("id = ?", comerID).Find(&comer).Error; err != nil {
@@ -36,9 +31,28 @@ func GetComerByID(db *gorm.DB, comerID uint64) (comer Comer, err error) {
 	return
 }
 
+// CreateComer create a comer
+func CreateComer(db *gorm.DB, comer *Comer) (err error) {
+	return db.Create(comer).Error
+}
+
 //UpdateComerAddress update the comer address
 func UpdateComerAddress(db *gorm.DB, comerID uint64, address string) (err error) {
 	return db.Model(&Comer{Base: model.Base{ID: comerID}}).Update("address", address).Error
+}
+
+func GetComerAccount(db *gorm.DB, accountType ComerAccountType, oin string) (comerAccount ComerAccount, err error) {
+	if err = db.Where("type = ? AND oin = ?", accountType, oin).Find(&comerAccount).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = nil
+		}
+		return
+	}
+	return
+}
+
+func CreateAccount(db *gorm.DB, comerAccount *ComerAccount) (err error) {
+	return db.Create(comerAccount).Error
 }
 
 //GetComerProfile update the comer address

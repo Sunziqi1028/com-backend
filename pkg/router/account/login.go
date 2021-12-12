@@ -1,12 +1,15 @@
 package account
 
 import (
+	"ceres/pkg/config"
 	"ceres/pkg/initialization/redis"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
 	"context"
+	"fmt"
+	"net/http"
 )
 
 // LoginWithGithub login with github oauth
@@ -27,17 +30,30 @@ func LoginWithGithub(ctx *router.Context) {
 
 // LoginWithGoogle login with google oauth
 func LoginWithGoogle(ctx *router.Context) {
-	requestToken := ctx.Query("request_token")
-	if requestToken == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "request_token missed")
+	client := auth.NewGoogleClient(config.Google.CallbackURL, "", "")
+	url := client.AuthCodeURL(client.OauthState)
+	ctx.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+// LoginWithGoogleCallback login with google oauth callback
+func LoginWithGoogleCallback(ctx *router.Context) {
+	state := ctx.Query("state")
+	if state == "" {
+		ctx.ERROR(router.ErrParametersInvaild, "state missed")
 		return
 	}
-	client := auth.NewFacebookClient(requestToken)
-	response, err := service.LoginWithOauth(client, model.GithubOauth)
+	code := ctx.Query("code")
+	if code == "" {
+		ctx.ERROR(router.ErrParametersInvaild, "code missed")
+		return
+	}
+	client := auth.NewGoogleClient(config.Google.CallbackURL, state, code)
+	response, err := service.LoginWithOauth(client, model.GoogleOauth)
 	if err != nil {
 		ctx.ERROR(router.ErrBuisnessError, err.Error())
 		return
 	}
+	fmt.Println(response)
 	ctx.OK(response)
 }
 

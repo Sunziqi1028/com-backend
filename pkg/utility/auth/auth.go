@@ -4,6 +4,8 @@ import (
 	"ceres/pkg/config"
 	"crypto/tls"
 	"net/http"
+
+	"golang.org/x/oauth2"
 )
 
 // Comunion Oauth interface
@@ -59,6 +61,42 @@ func NewFacebookClient(requestToken string) (client OauthClient) {
 		RequestToken: requestToken,
 	}
 }
+
+// NewGoogleClient build a new Google client with the request token from login
+func NewGoogleClient(callbackUrl, currentState, code string) (client *Google) {
+	return &Google{
+		Config: oauth2.Config{
+			ClientID:     config.Google.ClientID,
+			ClientSecret: config.Google.ClientSecret,
+			RedirectURL:  callbackUrl,
+			Endpoint:     googleEndpoint,
+			Scopes:       scopes,
+		},
+		OauthState:   googleOauthStateString,
+		client:       httpClient,
+		CurrentState: currentState,
+		Code:         code,
+	}
+}
+
+/*
+var endpotin = oauth2.Endpoint{
+    AuthURL:  "https://accounts.google.com/o/oauth2/auth",
+    TokenURL: "https://accounts.google.com/o/oauth2/token",
+}
+
+var googleOauthConfig = &oauth2.Config{
+    ClientID:     "your_client_id",
+    ClientSecret: "your_client_secret",
+    RedirectURL:  "http://localhost:8000/GoogleCallback",
+    Scopes: []string{"https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email"},
+    Endpoint: endpotin,
+}
+
+const oauthStateString = "random"
+
+*/
 
 // NewTwitterClient  build a new Twitter client with the request token from login
 func NewTwitterClient() (client OauthClient) {

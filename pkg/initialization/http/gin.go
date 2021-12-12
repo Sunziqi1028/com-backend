@@ -29,7 +29,8 @@ func Init() (err error) {
 	{
 		oauthLogin.Use(middleware.GuestAuthorizationMiddleware())
 		oauthLogin.POST("/github/login", router.Wrap(account.LoginWithGithub))
-		oauthLogin.POST("/google/login", router.Wrap(account.LoginWithGoogle))
+		oauthLogin.GET("/google/login", router.Wrap(account.LoginWithGoogle))
+		oauthLogin.GET("/google/login/callback", router.Wrap(account.LoginWithGoogleCallback))
 	}
 
 	// web3 login router
@@ -46,9 +47,10 @@ func Init() (err error) {
 		accounts.Use(middleware.ComerAuthorizationMiddleware())
 		// basic operations
 		accounts.GET("/list", router.Wrap(account.ListAccounts))
-		accounts.POST("/oauth/link/github", router.Wrap(account.LinkWithGithub))
-		accounts.POST("/oauth/link/google", router.Wrap(account.LinkWithGoogle))
-		accounts.POST("/eth/link/wallet", router.Wrap(account.LinkWithWallet))
+		accounts.POST("/oauth/github/link", router.Wrap(account.LinkWithGithub))
+		accounts.POST("/oauth/google/link", router.Wrap(account.LinkWithGoogle))
+		accounts.POST("/oauth/google/link/callback", router.Wrap(account.LinkWithGoogleCallback))
+		accounts.POST("/eth/wallet/link", router.Wrap(account.LinkWithWallet))
 		accounts.DELETE("/unlink/:accountId", router.Wrap(account.UnlinkAccount))
 		// profile operations
 		accounts.GET("/profile", router.Wrap(account.GetProfile))
