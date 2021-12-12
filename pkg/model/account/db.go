@@ -65,6 +65,10 @@ func CreateAccount(db *gorm.DB, comerAccount *ComerAccount) (err error) {
 	return db.Create(comerAccount).Error
 }
 
+func DeleteAccount(db *gorm.DB, comerID, accountID uint64) error {
+	return db.Where("comer_id = ? AND id = ?", comerID, accountID).Delete(&ComerAccount{}).Error
+}
+
 //GetComerProfile update the comer address
 func GetComerProfile(db *gorm.DB, comerID uint64) (comerProfile ComerProfile, err error) {
 	if err = db.Where("comer_id = ?", comerID).Find(&comerProfile).Error; err != nil {

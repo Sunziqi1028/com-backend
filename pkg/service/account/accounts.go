@@ -21,19 +21,8 @@ func GetComerAccounts(comerID uint64) (response *model.ComerOuterAccountListResp
 }
 
 // UnlinkComerAccount  unlink the comer account
-func UnlinkComerAccount(uin, identifier uint64) (err error) {
-	//err = mysql.DB.Transaction(func(tx *gorm.DB) error {
-	//	account, err := model.GetAccountByIdentifier(tx, identifier)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	err = model.UnlinkComerAccount(tx, &account)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	return nil
-	//})
-	return
+func UnlinkComerAccount(comerID, accountID uint64) (err error) {
+	return model.DeleteAccount(mysql.DB, comerID, accountID)
 }
 
 // CheckComerExists check if the comer is exists with this outer account

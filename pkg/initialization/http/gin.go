@@ -51,7 +51,7 @@ func Init() (err error) {
 		accounts.POST("/oauth/google/link", router.Wrap(account.LinkWithGoogle))
 		accounts.POST("/oauth/google/link/callback", router.Wrap(account.LinkWithGoogleCallback))
 		accounts.POST("/eth/wallet/link", router.Wrap(account.LinkWithWallet))
-		accounts.DELETE("/unlink/:accountId", router.Wrap(account.UnlinkAccount))
+		accounts.DELETE("/:accountID/unlink", router.Wrap(account.UnlinkAccount))
 		// profile operations
 		accounts.GET("/profile", router.Wrap(account.GetProfile))
 		accounts.POST("/profile", router.Wrap(account.CreateProfile))

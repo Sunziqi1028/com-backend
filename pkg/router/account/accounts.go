@@ -79,13 +79,13 @@ func ListAccounts(ctx *router.Context) {
 
 // UnlinkAccount unlink accounts for the Comer
 func UnlinkAccount(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	identifier, err := strconv.ParseInt(ctx.Query("identifier"), 10, 64)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	accountID, err := strconv.ParseUint(ctx.Param("accountID"), 0, 64)
 	if err != nil {
 		ctx.ERROR(router.ErrParametersInvaild, err.Error())
 		return
 	}
-	err = service.UnlinkComerAccount(uin, uint64(identifier))
+	err = service.UnlinkComerAccount(comerID, accountID)
 	if err != nil {
 		ctx.ERROR(router.ErrBuisnessError, err.Error())
 		return
