@@ -79,25 +79,6 @@ func NewGoogleClient(callbackUrl, currentState, code string) (client *Google) {
 	}
 }
 
-/*
-var endpotin = oauth2.Endpoint{
-    AuthURL:  "https://accounts.google.com/o/oauth2/auth",
-    TokenURL: "https://accounts.google.com/o/oauth2/token",
-}
-
-var googleOauthConfig = &oauth2.Config{
-    ClientID:     "your_client_id",
-    ClientSecret: "your_client_secret",
-    RedirectURL:  "http://localhost:8000/GoogleCallback",
-    Scopes: []string{"https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email"},
-    Endpoint: endpotin,
-}
-
-const oauthStateString = "random"
-
-*/
-
 // NewTwitterClient  build a new Twitter client with the request token from login
 func NewTwitterClient() (client OauthClient) {
 	return
