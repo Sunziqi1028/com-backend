@@ -34,7 +34,7 @@ jobs:
           passphrase: ${{ secrets.DEV_PASSPHRASE }}
           key: ${{ secrets.DEV_KEY }}
           port: ${{ secrets.DEV_PORT }}
-          source: "hack/build/app"
+          source: "main"
           target: ${{ secrets.DEV_BIN_PATH }}
       - name: Restart server
         uses: appleboy/ssh-action@master
