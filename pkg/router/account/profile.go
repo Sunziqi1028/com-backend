@@ -11,20 +11,19 @@ import (
 func CreateProfile(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	request := &model.CreateProfileRequest{}
-	err := ctx.BindJSON(request)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"wrong metamask login parameter",
-		)
+	if err := ctx.BindJSON(request); err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid data format")
+		ctx.HandleError(err)
 		return
 	}
-	err = service.CreateComerProfile(comerID, request)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrBuisnessError,
-			err.Error(),
-		)
+
+	if err := request.Validate(); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	if err := service.CreateComerProfile(comerID, request); err != nil {
+		ctx.HandleError(err)
 		return
 	}
 
@@ -34,12 +33,9 @@ func CreateProfile(ctx *router.Context) {
 // GetProfile get current Comer profile
 func GetProfile(ctx *router.Context) {
 	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	response, err := service.GetComerProfile(uin)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrBuisnessError,
-			"wrong metamask login parameter",
-		)
+	var response model.ComerProfileResponse
+	if err := service.GetComerProfile(uin, &response); err != nil {
+		ctx.HandleError(err)
 		return
 	}
 
@@ -50,20 +46,19 @@ func GetProfile(ctx *router.Context) {
 func UpdateProfile(ctx *router.Context) {
 	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	request := &model.UpdateProfileRequest{}
-	err := ctx.BindJSON(request)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"wrong metamask login parameter",
-		)
+	if err := ctx.BindJSON(request); err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid data format")
+		ctx.HandleError(err)
 		return
 	}
-	err = service.UpdateComerProfile(uin, request)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrBuisnessError,
-			"wrong metamask login parameter",
-		)
+
+	if err := request.Validate(); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	if err := service.UpdateComerProfile(uin, request); err != nil {
+		ctx.HandleError(err)
 		return
 	}
 

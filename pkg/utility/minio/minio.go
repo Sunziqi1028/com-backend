@@ -5,7 +5,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/gotomicro/ego/core/elog"
 	"github.com/minio/minio-go/v7"
 )
 
@@ -17,7 +16,6 @@ func PreSignUpload(client *minio.Client, file string) (url string, err error) {
 		time.Minute*10,
 	)
 	if err != nil {
-		elog.Errorf("PreSign the upload request failed %v", err)
 		return
 	}
 	url = u.String()

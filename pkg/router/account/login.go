@@ -2,13 +2,12 @@ package account
 
 import (
 	"ceres/pkg/config"
-	"ceres/pkg/initialization/redis"
+	"ceres/pkg/model/account"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
-	"context"
 	"fmt"
 	"net/http"
 )
@@ -23,22 +22,22 @@ func LoginWithGithub(ctx *router.Context) {
 func LoginWithGithubCallback(ctx *router.Context) {
 	code := ctx.Query("code")
 	if code == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "code missed")
+		err := router.ErrBadRequest.WithMsg("Code missed")
+		ctx.HandleError(err)
 		return
 	}
 	client := auth.NewGithubOauthClient(code)
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	if comerID == 0 {
-		response, err := service.LoginWithOauth(client, model.GithubOauth)
-		if err != nil {
-			ctx.ERROR(router.ErrBuisnessError, err.Error())
+		var response account.ComerLoginResponse
+		if err := service.LoginWithOauth(client, model.GithubOauth, &response); err != nil {
+			ctx.HandleError(err)
 			return
 		}
 		ctx.OK(response)
 	} else {
-		err := service.LinkOauthAccountToComer(comerID, client, model.GithubOauth)
-		if err != nil {
-			ctx.ERROR(router.ErrBuisnessError, err.Error())
+		if err := service.LinkOauthAccountToComer(comerID, client, model.GithubOauth); err != nil {
+			ctx.HandleError(err)
 			return
 		}
 		ctx.OK(nil)
@@ -56,27 +55,28 @@ func LoginWithGoogle(ctx *router.Context) {
 func LoginWithGoogleCallback(ctx *router.Context) {
 	state := ctx.Query("state")
 	if state == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "state missed")
+		err := router.ErrBadRequest.WithMsg("State missed")
+		ctx.HandleError(err)
 		return
 	}
 	code := ctx.Query("code")
 	if code == "" {
-		ctx.ERROR(router.ErrParametersInvaild, "code missed")
+		err := router.ErrBadRequest.WithMsg("Code missed")
+		ctx.HandleError(err)
 		return
 	}
 	client := auth.NewGoogleClient(state, code)
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	if comerID == 0 {
-		response, err := service.LoginWithOauth(client, model.GoogleOauth)
-		if err != nil {
-			ctx.ERROR(router.ErrBuisnessError, err.Error())
+		var response account.ComerLoginResponse
+		if err := service.LoginWithOauth(client, model.GoogleOauth, &response); err != nil {
+			ctx.HandleError(err)
 			return
 		}
 		ctx.OK(response)
 	} else {
-		err := service.LinkOauthAccountToComer(comerID, client, model.GoogleOauth)
-		if err != nil {
-			ctx.ERROR(router.ErrBuisnessError, err.Error())
+		if err := service.LinkOauthAccountToComer(comerID, client, model.GoogleOauth); err != nil {
+			ctx.HandleError(err)
 			return
 		}
 		ctx.OK(nil)
@@ -87,56 +87,33 @@ func LoginWithGoogleCallback(ctx *router.Context) {
 func GetBlockchainLoginNonce(ctx *router.Context) {
 	address := ctx.Query("address")
 	if address == "" {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"no web3 public key",
-		)
+		err := router.ErrBadRequest.WithMsg("Invalid address")
+		ctx.HandleError(err)
 		return
 	}
-	nonce, err := service.GenerateWeb3LoginNonce(address)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrBuisnessError,
-			err.Error(),
-		)
-		return
+
+	var nonce account.WalletNonceResponse
+	if err := service.GenerateWeb3LoginNonce(address, &nonce); err != nil {
+		ctx.HandleError(err)
 	}
+
 	ctx.OK(nonce)
 }
 
 // LoginWithWallet login with the wallet signature.
 func LoginWithWallet(ctx *router.Context) {
-	signature := &model.EthSignatureObject{}
-	err := ctx.BindJSON(signature)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"wrong wallet login parameter",
-		)
+	var request model.EthLoginRequest
+	if err := ctx.BindJSON(&request); err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid data format")
+		ctx.HandleError(err)
 		return
 	}
 
-	nonce, err := redis.Client.Get(context.TODO(), signature.Address)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"wrong wallet login parameter",
-		)
+	var response account.ComerLoginResponse
+	if err := service.LoginWithEthWallet(request.Address, request.Signature, &response); err != nil {
+		ctx.HandleError(err)
 		return
 	}
-	// Replace the 0x prefix
-	response, err := service.LoginWithEthWallet(
-		signature.Address,
-		signature.Signature,
-		nonce,
-	)
 
-	if err != nil {
-		ctx.ERROR(
-			router.ErrBuisnessError,
-			err.Error(),
-		)
-		return
-	}
 	ctx.OK(response)
 }

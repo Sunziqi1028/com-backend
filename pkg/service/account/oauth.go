@@ -3,30 +3,32 @@ package account
 import (
 	"ceres/pkg/initialization/mysql"
 	"ceres/pkg/model/account"
+	"ceres/pkg/router"
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
-	"errors"
 
+	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
-
-	"github.com/gotomicro/ego/core/elog"
 )
 
 // LoginWithOauth common oauth login logic in comunion
-func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType) (response *account.ComerLoginResponse, err error) {
+func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType, response *account.ComerLoginResponse) (err error) {
 	oauth, err := client.GetUserProfile()
 	if err != nil {
+		log.Warn(err)
 		return
 	}
+
 	// try to find account
-	comerAccount, err := account.GetComerAccount(mysql.DB, oauthType, oauth.GetUserID())
-	if err != nil {
-		elog.Errorf("Comunion Oauth login faild, because of %v", err)
+	var comerAccount account.ComerAccount
+	if err = account.GetComerAccount(mysql.DB, oauthType, oauth.GetUserID(), &comerAccount); err != nil {
+		log.Warn(err)
 		return
 	}
+
 	//set default profile status
 	var isProfiled bool
-	var comerProfile account.ComerProfile
+	var profile account.ComerProfile
 	var comer account.Comer
 
 	if comerAccount.ID == 0 {
@@ -50,12 +52,11 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType)
 			return
 		})
 	} else {
-		comerProfile, err = account.GetComerProfile(mysql.DB, comer.ID)
-		if err != nil {
-			elog.Errorf("Comunion get comer profile fauld, because of %v", err)
+		if err = account.GetComerProfile(mysql.DB, comer.ID, &profile); err != nil {
+			log.Warn(err)
 			return
 		}
-		if comerProfile.ID != 0 {
+		if profile.ID != 0 {
 			isProfiled = true
 		}
 	}
@@ -68,10 +69,10 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType)
 		address = *comer.Address
 	}
 
-	response = &account.ComerLoginResponse{
+	*response = account.ComerLoginResponse{
 		IsProfiled: isProfiled,
 		Avatar:     "",
-		Name:       comerProfile.Name,
+		Name:       profile.Name,
 		Address:    address,
 		Token:      token,
 	}
@@ -82,14 +83,14 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType)
 // LinkOauthAccountToComer link a new Oauth account to the current comer
 func LinkOauthAccountToComer(ComerID uint64, client auth.OauthClient, oauthType account.ComerAccountType) (err error) {
 	oauth, err := client.GetUserProfile()
-	comerAccount, err := account.GetComerAccount(mysql.DB, oauthType, oauth.GetUserID())
-	if err != nil {
-		elog.Errorf("Comunion Oauth login faild, because of %v", err)
-		return
+	// try to find account
+	var comerAccount account.ComerAccount
+	if err = account.GetComerAccount(mysql.DB, oauthType, oauth.GetUserID(), &comerAccount); err != nil {
+		log.Warn(err)
+		return err
 	}
 	if comerAccount.ID != 0 {
-		err = errors.New("account has bind to another comer")
-		elog.Error(err.Error())
+		err = router.ErrBadRequest.WithMsg("Account has bind to another comer")
 		return err
 	}
 	comerAccount = account.ComerAccount{

@@ -2,7 +2,6 @@ package account
 
 import (
 	"ceres/pkg/model"
-	"errors"
 
 	"gorm.io/gorm/clause"
 
@@ -10,25 +9,13 @@ import (
 )
 
 // GetComerByAddress  get comer entity by comer's address
-func GetComerByAddress(db *gorm.DB, address string) (comer Comer, err error) {
-	if err = db.Where("address = ?", address).Find(&comer).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = nil
-		}
-		return
-	}
-	return
+func GetComerByAddress(db *gorm.DB, address string, comer *Comer) error {
+	return db.Where("address = ?", address).Find(comer).Error
 }
 
 // GetComerByID  get comer entity by comer's ID
-func GetComerByID(db *gorm.DB, comerID uint64) (comer Comer, err error) {
-	if err = db.Where("id = ?", comerID).Find(&comer).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = nil
-		}
-		return
-	}
-	return
+func GetComerByID(db *gorm.DB, comerID uint64, comer *Comer) (err error) {
+	return db.Where("id = ?", comerID).Find(comer).Error
 }
 
 // CreateComer create a comer
@@ -41,24 +28,12 @@ func UpdateComerAddress(db *gorm.DB, comerID uint64, address string) (err error)
 	return db.Model(&Comer{Base: model.Base{ID: comerID}}).Update("address", address).Error
 }
 
-func GetComerAccount(db *gorm.DB, accountType ComerAccountType, oin string) (comerAccount ComerAccount, err error) {
-	if err = db.Where("type = ? AND oin = ?", accountType, oin).Find(&comerAccount).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = nil
-		}
-		return
-	}
-	return
+func GetComerAccount(db *gorm.DB, accountType ComerAccountType, oin string, comerAccount *ComerAccount) error {
+	return db.Where("type = ? AND oin = ?", accountType, oin).Find(comerAccount).Error
 }
 
-func ListAccount(db *gorm.DB, comerID uint64) (accountList []ComerAccount, err error) {
-	if err = db.Where("comer_id = ? ", comerID).Find(&accountList).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = nil
-		}
-		return
-	}
-	return
+func ListAccount(db *gorm.DB, comerID uint64, accountList *[]ComerAccount) (err error) {
+	return db.Where("comer_id = ? ", comerID).Find(accountList).Error
 }
 
 func CreateAccount(db *gorm.DB, comerAccount *ComerAccount) (err error) {
@@ -70,14 +45,8 @@ func DeleteAccount(db *gorm.DB, comerID, accountID uint64) error {
 }
 
 //GetComerProfile update the comer address
-func GetComerProfile(db *gorm.DB, comerID uint64) (comerProfile ComerProfile, err error) {
-	if err = db.Where("comer_id = ?", comerID).Find(&comerProfile).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = nil
-		}
-		return
-	}
-	return
+func GetComerProfile(db *gorm.DB, comerID uint64, profile *ComerProfile) (err error) {
+	return db.Where("comer_id = ?", comerID).Find(profile).Error
 }
 
 //CreateComerProfile update the comer address
@@ -91,17 +60,13 @@ func UpdateComerProfile(db *gorm.DB, comerProfile *ComerProfile) error {
 }
 
 //GetSkillByIds first or create skills
-func GetSkillByIds(db *gorm.DB, skillIDs []uint64) (skill []Skill, err error) {
-	db = db.Find(&skill, skillIDs)
-	err = db.Error
-	return
+func GetSkillByIds(db *gorm.DB, skillIDs []uint64, skills *[]Skill) error {
+	return db.Find(skills, skillIDs).Error
 }
 
 //GetSkillRelListByComerID first or create skills
-func GetSkillRelListByComerID(db *gorm.DB, comerID uint64) (comerSkillRel []ComerSkillRel, err error) {
-	db.Where("comer_id = ?", comerID).First(&comerSkillRel)
-	err = db.Error
-	return
+func GetSkillRelListByComerID(db *gorm.DB, comerID uint64, comerSkillRel *[]ComerSkillRel) error {
+	return db.Where("comer_id = ?", comerID).Find(comerSkillRel).Error
 }
 
 //FirstOrCreateSkill first or create skills

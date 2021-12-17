@@ -3,51 +3,62 @@ package account
 import (
 	"ceres/pkg/initialization/mysql"
 	model "ceres/pkg/model/account"
+	"ceres/pkg/router"
 	"errors"
 
+	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
 )
 
 // GetComerProfile get current comer profile
-// if profile is not exists then will let the router return 404
-func GetComerProfile(comerID uint64) (response *model.ComerProfileResponse, err error) {
-	profile, err := model.GetComerProfile(mysql.DB, comerID)
-	if err != nil {
-		return
+func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err error) {
+	//get comer profile
+	var profile model.ComerProfile
+	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+		log.Warn(err)
+		return err
 	}
-	// current comer is no profile saved then the router should return some code for frontend
 	if profile.ID == 0 {
-		return
+		return router.ErrNotFound.WithMsg("user profile does not exists")
+	}
+	//get comer profile skill relations
+	var comerSkillRel []model.ComerSkillRel
+	if err = model.GetSkillRelListByComerID(mysql.DB, comerID, &comerSkillRel); err != nil {
+		log.Warn(err)
+		return err
+	}
+	//get skills
+	skills := make([]model.Skill, 0)
+	if len(comerSkillRel) > 0 {
+		skillIds := make([]uint64, 0)
+		for _, skillRel := range comerSkillRel {
+			skillIds = append(skillIds, skillRel.SkillID)
+		}
+		if err = model.GetSkillByIds(mysql.DB, skillIds, &skills); err != nil {
+			return err
+		}
 	}
 
-	skillRels, err := model.GetSkillRelListByComerID(mysql.DB, comerID)
-	if err != nil {
-		return nil, err
-	}
-	skillIds := make([]uint64, 0)
-	for _, skillRel := range skillRels {
-		skillIds = append(skillIds, skillRel.SkillID)
-	}
-	skills, err := model.GetSkillByIds(mysql.DB, skillIds)
-	if err != nil {
-		return nil, err
-	}
-	response = &model.ComerProfileResponse{
+	*response = model.ComerProfileResponse{
 		ComerProfile: profile,
 		Skills:       skills,
 	}
+
 	return
 }
 
 // CreateComerProfile  create a new profil for comer
 // current comer should not be exists now
 func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err error) {
-	profile, err := model.GetComerProfile(mysql.DB, comerID)
-	if err != nil {
-		return err
+	//get comer profile
+	var profile model.ComerProfile
+	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 	if profile.ID != 0 {
-		return errors.New("comer profile has exist")
+		return router.ErrBadRequest.WithMsg("user profile already exists")
 	}
 	var comerSkillRelList []model.ComerSkillRel
 	profile = model.ComerProfile{
@@ -88,12 +99,15 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 // UpdateComerProfile update the comer profile
 // if profile is not exists then will return the not exits error
 func UpdateComerProfile(comerID uint64, post *model.UpdateProfileRequest) (err error) {
-	profile, err := model.GetComerProfile(mysql.DB, comerID)
-	if err != nil {
-		return err
+	//get comer profile
+	var profile model.ComerProfile
+	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 	if profile.ID == 0 {
-		return errors.New("comer does not exist")
+		return router.ErrBadRequest.WithMsg("user profile does not exists")
 	}
 	var skillIds []uint64
 	var comerSkillRelList []model.ComerSkillRel

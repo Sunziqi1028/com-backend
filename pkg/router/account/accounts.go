@@ -1,25 +1,19 @@
 package account
 
 import (
-	"ceres/pkg/initialization/redis"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
-	"context"
-	"fmt"
 	"strconv"
-
-	"github.com/gotomicro/ego/core/elog"
 )
 
 // ListAccounts list all accounts of the Comer
 func ListAccounts(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	fmt.Println(comerID)
-	response, err := service.GetComerAccounts(comerID)
-	if err != nil {
-		ctx.ERROR(router.ErrBuisnessError, err.Error())
+	var response model.ComerOuterAccountListResponse
+	if err := service.GetComerAccounts(comerID, &response); err != nil {
+		ctx.HandleError(err)
 		return
 	}
 
@@ -31,12 +25,13 @@ func UnlinkAccount(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	accountID, err := strconv.ParseUint(ctx.Param("accountID"), 0, 64)
 	if err != nil {
-		ctx.ERROR(router.ErrParametersInvaild, err.Error())
+		err = router.ErrBadRequest.WithMsg("Invalid account ID")
+		ctx.HandleError(err)
 		return
 	}
 	err = service.UnlinkComerAccount(comerID, accountID)
 	if err != nil {
-		ctx.ERROR(router.ErrBuisnessError, err.Error())
+		ctx.HandleError(err)
 		return
 	}
 
@@ -46,52 +41,17 @@ func UnlinkAccount(ctx *router.Context) {
 // LinkWithWallet link current account with wallet
 func LinkWithWallet(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	signature := &model.EthSignatureObject{}
-	err := ctx.BindJSON(signature)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrParametersInvaild,
-			"wrong metamask login parameter",
-		)
+	var ethLoginRequest model.EthLoginRequest
+	if err := ctx.BindJSON(&ethLoginRequest); err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid data format")
+		ctx.HandleError(err)
 		return
 	}
 
-	//get nonce
-	nonce, err := redis.Client.Get(context.TODO(), signature.Address)
-	if err != nil {
-		elog.Errorf("Comunion redis get key failed %v", err)
-		return
-	}
-
-	err = service.LinkEthAccountToComer(
-		comerID,
-		signature.Address,
-		signature.Signature,
-		nonce,
-	)
-
-	if err != nil {
-		ctx.ERROR(
-			router.ErrBuisnessError,
-			err.Error(),
-		)
+	if err := service.LinkEthAccountToComer(comerID, ethLoginRequest.Address, ethLoginRequest.Signature); err != nil {
+		ctx.HandleError(err)
 		return
 	}
 
 	ctx.OK(nil)
-}
-
-// CheckComerExists
-func CheckComerExists(ctx *router.Context) {
-	oin := ctx.Query("oin")
-	result, err := service.CheckComerExists(oin)
-	if err != nil {
-		ctx.ERROR(
-			router.ErrBuisnessError,
-			err.Error(),
-		)
-		return
-	}
-
-	ctx.OK(result)
 }
