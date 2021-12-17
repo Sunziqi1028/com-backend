@@ -19,13 +19,13 @@ func Init() (err error) {
 	// register the router at this
 
 	// account without token
-	accountWhite := Gin.Group("/account/white")
+	accountWhite := Gin.Group("/api/account/white")
 	{
 		accountWhite.GET("/check", router.Wrap(account.CheckComerExists))
 	}
 
 	// oauth login router
-	oauthLogin := Gin.Group("/account/oauth")
+	oauthLogin := Gin.Group("/api/account/oauth")
 	{
 		oauthLogin.Use(middleware.GuestAuthorizationMiddleware())
 		oauthLogin.GET("/github/login", router.Wrap(account.LoginWithGithub))
@@ -35,7 +35,7 @@ func Init() (err error) {
 	}
 
 	// web3 login router
-	web3Login := Gin.Group("/account/eth")
+	web3Login := Gin.Group("/api/account/eth")
 	{
 		web3Login.Use(middleware.GuestAuthorizationMiddleware())
 		web3Login.GET("/nonce", router.Wrap(account.GetBlockchainLoginNonce))
@@ -43,7 +43,7 @@ func Init() (err error) {
 	}
 
 	// accounts operation router
-	accounts := Gin.Group("/account")
+	accounts := Gin.Group("/api/account")
 	{
 		accounts.Use(middleware.ComerAuthorizationMiddleware())
 		// basic operations
