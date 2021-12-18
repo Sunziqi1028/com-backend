@@ -3,53 +3,66 @@ package account
 import (
 	"ceres/pkg/initialization/mysql"
 	model "ceres/pkg/model/account"
+	"ceres/pkg/model/tag"
+	"ceres/pkg/router"
 	"errors"
+	"fmt"
 
+	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
 )
 
 // GetComerProfile get current comer profile
-// if profile is not exists then will let the router return 404
-func GetComerProfile(comerID uint64) (response *model.ComerProfileResponse, err error) {
-	profile, err := model.GetComerProfile(mysql.DB, comerID)
-	if err != nil {
-		return
+func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err error) {
+	//get comer profile
+	var profile model.ComerProfile
+	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+		log.Warn(err)
+		return err
 	}
-	// current comer is no profile saved then the router should return some code for frontend
 	if profile.ID == 0 {
-		return
+		return router.ErrNotFound.WithMsg("user profile does not exists")
+	}
+	//get comer profile skill relations
+	var tagRelList []tag.TagTargetRel
+	if err = tag.GetTagRelList(mysql.DB, comerID, tag.ComerSkillTag, &tagRelList); err != nil {
+		log.Warn(err)
+		return err
+	}
+	//get skills
+	skills := make([]tag.Tag, 0)
+	if len(tagRelList) > 0 {
+		skillIds := make([]uint64, 0)
+		for _, skillRel := range tagRelList {
+			skillIds = append(skillIds, skillRel.TagID)
+		}
+		if err = tag.GetTagListByIDs(mysql.DB, skillIds, &skills); err != nil {
+			return err
+		}
 	}
 
-	skillRels, err := model.GetSkillRelListByComerID(mysql.DB, comerID)
-	if err != nil {
-		return nil, err
-	}
-	skillIds := make([]uint64, 0)
-	for _, skillRel := range skillRels {
-		skillIds = append(skillIds, skillRel.SkillID)
-	}
-	skills, err := model.GetSkillByIds(mysql.DB, skillIds)
-	if err != nil {
-		return nil, err
-	}
-	response = &model.ComerProfileResponse{
+	*response = model.ComerProfileResponse{
 		ComerProfile: profile,
 		Skills:       skills,
 	}
+
 	return
 }
 
 // CreateComerProfile  create a new profil for comer
 // current comer should not be exists now
 func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err error) {
-	profile, err := model.GetComerProfile(mysql.DB, comerID)
-	if err != nil {
-		return err
+	//get comer profile
+	var profile model.ComerProfile
+	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 	if profile.ID != 0 {
-		return errors.New("comer profile has exist")
+		return router.ErrBadRequest.WithMsg("user profile already exists")
 	}
-	var comerSkillRelList []model.ComerSkillRel
+	var tagRelList []tag.TagTargetRel
 	profile = model.ComerProfile{
 		ComerID:  comerID,
 		Name:     post.Name,
@@ -61,19 +74,26 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
 		//create skill
 		for _, skillName := range post.SKills {
-			skill := model.Skill{
-				Name: skillName,
+			var isIndex bool
+			if len(skillName) > 2 && skillName[0:1] == "#" {
+				isIndex = true
 			}
-			if err = model.FirstOrCreateSkill(tx, &skill); err != nil {
+			skill := tag.Tag{
+				Name:    skillName,
+				IsIndex: isIndex,
+			}
+			if err = tag.FirstOrCreateTag(tx, &skill); err != nil {
 				return err
 			}
-			comerSkillRelList = append(comerSkillRelList, model.ComerSkillRel{
-				ComerID: comerID,
-				SkillID: skill.ID,
+			fmt.Println(skill)
+			tagRelList = append(tagRelList, tag.TagTargetRel{
+				TagID:    skill.ID,
+				Target:   tag.ComerSkillTag,
+				TargetID: comerID,
 			})
 		}
 		//batch create comer skill relation
-		if err = model.BatchCreateComerSkillRel(tx, comerSkillRelList); err != nil {
+		if err = tag.BatchCreateTagRel(tx, tagRelList); err != nil {
 			return err
 		}
 		//create comer profile
@@ -88,15 +108,18 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 // UpdateComerProfile update the comer profile
 // if profile is not exists then will return the not exits error
 func UpdateComerProfile(comerID uint64, post *model.UpdateProfileRequest) (err error) {
-	profile, err := model.GetComerProfile(mysql.DB, comerID)
-	if err != nil {
-		return err
+	//get comer profile
+	var profile model.ComerProfile
+	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 	if profile.ID == 0 {
-		return errors.New("comer does not exist")
+		return router.ErrBadRequest.WithMsg("user profile does not exists")
 	}
-	var skillIds []uint64
-	var comerSkillRelList []model.ComerSkillRel
+	var tagIds []uint64
+	var tagRelList []tag.TagTargetRel
 	profile = model.ComerProfile{
 		ComerID:  comerID,
 		Name:     post.Name,
@@ -105,27 +128,32 @@ func UpdateComerProfile(comerID uint64, post *model.UpdateProfileRequest) (err e
 		Website:  post.Website,
 		BIO:      post.BIO,
 	}
-	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
-		//create skill
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error { //create skill
 		for _, skillName := range post.SKills {
-			skill := model.Skill{
-				Name: skillName,
+			var isIndex bool
+			if len(skillName) > 1 && skillName[0:1] == "#" {
+				isIndex = true
 			}
-			if err = model.FirstOrCreateSkill(tx, &skill); err != nil {
+			skill := tag.Tag{
+				Name:    skillName,
+				IsIndex: isIndex,
+			}
+			if err = tag.FirstOrCreateTag(tx, &skill); err != nil {
 				return err
 			}
-			comerSkillRelList = append(comerSkillRelList, model.ComerSkillRel{
-				ComerID: comerID,
-				SkillID: skill.ID,
+			tagRelList = append(tagRelList, tag.TagTargetRel{
+				TagID:    skill.ID,
+				Target:   tag.ComerSkillTag,
+				TargetID: comerID,
 			})
-			skillIds = append(skillIds, skill.ID)
+			tagIds = append(tagIds, skill.ID)
 		}
 		//delete not used skills
-		if err = model.DeleteComerSkillRelByNotIds(tx, comerID, skillIds); err != nil {
+		if err = tag.DeleteTagRel(tx, comerID, tag.ComerSkillTag, tagIds); err != nil {
 			return err
 		}
 		//batch create comer skill rel
-		if err = model.BatchCreateComerSkillRel(tx, comerSkillRelList); err != nil {
+		if err = tag.BatchCreateTagRel(tx, tagRelList); err != nil {
 			return err
 		}
 		//create profile

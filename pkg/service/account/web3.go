@@ -4,6 +4,7 @@ import (
 	"ceres/pkg/initialization/mysql"
 	"ceres/pkg/initialization/redis"
 	"ceres/pkg/model/account"
+	"ceres/pkg/router"
 	"ceres/pkg/utility/jwt"
 	"context"
 	"errors"
@@ -11,11 +12,12 @@ import (
 	"math/rand"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-
-	"github.com/gotomicro/ego/core/elog"
+	"github.com/qiniu/x/log"
 )
 
 const (
@@ -31,40 +33,49 @@ func createNonce() string {
 
 // GenerateWeb3LoginNonce
 // generate the login nonce help frontend to sign the login signature
-func GenerateWeb3LoginNonce(address string) (response *account.WalletNonceResponse, err error) {
+func GenerateWeb3LoginNonce(address string, response *account.WalletNonceResponse) (err error) {
 	nonce, err := redis.Client.Get(context.TODO(), address)
 	if err != nil {
-		elog.Debugf("NONCE test is %s", err.Error())
+		if err.Error() != "eredis get string error eredis exec command get fail, redis: nil" {
+			log.Warn(err)
+			return err
+		}
 	}
-
 	if nonce == "" {
 		nonce = createNonce()
 		err = redis.Client.Set(context.TODO(), address, nonce, expire)
 		if err != nil {
-			elog.Warnf("NONCE set fail %s", err.Error())
+			log.Errorf("NONCE set fail %s", err)
 		}
 	}
 
-	response = &account.WalletNonceResponse{Nonce: nonce}
-
+	response.Nonce = nonce
 	return
 }
 
 // LoginWithEthWallet common eth wallet login
-func LoginWithEthWallet(address, signature, nonce string) (response *account.ComerLoginResponse, err error) {
+func LoginWithEthWallet(address, signature string, response *account.ComerLoginResponse) (err error) {
+	nonce, err := redis.Client.Get(context.TODO(), address)
+	if err != nil {
+		if err.Error() == "eredis get string error eredis exec command get fail, redis: nil" {
+			err = router.ErrBadRequest.WithMsg("Please get nonce")
+			return
+		}
+		log.Warn(err)
+		return err
+	}
 	//verify wallet and nonce
 	if err = VerifyEthWallet(address, nonce, signature); err != nil {
 		return
 	}
-
-	comer, err := account.GetComerByAddress(mysql.DB, address)
-	if err != nil {
-		elog.Error(err.Error())
-		return
+	var comer account.Comer
+	if err = account.GetComerByAddress(mysql.DB, address, &comer); err != nil {
+		log.Warn(err)
+		return err
 	}
 	//set default profile status
 	var isProfiled bool
-	var comerProfile account.ComerProfile
+	var profile account.ComerProfile
 
 	if comer.ID == 0 {
 		comer = account.Comer{
@@ -73,81 +84,86 @@ func LoginWithEthWallet(address, signature, nonce string) (response *account.Com
 		// create a new comer
 		err = account.CreateComer(mysql.DB, &comer)
 		if err != nil {
-			elog.Errorf("Comunion Eth login faild, because of %v", err)
 			return
 		}
 		isProfiled = false
 	} else {
-		comerProfile, err = account.GetComerProfile(mysql.DB, comer.ID)
-		if err != nil {
-			elog.Errorf("Comunion get comer profile fauld, because of %v", err)
-			return
+		//get comer profile
+		if err = account.GetComerProfile(mysql.DB, comer.ID, &profile); err != nil {
+			log.Warn(err)
+			return err
 		}
-		if comerProfile.ID != 0 {
+		if profile.ID != 0 {
 			isProfiled = true
 		}
 	}
 
 	_, err = redis.Client.Del(context.TODO(), address)
 	if err != nil {
-		elog.Errorf("Comunion redis remove key failed %v", err)
+		log.Warnf("Comunion redis remove key failed %v", err)
 	}
 
 	// sign with jwt
 	token := jwt.Sign(comer.ID)
 
-	fmt.Println("comer.ID", comer.ID)
-
-	response = &account.ComerLoginResponse{
+	*response = account.ComerLoginResponse{
+		IsProfiled: isProfiled,
+		Avatar:     "",
+		Name:       profile.Name,
 		Address:    address,
 		Token:      token,
-		Name:       comerProfile.Name,
-		Avatar:     comerProfile.Avatar,
-		IsProfiled: isProfiled,
 	}
+
 	return
 }
 
 // LinkEthAccountToComer link a new eth wallet account to comer
-func LinkEthAccountToComer(comerID uint64, address, signature, nonce string) (err error) {
+func LinkEthAccountToComer(comerID uint64, address, signature string) (err error) {
+	nonce, err := redis.Client.Get(context.TODO(), address)
+	if err != nil {
+		if err.Error() == "eredis get string error eredis exec command get fail, redis: nil" {
+			err = router.ErrBadRequest.WithMsg("Please get nonce")
+			return
+		}
+		log.Warn(err)
+		return err
+	}
 	//verify wallet and nonce
 	if err = VerifyEthWallet(address, nonce, signature); err != nil {
 		return
 	}
 
-	comer, err := account.GetComerByID(mysql.DB, comerID)
-	if err != nil {
-		elog.Error(err.Error())
-		return err
+	var comer account.Comer
+	if err = account.GetComerByID(mysql.DB, comerID, &comer); err != nil {
+		return
 	}
-
 	if comer.Address != nil {
-		return errors.New("Current comer has linked with a wallet")
+		return router.ErrBadRequest.WithMsg("Current comer has linked with a wallet")
 	}
 
-	comer, err = account.GetComerByAddress(mysql.DB, address)
-	if err != nil {
-		elog.Error(err.Error())
-		return err
+	if err = account.GetComerByAddress(mysql.DB, address, &comer); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return
+		}
 	}
-
 	if comer.ID != 0 {
-		return errors.New("Current eth wallet account is linked with a comer")
+		return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with a comer")
 	}
 
 	if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
+		log.Warn(err)
 		return
 	}
 
 	_, err = redis.Client.Del(context.TODO(), address)
 	if err != nil {
-		elog.Errorf("Comunion redis remove key failed %v", err)
+		log.Warnf("redis remove nonce key failed %v", err)
 	}
-	return nil
+	return
 }
 
 // VerifyEthWallet verify the signature and login with the wallet
-func VerifyEthWallet(address, nonce, signature string) (err error) {
+func VerifyEthWallet(address, nonce, signature string) error {
 	addrKey := common.HexToAddress(address)
 	sig := hexutil.MustDecode(signature)
 	if sig[64] == 27 || sig[64] == 28 {
@@ -157,12 +173,12 @@ func VerifyEthWallet(address, nonce, signature string) (err error) {
 	msg256 := crypto.Keccak256([]byte(msg))
 	pubKey, err := crypto.SigToPub(msg256, sig)
 	if err != nil {
-		return
+		return err
 	}
 	recoverAddr := crypto.PubkeyToAddress(*pubKey)
 	if recoverAddr != addrKey {
-		err = errors.New("Not match the origin public key")
-		return
+		err = router.ErrBadRequest.WithMsg("Address mismatch")
+		return err
 	}
-	return
+	return nil
 }

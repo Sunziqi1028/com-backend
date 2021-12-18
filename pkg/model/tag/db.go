@@ -1,39 +1,37 @@
 package tag
 
 import (
-	"time"
-
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
-// const tag category type
-const (
-	StartupTag = 1
-	SkillTag   = 2
-)
-
-// Tag  Comunion tag for startup bounty profile and other position need Tag.
-type Tag struct {
-	ID       uint64    `gorm:"column:id"`
-	Name     string    `gorm:"column:name"`
-	Code     int       `gorm:"column:code"`
-	Category int       `gorm:"column:category"`
-	CreateAt time.Time `gorm:"column:create_at;autoCreateTime"`
-	UpdateAt time.Time `gorm:"column:update_at;autoUpdateTime:milli"`
-}
-
-// TableName identify the table name of this model.
-func (Tag) TableName() string {
-	return "comunion_tags_tbl"
-}
-
-// GetTagListByCategory  get some category tag list by the category code
-// @see ceres/pkg/mode/tag/db.go const such as StartupTag SkillTag.
-func GetTagListByCategory(db *gorm.DB, category int) (tags []Tag, err error) {
-	db = db.Where("category = ?", category).Find(tags)
-	err = db.Error
-	if err != nil {
-		return
-	}
+//GetTagList get tag list tag ids
+func GetTagList(db *gorm.DB, request ListRequest, tags *[]Tag) (count int64, err error) {
+	err = db.Where("is_index = ? AND is_deleted = false", request.IsIndex).Find(tags).Count(&count).Limit(request.Limit).Offset(request.Offset).Error
 	return
+}
+
+//GetTagListByIDs get tag list tag ids
+func GetTagListByIDs(db *gorm.DB, tagIDs []uint64, tags *[]Tag) error {
+	return db.Find(tags, tagIDs).Error
+}
+
+//GetTagRelList get tag-target relation list
+func GetTagRelList(db *gorm.DB, targetID uint64, target Target, comerSkillRel *[]TagTargetRel) error {
+	return db.Where("target_id = ? AND target = ?", targetID, target).Find(comerSkillRel).Error
+}
+
+//FirstOrCreateTag first or create tags
+func FirstOrCreateTag(db *gorm.DB, tag *Tag) error {
+	return db.Where("name = ?", tag.Name).FirstOrCreate(&tag).Error
+}
+
+//DeleteTagRel delete comer skill relation where not used
+func DeleteTagRel(db *gorm.DB, comerID uint64, target Target, skillIds []uint64) error {
+	return db.Delete(&TagTargetRel{}, "target_id = ? AND target = ? AND tag_id NOT IN ?", comerID, target, skillIds).Error
+}
+
+//BatchCreateTagRel delete comer skill relation where not used
+func BatchCreateTagRel(db *gorm.DB, tagTargetRelList []TagTargetRel) error {
+	return db.Clauses(clause.OnConflict{DoNothing: true}).Create(&tagTargetRelList).Error
 }
