@@ -38,10 +38,6 @@ type googleAccessTokenResponse struct {
 // GetAccessToken
 // use the requestToken to get the access token which will be used to get the github user information
 func (google *Google) getAccessToken() (accessToken string, err error) {
-	if google.CurrentState != google.OauthState {
-		err = fmt.Errorf("invalid oauth state, expected '%s', got '%s'\n", google.OauthState, google.CurrentState)
-		return
-	}
 	token, err := google.Exchange(oauth2.NoContext, google.Code)
 	if err != nil {
 		err = fmt.Errorf("Code exchange failed with '%s'", err)
@@ -87,7 +83,6 @@ func (account *GoogleOauthAccount) GetUserNick() string {
 // GetUserProfile  Facebook Oauth get user profile logic
 func (google *Google) GetUserProfile() (account OauthAccount, err error) {
 	accessToken, err := google.getAccessToken()
-	fmt.Println(accessToken)
 	if err != nil {
 		return
 	}

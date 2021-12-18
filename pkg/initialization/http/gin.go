@@ -77,7 +77,7 @@ func Init() (err error) {
 		misc.GET("/upload/presign", router.Wrap(upload.GetPresignedURLForUpload))
 	}
 
-	// meta informations
+	// meta information
 	meta := Gin.Group("/meta")
 	{
 		meta.Use(middleware.GuestAuthorizationMiddleware())

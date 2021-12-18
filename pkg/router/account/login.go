@@ -5,16 +5,16 @@ import (
 	"ceres/pkg/model/account"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
-	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
+	"ceres/pkg/utility/jwt"
 	"fmt"
 	"net/http"
 )
 
 // LoginWithGithub login with github oauth
 func LoginWithGithub(ctx *router.Context) {
-	url := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%v&redirect_uri=%v", config.Github.ClientID, config.Github.CallbackURL)
+	url := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%v&redirect_uri=%v&state=%v", config.Github.ClientID, config.Github.CallbackURL, ctx.GetHeader("X-COMUNION-AUTHORIZATION"))
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
 
@@ -27,8 +27,9 @@ func LoginWithGithubCallback(ctx *router.Context) {
 		return
 	}
 	client := auth.NewGithubOauthClient(code)
-	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	if comerID == 0 {
+	state := ctx.Query("state")
+	comerID, err := jwt.Verify(state)
+	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
 		if err := service.LoginWithOauth(client, model.GithubOauth, &response); err != nil {
 			ctx.HandleError(err)
@@ -46,28 +47,24 @@ func LoginWithGithubCallback(ctx *router.Context) {
 
 // LoginWithGoogle login with google oauth
 func LoginWithGoogle(ctx *router.Context) {
-	client := auth.NewGoogleClient("", "")
+	jwtHeader := ctx.GetHeader("X-COMUNION-AUTHORIZATION")
+	client := auth.NewGoogleClient(jwtHeader, "")
 	url := client.AuthCodeURL(client.OauthState)
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 // LoginWithGoogleCallback login with google oauth callback
 func LoginWithGoogleCallback(ctx *router.Context) {
-	state := ctx.Query("state")
-	if state == "" {
-		err := router.ErrBadRequest.WithMsg("State missed")
-		ctx.HandleError(err)
-		return
-	}
 	code := ctx.Query("code")
 	if code == "" {
 		err := router.ErrBadRequest.WithMsg("Code missed")
 		ctx.HandleError(err)
 		return
 	}
+	state := ctx.Query("state")
 	client := auth.NewGoogleClient(state, code)
-	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	if comerID == 0 {
+	comerID, err := jwt.Verify(state)
+	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
 		if err := service.LoginWithOauth(client, model.GoogleOauth, &response); err != nil {
 			ctx.HandleError(err)
@@ -95,6 +92,7 @@ func GetBlockchainLoginNonce(ctx *router.Context) {
 	var nonce account.WalletNonceResponse
 	if err := service.GenerateWeb3LoginNonce(address, &nonce); err != nil {
 		ctx.HandleError(err)
+		return
 	}
 
 	ctx.OK(nonce)

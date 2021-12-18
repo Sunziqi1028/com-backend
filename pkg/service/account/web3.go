@@ -36,7 +36,10 @@ func createNonce() string {
 func GenerateWeb3LoginNonce(address string, response *account.WalletNonceResponse) (err error) {
 	nonce, err := redis.Client.Get(context.TODO(), address)
 	if err != nil {
-		return err
+		if err.Error() != "eredis get string error eredis exec command get fail, redis: nil" {
+			log.Warn(err)
+			return err
+		}
 	}
 	if nonce == "" {
 		nonce = createNonce()
