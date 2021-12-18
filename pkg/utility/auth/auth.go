@@ -63,7 +63,7 @@ func NewFacebookClient(requestToken string) (client OauthClient) {
 }
 
 // NewGoogleClient build a new Google client with the request token from login
-func NewGoogleClient(state, code string) (client *Google) {
+func NewGoogleClient(code string) (client *Google) {
 	return &Google{
 		Config: oauth2.Config{
 			ClientID:     config.Google.ClientID,
@@ -72,9 +72,8 @@ func NewGoogleClient(state, code string) (client *Google) {
 			Endpoint:     googleEndpoint,
 			Scopes:       scopes,
 		},
-		OauthState: state,
-		client:     httpClient,
-		Code:       code,
+		client: httpClient,
+		Code:   code,
 	}
 }
 

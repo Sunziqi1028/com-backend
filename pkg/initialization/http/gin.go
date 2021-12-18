@@ -20,9 +20,7 @@ func Init() (err error) {
 	oauthLogin := Gin.Group("/account/oauth")
 	{
 		oauthLogin.Use(middleware.GuestAuthorizationMiddleware())
-		oauthLogin.GET("/github/login", router.Wrap(account.LoginWithGithub))
 		oauthLogin.GET("/github/login/callback", router.Wrap(account.LoginWithGithubCallback))
-		oauthLogin.GET("/google/login", router.Wrap(account.LoginWithGoogle))
 		oauthLogin.GET("/google/login/callback", router.Wrap(account.LoginWithGoogleCallback))
 	}
 
