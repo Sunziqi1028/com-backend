@@ -1,22 +1,13 @@
 package account
 
 import (
-	"ceres/pkg/config"
 	"ceres/pkg/model/account"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
-	"fmt"
-	"net/http"
 )
-
-// LoginWithGithub login with github oauth
-func LoginWithGithub(ctx *router.Context) {
-	url := fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%v&redirect_uri=%v&state=%v", config.Github.ClientID, config.Github.CallbackURL, ctx.GetHeader("X-COMUNION-AUTHORIZATION"))
-	ctx.Redirect(http.StatusTemporaryRedirect, url)
-}
 
 // LoginWithGithubCallback login with github oauth
 func LoginWithGithubCallback(ctx *router.Context) {
@@ -27,30 +18,21 @@ func LoginWithGithubCallback(ctx *router.Context) {
 		return
 	}
 	client := auth.NewGithubOauthClient(code)
-	state := ctx.Query("state")
-	comerID, err := jwt.Verify(state)
+	comerID, err := jwt.Verify(ctx.GetHeader("X-COMUNION-AUTHORIZATION"))
 	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
-		if err := service.LoginWithOauth(client, model.GithubOauth, &response); err != nil {
+		if err = service.LoginWithOauth(client, model.GithubOauth, &response); err != nil {
 			ctx.HandleError(err)
 			return
 		}
 		ctx.OK(response)
 	} else {
-		if err := service.LinkOauthAccountToComer(comerID, client, model.GithubOauth); err != nil {
+		if err = service.LinkOauthAccountToComer(comerID, client, model.GithubOauth); err != nil {
 			ctx.HandleError(err)
 			return
 		}
 		ctx.OK(nil)
 	}
-}
-
-// LoginWithGoogle login with google oauth
-func LoginWithGoogle(ctx *router.Context) {
-	jwtHeader := ctx.GetHeader("X-COMUNION-AUTHORIZATION")
-	client := auth.NewGoogleClient(jwtHeader, "")
-	url := client.AuthCodeURL(client.OauthState)
-	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 // LoginWithGoogleCallback login with google oauth callback
@@ -61,18 +43,17 @@ func LoginWithGoogleCallback(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	state := ctx.Query("state")
-	client := auth.NewGoogleClient(state, code)
-	comerID, err := jwt.Verify(state)
+	client := auth.NewGoogleClient(code)
+	comerID, err := jwt.Verify(ctx.GetHeader("X-COMUNION-AUTHORIZATION"))
 	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
-		if err := service.LoginWithOauth(client, model.GoogleOauth, &response); err != nil {
+		if err = service.LoginWithOauth(client, model.GoogleOauth, &response); err != nil {
 			ctx.HandleError(err)
 			return
 		}
 		ctx.OK(response)
 	} else {
-		if err := service.LinkOauthAccountToComer(comerID, client, model.GoogleOauth); err != nil {
+		if err = service.LinkOauthAccountToComer(comerID, client, model.GoogleOauth); err != nil {
 			ctx.HandleError(err)
 			return
 		}
