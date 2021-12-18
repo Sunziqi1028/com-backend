@@ -32,9 +32,9 @@ func CreateProfile(ctx *router.Context) {
 
 // GetProfile get current Comer profile
 func GetProfile(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	var response model.ComerProfileResponse
-	if err := service.GetComerProfile(uin, &response); err != nil {
+	if err := service.GetComerProfile(comerID, &response); err != nil {
 		ctx.HandleError(err)
 		return
 	}
@@ -44,7 +44,7 @@ func GetProfile(ctx *router.Context) {
 
 // UpdateProfile update the profile
 func UpdateProfile(ctx *router.Context) {
-	uin, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	request := &model.UpdateProfileRequest{}
 	if err := ctx.BindJSON(request); err != nil {
 		err = router.ErrBadRequest.WithMsg("Invalid data format")
@@ -57,7 +57,7 @@ func UpdateProfile(ctx *router.Context) {
 		return
 	}
 
-	if err := service.UpdateComerProfile(uin, request); err != nil {
+	if err := service.UpdateComerProfile(comerID, request); err != nil {
 		ctx.HandleError(err)
 		return
 	}

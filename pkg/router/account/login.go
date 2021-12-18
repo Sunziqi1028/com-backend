@@ -27,8 +27,7 @@ func LoginWithGithubCallback(ctx *router.Context) {
 		return
 	}
 	client := auth.NewGithubOauthClient(code)
-	state := ctx.Query("state")
-	comerID, err := jwt.Verify(state)
+	comerID, err := jwt.Verify(ctx.GetHeader(ctx.GetHeader("X-COMUNION-AUTHORIZATION")))
 	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
 		if err := service.LoginWithOauth(client, model.GithubOauth, &response); err != nil {
@@ -61,9 +60,8 @@ func LoginWithGoogleCallback(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	state := ctx.Query("state")
-	client := auth.NewGoogleClient(state, code)
-	comerID, err := jwt.Verify(state)
+	client := auth.NewGoogleClient("", code)
+	comerID, err := jwt.Verify(ctx.GetHeader(ctx.GetHeader("X-COMUNION-AUTHORIZATION")))
 	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
 		if err := service.LoginWithOauth(client, model.GoogleOauth, &response); err != nil {
