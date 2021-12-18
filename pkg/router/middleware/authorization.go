@@ -59,7 +59,7 @@ func JwtAuthorizationMiddleware(ctx *gin.Context) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, router.ErrUnauthorized.WithMsg("comer does not exist"))
 		}
-		log.Warn("get comer fail %v", err)
+		log.Warnf("get comer fail %v", err)
 		return
 	}
 
