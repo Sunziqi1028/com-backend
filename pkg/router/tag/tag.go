@@ -4,7 +4,6 @@ import (
 	"ceres/pkg/model/tag"
 	"ceres/pkg/router"
 	service "ceres/pkg/service/tag"
-	"fmt"
 )
 
 // GetTagList get tag list
@@ -15,7 +14,12 @@ func GetTagList(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	fmt.Println(request)
+
+	if err := request.Validate(); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
 	var response tag.ListResponse
 	if err := service.GetStartupTagList(request, &response); err != nil {
 		ctx.HandleError(err)
