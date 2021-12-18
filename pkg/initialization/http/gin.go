@@ -4,6 +4,7 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/account"
 	"ceres/pkg/router/middleware"
+	"ceres/pkg/router/tag"
 	"ceres/pkg/router/upload"
 
 	"github.com/gotomicro/ego/server/egin"
@@ -80,8 +81,7 @@ func Init() (err error) {
 	meta := Gin.Group("/meta")
 	{
 		meta.Use(middleware.GuestAuthorizationMiddleware())
-		//meta.GET("/tag/startup", router.Wrap(tags.GetStartupTagList))
-		//meta.GET("/tag/skill", router.Wrap(tags.GetSkillTagList))
+		meta.GET("/tags", router.Wrap(tag.GetTagList))
 	}
 
 	return

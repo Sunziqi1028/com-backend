@@ -49,9 +49,9 @@ CREATE TABLE `comer_account` (
   `avatar` varchar(255) NOT NULL COMMENT 'avatar link address',
   `type` int(11) NOT NULL COMMENT '1 for github 2 for twitter 3 for facebook 4 for likedin 5 for google',
   `is_linked` tinyint(1) NOT NULL COMMENT '0 for unlink 1 for linked',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
   PRIMARY KEY (`id`),
   UNIQUE KEY `comer_account_oin_uindex` (`oin`) USING BTREE,
   KEY `comer_account_comer_id_index` (`comer_id`)
@@ -73,49 +73,50 @@ CREATE TABLE `comer_profile` (
   `location` char(42) NOT NULL COMMENT 'location city',
   `website` varchar(50) DEFAULT NULL COMMENT 'website',
   `bio` varchar(255) DEFAULT NULL COMMENT 'bio',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `comer_profile_comer_id_index` (`comer_id`)
+  UNIQUE KEY `comer_profile_comer_id_uindex` (`comer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
--- Table structure for table `comer_skill`
+-- Table structure for table `tag`
 --
 
-DROP TABLE IF EXISTS `comer_skill`;
+DROP TABLE IF EXISTS `tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `comer_skill` (
+CREATE TABLE `tag` (
   `id` bigint(20) NOT NULL,
   `name` varchar(64) NOT NULL COMMENT 'name',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
+  `is_index` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is index',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`) USING BTREE
+  UNIQUE KEY `tag_name_uindex` (`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `comer_skill_rel`
+-- Table structure for table `tag_target_rel`
 --
 
-DROP TABLE IF EXISTS `comer_skill_rel`;
+DROP TABLE IF EXISTS `tag_target_rel`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `comer_skill_rel` (
+CREATE TABLE `tag_target_rel` (
   `id` bigint(20) NOT NULL,
-  `comer_id` bigint(20) NOT NULL COMMENT 'comer id',
-  `skill_id` bigint(20) NOT NULL COMMENT 'skill id',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
+  `target` varchar(20) NOT NULL COMMENT 'comerSkill,startup',
+  `target_id` bigint(20) NOT NULL COMMENT 'target id',
+  `tag_id` bigint(20) NOT NULL COMMENT 'skill id',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `comer_id_skill_id` (`comer_id`,`skill_id`) USING BTREE
+  UNIQUE KEY `comer_id_skill_id_uindex` (`target`,`target_id`,`tag_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

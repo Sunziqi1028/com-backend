@@ -19,3 +19,15 @@ func (base *Base) BeforeCreate(tx *gorm.DB) (err error) {
 	base.ID = utility.Sequence.Next()
 	return
 }
+
+// RelationBase contains common columns for all tables.
+type RelationBase struct {
+	ID        uint64 `gorm:"primary_key;column:id"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (base *RelationBase) BeforeCreate(tx *gorm.DB) (err error) {
+	base.ID = utility.Sequence.Next()
+	return
+}

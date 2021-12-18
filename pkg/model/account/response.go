@@ -1,5 +1,7 @@
 package account
 
+import "ceres/pkg/model/tag"
+
 // ComerLoginResponse comer login response
 type ComerLoginResponse struct {
 	Name       string `json:"name"`
@@ -17,7 +19,7 @@ type WalletNonceResponse struct {
 // ComerProfileResponse return the profile of some comer
 type ComerProfileResponse struct {
 	ComerProfile
-	Skills []Skill `json:"skills"`
+	Skills []tag.Tag `json:"skills"`
 }
 
 // ComerOuterAccountListResponse response of the comer outer account list

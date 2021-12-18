@@ -57,26 +57,3 @@ type ComerProfile struct {
 func (ComerProfile) TableName() string {
 	return "comer_profile"
 }
-
-// Skill model
-type Skill struct {
-	model.Base
-	Name string `gorm:"column:name"`
-}
-
-// TableName the Skill table name for gorm
-func (Skill) TableName() string {
-	return "comer_skill"
-}
-
-// ComerSkillRel model
-type ComerSkillRel struct {
-	model.Base
-	ComerID uint64 `gorm:"column:comer_id"`
-	SkillID uint64 `gorm:"column:skill_id"`
-}
-
-// TableName the comer skill relation table name for gorm
-func (ComerSkillRel) TableName() string {
-	return "comer_skill_rel"
-}
