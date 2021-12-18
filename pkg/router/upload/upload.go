@@ -26,7 +26,7 @@ func GetPresignedURLForUpload(ctx *router.Context) {
 	prefix = hex.EncodeToString(res[:])
 	signed, err := utility.PreSignUpload(minio.Client, prefix+"."+suffix)
 	if err != nil {
-		log.Warn("signed the MINIO url failed %v", err)
+		log.Warnf("signed the MINIO url failed %v", err)
 		ctx.HandleError(err)
 		return
 	}
