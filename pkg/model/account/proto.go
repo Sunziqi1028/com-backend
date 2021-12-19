@@ -8,10 +8,10 @@ type ComerAccountType int
 
 const (
 	GithubOauth   ComerAccountType = 1
-	TwitterOauth  ComerAccountType = 2
-	FacebookOauth ComerAccountType = 3
-	LikedinOauth  ComerAccountType = 4
-	GoogleOauth   ComerAccountType = 5
+	GoogleOauth   ComerAccountType = 2
+	TwitterOauth  ComerAccountType = 3
+	FacebookOauth ComerAccountType = 4
+	LikedinOauth  ComerAccountType = 5
 )
 
 // Comer the comer model of comunion inner account

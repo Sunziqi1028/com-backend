@@ -47,7 +47,7 @@ CREATE TABLE `comer_account` (
   `is_primary` tinyint(1) NOT NULL COMMENT 'comer use this account as primay account',
   `nick` varchar(50) NOT NULL COMMENT 'comer nick name',
   `avatar` varchar(255) NOT NULL COMMENT 'avatar link address',
-  `type` int(11) NOT NULL COMMENT '1 for github 2 for twitter 3 for facebook 4 for likedin 5 for google',
+  `type` int(11) NOT NULL COMMENT '1 for github  2 for google 3 for twitter 4 for facebook 5 for likedin',
   `is_linked` tinyint(1) NOT NULL COMMENT '0 for unlink 1 for linked',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
