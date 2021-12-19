@@ -15,8 +15,8 @@ const (
 // Tag  Comunion tag for startup bounty profile and other position need Tag.
 type Tag struct {
 	model.Base
-	Name    string `gorm:"column:name"`
-	IsIndex bool   `gorm:"column:is_index"`
+	Name    string `gorm:"column:name" json:"name"`
+	IsIndex bool   `gorm:"column:is_index" json:"isIndex"`
 }
 
 // TableName identify the table name of this model.
