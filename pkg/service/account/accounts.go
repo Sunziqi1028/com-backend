@@ -8,17 +8,17 @@ import (
 )
 
 // GetComerAccounts get current comer accounts
-func GetComerAccounts(comerID uint64, response *model.ComerOuterAccountListResponse) error {
+func GetComerAccounts(comerID uint64, response *model.ComerOuterAccountListResponse) (err error) {
 	accountList := make([]model.ComerAccount, 0)
-	if err := model.ListAccount(mysql.DB, comerID, &accountList); err != nil {
+	if err = model.ListAccount(mysql.DB, comerID, &accountList); err != nil {
 		log.Warn(err)
-		return err
+		return
 	}
 	*response = model.ComerOuterAccountListResponse{
 		List:  accountList,
 		Total: uint64(len(accountList)),
 	}
-	return nil
+	return
 }
 
 // UnlinkComerAccount  unlink the comer account

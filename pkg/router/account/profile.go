@@ -14,8 +14,8 @@ func CreateProfile(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	request := &model.CreateProfileRequest{}
 	if err := ctx.ShouldBindJSON(request); err != nil {
-		err = router.ErrBadRequest.WithMsg(err.Error())
 		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
 		ctx.HandleError(err)
 		return
 	}
@@ -45,8 +45,8 @@ func UpdateProfile(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	request := &model.UpdateProfileRequest{}
 	if err := ctx.ShouldBindJSON(request); err != nil {
-		err = router.ErrBadRequest.WithMsg(err.Error())
 		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
 		ctx.HandleError(err)
 		return
 	}

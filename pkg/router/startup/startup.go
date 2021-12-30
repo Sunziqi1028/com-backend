@@ -14,8 +14,8 @@ import (
 func ListStartups(ctx *router.Context) {
 	var request model.ListStartupRequest
 	if err := ctx.ShouldBindQuery(&request); err != nil {
-		err = router.ErrBadRequest.WithMsg(err.Error())
 		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
 		ctx.HandleError(err)
 		return
 	}
@@ -34,8 +34,8 @@ func ListStartupsMe(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	var request model.ListStartupRequest
 	if err := ctx.ShouldBindQuery(&request); err != nil {
-		err = router.ErrBadRequest.WithMsg(err.Error())
 		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
 		ctx.HandleError(err)
 		return
 	}
@@ -49,7 +49,7 @@ func ListStartupsMe(ctx *router.Context) {
 	ctx.OK(response)
 }
 
-// GetStartup create the profile
+// GetStartup get startup
 func GetStartup(ctx *router.Context) {
 	startupID, err := strconv.ParseUint(ctx.Param("startupID"), 0, 64)
 	if err != nil {

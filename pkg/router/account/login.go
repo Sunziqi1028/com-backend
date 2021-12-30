@@ -7,6 +7,8 @@ import (
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
+
+	"github.com/qiniu/x/log"
 )
 
 // LoginWithGithubCallback login with github oauth
@@ -83,7 +85,8 @@ func GetBlockchainLoginNonce(ctx *router.Context) {
 func LoginWithWallet(ctx *router.Context) {
 	var request model.EthLoginRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		err = router.ErrBadRequest.WithMsg("Invalid data format")
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
 		ctx.HandleError(err)
 		return
 	}
