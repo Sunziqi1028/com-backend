@@ -167,6 +167,24 @@ CREATE TABLE `startup_wallet` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `startup_follow_rel`
+--
+
+DROP TABLE IF EXISTS `startup_follow_rel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `startup_follow_rel` (
+    `id` bigint(20) NOT NULL,
+    `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
+    `startup_id` bigint(20) NOT NULL COMMENT 'startup_id',
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `startup_followed_comer_id_startup_id_uindex` (`comer_id`,`startup_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

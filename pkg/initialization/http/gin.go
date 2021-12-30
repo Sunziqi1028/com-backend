@@ -51,6 +51,8 @@ func Init() (err error) {
 	{
 		coresPriv.Use(middleware.ComerAuthorizationMiddleware())
 		coresPriv.GET("/startups/me", router.Wrap(startup.ListStartupsMe))
+		coresPriv.POST("/startups/:startupID/follow", router.Wrap(startup.FollowStartup))
+		coresPriv.GET("/startups/follow", router.Wrap(startup.ListFollowStartups))
 	}
 
 	coresPub := Gin.Group("/cores")

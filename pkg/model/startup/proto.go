@@ -43,3 +43,14 @@ type Wallet struct {
 func (Wallet) TableName() string {
 	return "startup_wallet"
 }
+
+type FollowRelation struct {
+	model.RelationBase
+	ComerID   uint64 `gorm:"comer_id" json:"comerID"`
+	StartupID uint64 `gorm:"startup_id" json:"startupID"`
+}
+
+// TableName Followed table name for gorm
+func (FollowRelation) TableName() string {
+	return "startup_follow_rel"
+}
