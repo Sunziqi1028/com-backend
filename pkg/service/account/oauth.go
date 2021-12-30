@@ -35,6 +35,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 		comer = account.Comer{}
 		err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
 			if er = account.CreateComer(tx, &comer); er != nil {
+				log.Warn(er)
 				return er
 			}
 			comerAccount = account.ComerAccount{
@@ -47,14 +48,18 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 				IsLinked:  true,
 			}
 			if er = account.CreateAccount(tx, &comerAccount); er != nil {
+				log.Warn(er)
 				return er
 			}
 			return
 		})
+		if err != nil {
+			return
+		}
 	} else {
 		if err = account.GetComerProfile(mysql.DB, comer.ID, &profile); err != nil {
 			log.Warn(err)
-			return
+			return err
 		}
 		if profile.ID != 0 {
 			isProfiled = true
@@ -71,18 +76,22 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 
 	*response = account.ComerLoginResponse{
 		IsProfiled: isProfiled,
-		Avatar:     "",
+		Avatar:     profile.Avatar,
 		Name:       profile.Name,
 		Address:    address,
 		Token:      token,
 	}
 
-	return
+	return nil
 }
 
 // LinkOauthAccountToComer link a new Oauth account to the current comer
 func LinkOauthAccountToComer(ComerID uint64, client auth.OauthClient, oauthType account.ComerAccountType) (err error) {
 	oauth, err := client.GetUserProfile()
+	if err != nil {
+		log.Warn(err)
+		return
+	}
 	// try to find account
 	var comerAccount account.ComerAccount
 	if err = account.GetComerAccount(mysql.DB, oauthType, oauth.GetUserID(), &comerAccount); err != nil {

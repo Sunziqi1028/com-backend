@@ -3,24 +3,25 @@ package account
 import (
 	"ceres/pkg/initialization/mysql"
 	model "ceres/pkg/model/account"
+
+	"github.com/qiniu/x/log"
 )
 
-// manage the account informations link and unlink
-
 // GetComerAccounts get current comer accounts
-func GetComerAccounts(comerID uint64, response *model.ComerOuterAccountListResponse) (err error) {
+func GetComerAccounts(comerID uint64, response *model.ComerOuterAccountListResponse) error {
 	accountList := make([]model.ComerAccount, 0)
-	if err = model.ListAccount(mysql.DB, comerID, &accountList); err != nil {
-		return
+	if err := model.ListAccount(mysql.DB, comerID, &accountList); err != nil {
+		log.Warn(err)
+		return err
 	}
 	*response = model.ComerOuterAccountListResponse{
 		List:  accountList,
 		Total: uint64(len(accountList)),
 	}
-	return
+	return nil
 }
 
 // UnlinkComerAccount  unlink the comer account
-func UnlinkComerAccount(comerID, accountID uint64) (err error) {
+func UnlinkComerAccount(comerID, accountID uint64) error {
 	return model.DeleteAccount(mysql.DB, comerID, accountID)
 }

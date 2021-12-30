@@ -4,6 +4,7 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/account"
 	"ceres/pkg/router/middleware"
+	"ceres/pkg/router/startup"
 	"ceres/pkg/router/tag"
 	"ceres/pkg/router/upload"
 
@@ -46,27 +47,19 @@ func Init() (err error) {
 		accounts.PUT("/profile", router.Wrap(account.UpdateProfile))
 	}
 
-	//coresPriv := Gin.Group("/cores")
-	//{
-	//	coresPriv.Use(middleware.ComerAuthorizationMiddleware())
-	//	coresPriv.GET("/startups/me", router.Wrap(account.ListAccounts))
-	//	coresPriv.GET("/startups/:startupId/bounties/me", router.Wrap(account.ListAccounts))
-	//}
+	coresPriv := Gin.Group("/cores")
+	{
+		coresPriv.Use(middleware.ComerAuthorizationMiddleware())
+		coresPriv.GET("/startups/me", router.Wrap(startup.ListStartupsMe))
+	}
 
-	// startups operation router
-	//coresPub := Gin.Group("/cores")
-	//{
-	//	coresPub.Use(middleware.GuestAuthorizationMiddleware())
-	//	// basic operations
-	//	coresPub.GET("/startups", router.Wrap(account.ListAccounts))
-	//	coresPub.GET("/startups/:startupId", router.Wrap(account.LinkWithGithub))
-	//	coresPub.GET("/startups/:startupId/bounties/", router.Wrap(account.ListAccounts))
-	//	coresPub.GET("/bounties/:bountyId", router.Wrap(account.ListAccounts))
-	//	coresPub.GET("/bounties", router.Wrap(account.ListAccounts))
-	//	coresPub.GET("/dios/:dioId", router.Wrap(account.ListAccounts))
-	//	coresPub.GET("/startups/:startupId/dios", router.Wrap(account.ListAccounts))
-	//	coresPub.GET("/startups/:startupId/dios/:dioId", router.Wrap(account.ListAccounts))
-	//}
+	coresPub := Gin.Group("/cores")
+	{
+		coresPub.Use(middleware.GuestAuthorizationMiddleware())
+		coresPub.GET("/startups", router.Wrap(startup.ListStartups))
+		coresPub.GET("/startups/:startupID", router.Wrap(startup.GetStartup))
+		//coresPub.GET("/startups/:startupId/setting", router.Wrap(startup.GetStartupSetting))
+	}
 
 	// misc operation router
 	misc := Gin.Group("/misc")

@@ -82,7 +82,7 @@ func GetBlockchainLoginNonce(ctx *router.Context) {
 // LoginWithWallet login with the wallet signature.
 func LoginWithWallet(ctx *router.Context) {
 	var request model.EthLoginRequest
-	if err := ctx.BindJSON(&request); err != nil {
+	if err := ctx.ShouldBindJSON(&request); err != nil {
 		err = router.ErrBadRequest.WithMsg("Invalid data format")
 		ctx.HandleError(err)
 		return

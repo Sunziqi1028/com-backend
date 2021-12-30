@@ -31,3 +31,10 @@ func (base *RelationBase) BeforeCreate(tx *gorm.DB) (err error) {
 	base.ID = utility.Sequence.Next()
 	return
 }
+
+// ListRequest list request
+type ListRequest struct {
+	Limit     int  `form:"limit" binding:"gt=0,lt=100"`
+	Offset    int  `form:"offset" binding:"gte=0"`
+	IsDeleted bool `form:"isDeleted"`
+}

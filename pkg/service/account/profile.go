@@ -6,7 +6,6 @@ import (
 	"ceres/pkg/model/tag"
 	"ceres/pkg/router"
 	"errors"
-	"fmt"
 
 	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
@@ -55,9 +54,8 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 	//get comer profile
 	var profile model.ComerProfile
 	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return err
-		}
+		log.Warn(err)
+		return
 	}
 	if profile.ID != 0 {
 		return router.ErrBadRequest.WithMsg("user profile already exists")
@@ -71,7 +69,7 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 		Website:  post.Website,
 		BIO:      post.BIO,
 	}
-	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+	err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
 		//create skill
 		for _, skillName := range post.SKills {
 			var isIndex bool
@@ -85,7 +83,6 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 			if err = tag.FirstOrCreateTag(tx, &skill); err != nil {
 				return err
 			}
-			fmt.Println(skill)
 			tagRelList = append(tagRelList, tag.TagTargetRel{
 				TagID:    skill.ID,
 				Target:   tag.ComerSkillTag,
@@ -94,11 +91,13 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 		}
 		//batch create comer skill relation
 		if err = tag.BatchCreateTagRel(tx, tagRelList); err != nil {
-			return err
+			log.Warn(er)
+			return
 		}
 		//create comer profile
 		if err = model.CreateComerProfile(tx, &profile); err != nil {
-			return err
+			log.Warn(er)
+			return
 		}
 		return nil
 	})
