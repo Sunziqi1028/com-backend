@@ -5,19 +5,17 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
+
+	"github.com/qiniu/x/log"
 )
 
 // CreateProfile create the profile
 func CreateProfile(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	request := &model.CreateProfileRequest{}
-	if err := ctx.BindJSON(request); err != nil {
-		err = router.ErrBadRequest.WithMsg("Invalid data format")
-		ctx.HandleError(err)
-		return
-	}
-
-	if err := request.Validate(); err != nil {
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
 		ctx.HandleError(err)
 		return
 	}
@@ -46,13 +44,9 @@ func GetProfile(ctx *router.Context) {
 func UpdateProfile(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	request := &model.UpdateProfileRequest{}
-	if err := ctx.BindJSON(request); err != nil {
-		err = router.ErrBadRequest.WithMsg("Invalid data format")
-		ctx.HandleError(err)
-		return
-	}
-
-	if err := request.Validate(); err != nil {
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
 		ctx.HandleError(err)
 		return
 	}

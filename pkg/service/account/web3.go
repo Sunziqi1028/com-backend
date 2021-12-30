@@ -108,7 +108,7 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 
 	*response = account.ComerLoginResponse{
 		IsProfiled: isProfiled,
-		Avatar:     "",
+		Avatar:     profile.Avatar,
 		Name:       profile.Name,
 		Address:    address,
 		Token:      token,
