@@ -16,7 +16,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 	oauth, err := client.GetUserProfile()
 	if err != nil {
 		log.Warn(err)
-		return
+		return router.ErrBadRequest.WithMsg("Login authorization failed")
 	}
 
 	// try to find account
