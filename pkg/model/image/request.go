@@ -1,11 +1,9 @@
-package tag
+package image
 
 import "ceres/pkg/router"
 
 type ListRequest struct {
-	Keyword  string   `form:"keyword"`
 	Category Category `form:"category"`
-	IsIndex  bool     `form:"isIndex"`
 	Limit    int      `form:"limit"`
 	Offset   int      `form:"offset"`
 }

@@ -27,7 +27,7 @@ CREATE TABLE `comer` (
   `address` char(42) DEFAULT NULL COMMENT 'comer could save some useful info on block chain with this address',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
   PRIMARY KEY (`id`),
   UNIQUE KEY `comer_address_uindex` (`address`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -51,7 +51,7 @@ CREATE TABLE `comer_account` (
   `is_linked` tinyint(1) NOT NULL COMMENT '0 for unlink 1 for linked',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
   PRIMARY KEY (`id`),
   UNIQUE KEY `comer_account_oin_uindex` (`oin`) USING BTREE,
   KEY `comer_account_comer_id_index` (`comer_id`)
@@ -75,12 +75,96 @@ CREATE TABLE `comer_profile` (
   `bio` varchar(255) DEFAULT NULL COMMENT 'bio',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
   PRIMARY KEY (`id`),
   UNIQUE KEY `comer_profile_comer_id_uindex` (`comer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+--
+-- Table structure for table `image`
+--
+
+DROP TABLE IF EXISTS `image`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `image` (
+  `id` bigint(20) NOT NULL,
+  `category` varchar(20) NOT NULL,
+  `name` varchar(64) NOT NULL COMMENT 'name',
+  `url` varchar(200) NOT NULL COMMENT 'url',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `image_category_name_uindex` (`category`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `startup`
+--
+
+DROP TABLE IF EXISTS `startup`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `startup` (
+  `id` bigint(20) NOT NULL,
+  `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
+  `name` bigint(20) NOT NULL COMMENT 'name',
+  `mode` varchar(5) NOT NULL COMMENT 'mode:NONE, ESG, NGO, DAO, COM',
+  `logo` varchar(40) NOT NULL COMMENT 'logo',
+  `mission` varchar(100) NOT NULL COMMENT 'logo',
+  `token_contract_address` char(42) NOT NULL COMMENT 'token contract address',
+  `overview` varchar(200) NOT NULL COMMENT 'overview',
+  `is_set` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is set',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `startup_name_uindex` (`name`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `startup_follow_rel`
+--
+
+DROP TABLE IF EXISTS `startup_follow_rel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `startup_follow_rel` (
+  `id` bigint(20) NOT NULL,
+  `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
+  `startup_id` bigint(20) NOT NULL COMMENT 'startup_id',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `startup_followed_comer_id_startup_id_uindex` (`comer_id`,`startup_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `startup_wallet`
+--
+
+DROP TABLE IF EXISTS `startup_wallet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `startup_wallet` (
+  `id` bigint(20) NOT NULL,
+  `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
+  `startup_id` bigint(20) NOT NULL COMMENT 'startup_id',
+  `wallet_name` varchar(100) NOT NULL COMMENT 'wallet name',
+  `wallet_address` char(42) NOT NULL COMMENT 'wallet address',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `startup_wallet_startup_id_wallet_name_uindex` (`startup_id`,`wallet_name`) USING BTREE,
+  UNIQUE KEY `startup_wallet_startup_id_wallet_address_uindex` (`startup_id`,`wallet_address`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `tag`
@@ -92,12 +176,13 @@ DROP TABLE IF EXISTS `tag`;
 CREATE TABLE `tag` (
   `id` bigint(20) NOT NULL,
   `name` varchar(64) NOT NULL COMMENT 'name',
-  `is_index` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is index',
+  `is_index` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is index',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
+  `category` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `tag_name_uindex` (`name`) USING BTREE
+  UNIQUE KEY `tag_category_name_uindex` (`name`,`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -119,71 +204,7 @@ CREATE TABLE `tag_target_rel` (
   UNIQUE KEY `tag_target_rel_target_target_id_tag_id_uindex` (`target`,`target_id`,`tag_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `startup`
---
-
-DROP TABLE IF EXISTS `startup`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `startup` (
-    `id` bigint(20) NOT NULL,
-    `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
-    `name` bigint(20) NOT NULL COMMENT 'name',
-    `mode` varchar(5) NOT NULL COMMENT 'mode:NONE, ESG, NGO, DAO, COM',
-    `logo` varchar(40) NOT NULL COMMENT 'logo',
-    `mission` varchar(100) NOT NULL COMMENT 'logo',
-    `token_contract_address` char(42) NOT NULL COMMENT 'token contract address',
-    `overview` varchar(200) NOT NULL COMMENT 'overview',
-    `is_set` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is set',
-    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `startup_name_uindex` (`name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `startup_wallet`
---
-
-DROP TABLE IF EXISTS `startup_wallet`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `startup_wallet` (
-    `id` bigint(20) NOT NULL,
-    `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
-    `startup_id` bigint(20) NOT NULL COMMENT 'startup_id',
-    `wallet_name` varchar(100) NOT NULL COMMENT 'wallet name',
-    `wallet_address` char(42) NOT NULL COMMENT 'wallet address',
-    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `is_deleted` tinyint(1) NOT NULL DEFAULT 0  COMMENT 'Is Deleted',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `startup_wallet_startup_id_wallet_name_uindex` (`startup_id`,`wallet_name`) USING BTREE,
-    UNIQUE KEY `startup_wallet_startup_id_wallet_address_uindex` (`startup_id`,`wallet_address`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `startup_follow_rel`
---
-
-DROP TABLE IF EXISTS `startup_follow_rel`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `startup_follow_rel` (
-    `id` bigint(20) NOT NULL,
-    `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
-    `startup_id` bigint(20) NOT NULL COMMENT 'startup_id',
-    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `startup_followed_comer_id_startup_id_uindex` (`comer_id`,`startup_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
@@ -193,4 +214,4 @@ CREATE TABLE `startup_follow_rel` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-05 12:11:51
+-- Dump completed on 2022-02-24  5:09:41
