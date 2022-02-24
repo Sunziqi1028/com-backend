@@ -6,8 +6,15 @@ import (
 )
 
 //GetTagList get tag list tag ids
-func GetTagList(db *gorm.DB, request ListRequest, tags *[]Tag) (count int64, err error) {
-	err = db.Where("is_index = ? AND is_deleted = false", request.IsIndex).Find(tags).Count(&count).Limit(request.Limit).Offset(request.Offset).Error
+func GetTagList(db *gorm.DB, input ListRequest, tags *[]Tag) (count int64, err error) {
+	db = db.Where("is_index = ? AND is_deleted = false", input.IsIndex)
+	if input.Keyword != "" {
+		db = db.Where("name like ?", "%"+input.Keyword+"%")
+	}
+	if input.Category != "" {
+		db = db.Where("category = ?", input.Category)
+	}
+	err = db.Find(tags).Count(&count).Limit(input.Limit).Offset(input.Offset).Error
 	return
 }
 

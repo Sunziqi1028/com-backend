@@ -77,8 +77,9 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 				isIndex = true
 			}
 			skill := tag.Tag{
-				Name:    skillName,
-				IsIndex: isIndex,
+				Name:     skillName,
+				IsIndex:  isIndex,
+				Category: tag.ComerSkill,
 			}
 			if er = tag.FirstOrCreateTag(tx, &skill); err != nil {
 				return er
@@ -134,8 +135,9 @@ func UpdateComerProfile(comerID uint64, post *model.UpdateProfileRequest) (err e
 				isIndex = true
 			}
 			skill := tag.Tag{
-				Name:    skillName,
-				IsIndex: isIndex,
+				Name:     skillName,
+				Category: tag.ComerSkill,
+				IsIndex:  isIndex,
 			}
 			if er = tag.FirstOrCreateTag(tx, &skill); er != nil {
 				return er

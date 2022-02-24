@@ -3,6 +3,7 @@ package http
 import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/account"
+	"ceres/pkg/router/image"
 	"ceres/pkg/router/middleware"
 	"ceres/pkg/router/startup"
 	"ceres/pkg/router/tag"
@@ -75,6 +76,7 @@ func Init() (err error) {
 	{
 		meta.Use(middleware.GuestAuthorizationMiddleware())
 		meta.GET("/tags", router.Wrap(tag.GetTagList))
+		meta.GET("/images", router.Wrap(image.GetImageList))
 	}
 
 	return
