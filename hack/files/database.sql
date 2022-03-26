@@ -122,7 +122,8 @@ CREATE TABLE `startup` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `startup_name_uindex` (`name`) USING BTREE
+  UNIQUE KEY `startup_name_uindex` (`name`) USING BTREE,
+  KEY `startup_token_contract_index` (`token_contract_address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -214,4 +215,4 @@ CREATE TABLE `tag_target_rel` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-02-24  5:09:41
+-- Dump completed on 2022-03-26 15:11:23
