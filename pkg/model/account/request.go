@@ -10,8 +10,8 @@ type EthLoginRequest struct {
 type CreateProfileRequest struct {
 	Name     string   `json:"name" binding:"min=1,max=24"`
 	Avatar   string   `json:"avatar" binding:"required"`
-	Location string   `json:"location" binding:"required"`
-	Website  string   `json:"website" binding:"required"`
+	Location string   `json:"location"`
+	Website  string   `json:"website"`
 	SKills   []string `json:"skills" binding:"min=1"`
 	BIO      string   `json:"bio" binding:"min=100"`
 }
@@ -20,8 +20,8 @@ type CreateProfileRequest struct {
 type UpdateProfileRequest struct {
 	Name     string   `json:"name" binding:"min=1,max=24"`
 	Avatar   string   `json:"avatar" binding:"required"`
-	Location string   `json:"location" binding:"required"`
-	Website  string   `json:"website" binding:"required"`
+	Location string   `json:"location"`
+	Website  string   `json:"website"`
 	SKills   []string `json:"skills" binding:"min=1"`
 	BIO      string   `json:"bio" binding:"min=100"`
 }

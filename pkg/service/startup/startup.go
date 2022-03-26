@@ -26,10 +26,28 @@ func ListStartups(comerID uint64, request *model.ListStartupRequest, response *m
 
 func GetStartup(startupID uint64, response *model.GetStartupResponse) (err error) {
 	var startup model.Startup
-	if err = model.GetStartup(mysql.DB, startupID, &startup); err != nil {
+	if err = model.GetStartup(mysql.DB, startupID, &response.Startup); err != nil {
 		log.Warn(err)
 		return
 	}
 	response.Startup = startup
+	return
+}
+
+func StartupNameIsExist(name string) (isExist bool, err error) {
+	isExist, err = model.StartupNameIsExist(mysql.DB, name)
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+	return
+}
+
+func StartupTokenContractIsExist(tokenContract string) (isExist bool, err error) {
+	isExist, err = model.StartupTokenContractIsExist(mysql.DB, tokenContract)
+	if err != nil {
+		log.Warn(err)
+		return
+	}
 	return
 }

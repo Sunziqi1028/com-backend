@@ -8,3 +8,7 @@ type ListStartupsResponse struct {
 type GetStartupResponse struct {
 	Startup
 }
+
+type ExistStartupResponse struct {
+	IsExist bool `json:"isExist"`
+}

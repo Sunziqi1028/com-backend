@@ -66,6 +66,41 @@ func GetStartup(ctx *router.Context) {
 	ctx.OK(response)
 }
 
+// StartupNameIsExist get startup name is exist
+func StartupNameIsExist(ctx *router.Context) {
+	name := ctx.Param("name")
+	if name == "" {
+		err := router.ErrBadRequest.WithMsg("Startup's name has been used")
+		ctx.HandleError(err)
+		return
+	}
+	isExist, err := service.StartupNameIsExist(name)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(model.ExistStartupResponse{IsExist: isExist})
+}
+
+// StartupTokenContractIsExist get startup name is exist
+func StartupTokenContractIsExist(ctx *router.Context) {
+	name := ctx.Param("tokenContract")
+	if name == "" {
+		err := router.ErrBadRequest.WithMsg("Startup's token contract has been used")
+		ctx.HandleError(err)
+		return
+	}
+
+	isExist, err := service.StartupTokenContractIsExist(name)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(model.ExistStartupResponse{IsExist: isExist})
+}
+
 // FollowStartup follow Startup
 func FollowStartup(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
