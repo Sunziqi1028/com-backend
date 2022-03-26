@@ -61,6 +61,8 @@ func Init() (err error) {
 		coresPub.Use(middleware.GuestAuthorizationMiddleware())
 		coresPub.GET("/startups", router.Wrap(startup.ListStartups))
 		coresPub.GET("/startups/:startupID", router.Wrap(startup.GetStartup))
+		coresPub.GET("/startups/name/:name/isExist", router.Wrap(startup.StartupNameIsExist))
+		coresPub.GET("/startups/tokenContract/:tokenContract/isExist", router.Wrap(startup.StartupTokenContractIsExist))
 		//coresPub.GET("/startups/:startupId/setting", router.Wrap(startup.GetStartupSetting))
 	}
 

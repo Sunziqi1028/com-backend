@@ -1,10 +1,40 @@
 package startup
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 // GetStartup  get startup
 func GetStartup(db *gorm.DB, startupID uint64, startup *Startup) error {
 	return db.Where("is_deleted = false AND id = ?", startupID).Preload("Wallets").Find(&startup).Error
+}
+
+func StartupNameIsExist(db *gorm.DB, name string) (isExit bool, err error) {
+	var count int64
+	err = db.Table("startup").Where("name = ?", name).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count == 0 {
+		isExit = false
+	} else {
+		isExit = true
+	}
+	return
+}
+
+func StartupTokenContractIsExist(db *gorm.DB, tokenContract string) (isExit bool, err error) {
+	var count int64
+	err = db.Table("startup").Where("token_contract_address = ?", tokenContract).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count == 0 {
+		isExit = false
+	} else {
+		isExit = true
+	}
+	return
 }
 
 // ListStartups  list startups
