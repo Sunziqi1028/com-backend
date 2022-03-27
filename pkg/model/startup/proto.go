@@ -4,14 +4,14 @@ import (
 	"ceres/pkg/model"
 )
 
-type Mode string
+type Mode uint8
 
 const (
-	ModeNONE Mode = "NONE"
-	ModeESG  Mode = "ESG"
-	ModeNGO  Mode = "NGO"
-	ModeDAO  Mode = "DAO"
-	ModeCOM  Mode = "COM"
+	ModeNONE Mode = 0
+	ModeESG  Mode = 1
+	ModeNGO  Mode = 2
+	ModeDAO  Mode = 3
+	ModeCOM  Mode = 4
 )
 
 type Startup struct {
@@ -22,6 +22,7 @@ type Startup struct {
 	Logo                 string   `gorm:"logo" json:"logo"`
 	Mission              string   `gorm:"mission" json:"mission"`
 	TokenContractAddress string   `gorm:"token_contract_address" json:"tokenContractAddress"`
+	Overview             string   `gorm:"overview" json:"overview"`
 	IsSet                bool     `gorm:"is_set" json:"isSet"`
 	Wallets              []Wallet `json:"wallets"`
 }

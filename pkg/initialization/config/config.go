@@ -17,6 +17,7 @@ func Init() error {
 	C.JWT = &C.JWTConfig{}
 	C.Mysql = &C.MysqlConfig{}
 	C.Aws = &C.AwsConfig{}
+	C.Eth = &C.EthConfig{}
 
 	err := econf.UnmarshalKey("ceres.oauth.github", C.Github)
 	if err != nil {
@@ -54,6 +55,11 @@ func Init() error {
 	}
 
 	err = econf.UnmarshalKey("ceres.aws", C.Aws)
+	if err != nil {
+		return err
+	}
+
+	err = econf.UnmarshalKey("ceres.eth", C.Eth)
 	if err != nil {
 		return err
 	}

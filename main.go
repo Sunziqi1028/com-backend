@@ -3,7 +3,9 @@
 package main
 
 import (
+	"ceres/pkg/event"
 	"ceres/pkg/initialization/config"
+	"ceres/pkg/initialization/eth"
 	"ceres/pkg/initialization/http"
 	"ceres/pkg/initialization/logger"
 	"ceres/pkg/initialization/metrics"
@@ -28,6 +30,7 @@ func main() {
 	// init the grpc
 	// init the gin
 	// init the web3
+	go event.SubEvent()
 	if err := ego.New().Invoker(
 		config.Init,
 		logger.Init,
@@ -37,6 +40,7 @@ func main() {
 		utility.Init,
 		http.Init,
 		s3.Init,
+		eth.Init,
 	).Serve(
 		metrics.Vernor,
 		http.Gin,

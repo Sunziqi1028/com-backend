@@ -6,7 +6,12 @@ import (
 
 // GetStartup  get startup
 func GetStartup(db *gorm.DB, startupID uint64, startup *Startup) error {
-	return db.Where("is_deleted = false AND id = ?", startupID).Preload("Wallets").Find(&startup).Error
+	return db.Where("is_deleted = false AND id = ?", startupID).Find(&startup).Error
+}
+
+// CreateStartup  create startup
+func CreateStartup(db *gorm.DB, startup *Startup) (err error) {
+	return db.Create(startup).Error
 }
 
 func StartupNameIsExist(db *gorm.DB, name string) (isExit bool, err error) {
@@ -42,16 +47,14 @@ func ListStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startu
 	db = db.Where("is_deleted = false")
 	if comerID != 0 {
 		db = db.Where("comer_id = ?", comerID)
-	} else {
-		db = db.Where("is_set = true")
 	}
 	if input.Keyword != "" {
 		db = db.Where("name like ?", "%"+input.Keyword+"%")
 	}
-	if input.Mode != "" {
+	if input.Mode != nil {
 		db = db.Where("mode = ?", input.Mode)
 	}
-	err = db.Preload("Wallets").Order("created_at DESC").Find(startups).Count(&total).Limit(input.Limit).Offset(input.Offset).Error
+	err = db.Order("created_at DESC").Find(startups).Count(&total).Limit(input.Limit).Offset(input.Offset).Error
 	return
 }
 
@@ -66,9 +69,9 @@ func ListFollowedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest
 	if input.Keyword != "" {
 		db = db.Where("name like ?", "%"+input.Keyword+"%")
 	}
-	if input.Mode != "" {
+	if input.Mode != nil {
 		db = db.Where("mode = ?", input.Mode)
 	}
-	err = db.Preload("Wallets").Order("created_at DESC").Find(startups).Count(&total).Limit(input.Limit).Offset(input.Offset).Error
+	err = db.Order("created_at DESC").Find(startups).Count(&total).Limit(input.Limit).Offset(input.Offset).Error
 	return
 }
