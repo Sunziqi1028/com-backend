@@ -26,6 +26,9 @@ var Mysql *MysqlConfig
 // Aws configuration.
 var Aws *AwsConfig
 
+// Eth configuration.
+var Eth *EthConfig
+
 // MinioConfig from the .toml file
 type MinioConfig struct {
 	AccessKey string
@@ -66,11 +69,6 @@ type Sequence struct {
 	Epoch int64
 }
 
-//Contract eth's Contract from .toml file
-type Contract struct {
-	Epoch int64
-}
-
 //MysqlConfig from .toml file
 type MysqlConfig struct {
 	ConnMaxLifetime int
@@ -89,4 +87,12 @@ type AwsConfig struct {
 	EndPoint     string
 	Region       string
 	MaxSize      int64
+}
+
+//EthConfig from .toml file
+type EthConfig struct {
+	Epoch                  int64
+	EndPoint               string
+	InfuraKey              string
+	StartupContractAddress string
 }

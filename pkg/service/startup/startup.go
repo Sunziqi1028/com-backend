@@ -9,8 +9,7 @@ import (
 
 // ListStartups get current comer accounts
 func ListStartups(comerID uint64, request *model.ListStartupRequest, response *model.ListStartupsResponse) (err error) {
-	var startups []model.Startup
-	total, err := model.ListStartups(mysql.DB, comerID, request, &startups)
+	total, err := model.ListStartups(mysql.DB, comerID, request, &response.List)
 	if err != nil {
 		log.Warn(err)
 		return
@@ -19,18 +18,15 @@ func ListStartups(comerID uint64, request *model.ListStartupRequest, response *m
 		response.List = make([]model.Startup, 0)
 		return
 	}
-	response.List = startups
 	response.Total = total
 	return
 }
 
 func GetStartup(startupID uint64, response *model.GetStartupResponse) (err error) {
-	var startup model.Startup
 	if err = model.GetStartup(mysql.DB, startupID, &response.Startup); err != nil {
 		log.Warn(err)
 		return
 	}
-	response.Startup = startup
 	return
 }
 
