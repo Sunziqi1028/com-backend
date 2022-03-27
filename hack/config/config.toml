@@ -53,10 +53,9 @@
     secret = "Comunion-Ceres"
 
 [ceres.aws]
-    accessKey = "AKIAWTVRSHFILVLXXPQ4"
-    accessSecret = "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"
-    endPoint = "http://s3.ap-northeast-1.amazonaws.com"
-    bucket = "comunion-avatars"
-    region = "ap-northeast-1"
-    downloadUrl = "https://comunion-avatars.s3.ap-northeast-1.amazonaws.com/"
+    accessKey = ""
+    accessSecret = ""
+    endPoint = ""
+    bucket = ""
+    region = ""
     maxSize = 1024000

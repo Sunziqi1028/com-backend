@@ -87,7 +87,6 @@ type AwsConfig struct {
 	AccessSecret string
 	Bucket       string
 	EndPoint     string
-	DownLoadUrl  string
 	Region       string
 	MaxSize      int64
 }
