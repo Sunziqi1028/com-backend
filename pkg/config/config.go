@@ -23,6 +23,9 @@ var Seq *Sequence
 // Mysql configuration.
 var Mysql *MysqlConfig
 
+// Aws configuration.
+var Aws *AwsConfig
+
 // MinioConfig from the .toml file
 type MinioConfig struct {
 	AccessKey string
@@ -76,4 +79,14 @@ type MysqlConfig struct {
 	Level           string
 	MaxIdleConns    int
 	MaxOpenConns    int
+}
+
+//AwsConfig from .toml file
+type AwsConfig struct {
+	AccessKey    string
+	AccessSecret string
+	Bucket       string
+	EndPoint     string
+	Region       string
+	MaxSize      int64
 }

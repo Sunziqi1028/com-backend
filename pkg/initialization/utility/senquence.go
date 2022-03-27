@@ -12,6 +12,7 @@ import (
 // use the database id as the
 
 var Sequence sequence.Senquence
+var AwsFileSequence sequence.Senquence
 
 func initSequence() (err error) {
 	machineIP := net.GetDomianIP()
@@ -23,5 +24,6 @@ func initSequence() (err error) {
 	}
 	// Create snowflake sequences
 	Sequence = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
+	AwsFileSequence = sequence.NewSnowflake(uint64(config.Seq.Epoch), uint64(machineID))
 	return
 }

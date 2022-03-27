@@ -9,6 +9,7 @@ import (
 	"ceres/pkg/initialization/metrics"
 	"ceres/pkg/initialization/mysql"
 	"ceres/pkg/initialization/redis"
+	"ceres/pkg/initialization/s3"
 	"ceres/pkg/initialization/utility"
 
 	"github.com/gotomicro/ego"
@@ -35,6 +36,7 @@ func main() {
 		metrics.Init,
 		utility.Init,
 		http.Init,
+		s3.Init,
 	).Serve(
 		metrics.Vernor,
 		http.Gin,

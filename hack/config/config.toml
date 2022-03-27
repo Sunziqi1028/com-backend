@@ -51,3 +51,11 @@
     # expired in 72 hours
     expired = 259200
     secret = "Comunion-Ceres"
+
+[ceres.aws]
+    accessKey = ""
+    accessSecret = ""
+    endPoint = ""
+    bucket = ""
+    region = ""
+    maxSize = 1024000
