@@ -66,7 +66,7 @@ func Init() (err error) {
 	// misc operation router
 	misc := Gin.Group("/misc")
 	{
-		//misc.Use(middleware.ComerAuthorizationMiddleware())
+		misc.Use(middleware.ComerAuthorizationMiddleware())
 		misc.POST("/upload", router.Wrap(upload.Upload))
 	}
 
