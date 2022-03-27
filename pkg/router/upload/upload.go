@@ -1,35 +1,57 @@
 package upload
 
 import (
-	minio "ceres/pkg/initialization/minio"
+	"ceres/pkg/config"
+	"ceres/pkg/initialization/s3"
+	"ceres/pkg/initialization/utility"
 	"ceres/pkg/router"
-	utility "ceres/pkg/utility/minio"
-	"crypto/md5"
-	"encoding/hex"
-	"path/filepath"
+	"fmt"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/qiniu/x/log"
 )
 
-// GetPresignedURLForUpload  to generate the presigned url with the file url
-// and the frontend using this URL to upload
-func GetPresignedURLForUpload(ctx *router.Context) {
-	name := ctx.Query("file_name")
-	if name == "" {
-		err := router.ErrBadRequest.WithMsg("name is missing")
-		ctx.HandleError(err)
-		return
-	}
-	suffix := filepath.Ext(name)
-	prefix := name[0 : len(name)-len(suffix)]
-	res := md5.Sum([]byte(prefix))
-	prefix = hex.EncodeToString(res[:])
-	signed, err := utility.PreSignUpload(minio.Client, prefix+"."+suffix)
+func Upload(ctx *router.Context) {
+	file, fileInfo, err := ctx.Request.FormFile("file")
 	if err != nil {
-		log.Warnf("signed the MINIO url failed %v", err)
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg("Invalidate file")
 		ctx.HandleError(err)
 		return
 	}
 
-	ctx.OK(signed)
+	if fileInfo.Size > config.Aws.MaxSize {
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg("The maximum size of upload file is 1MB")
+		ctx.HandleError(err)
+		return
+	}
+
+	fileName := ctx.Param("name")
+	fileNames := strings.Split(fileInfo.Filename, ".")
+	if len(fileNames) != 2 {
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg("Invalidate file name")
+		ctx.HandleError(err)
+		return
+	}
+	fileName = fmt.Sprintf("%v.%v", utility.Sequence.Next(), fileNames[1])
+
+	result, err := s3.S3Uploader.Upload(&s3manager.UploadInput{
+		Bucket: &config.Aws.Bucket,
+		Key:    &fileName,
+		ACL:    aws.String("public-read"),
+		Body:   file,
+	})
+	if err != nil {
+		log.Warn(err)
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(struct {
+		Url string
+	}{Url: result.Location})
 }

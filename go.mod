@@ -3,6 +3,7 @@ module ceres
 go 1.16
 
 require (
+	github.com/aws/aws-sdk-go v1.43.26
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ethereum/go-ethereum v1.10.3
 	github.com/gin-gonic/gin v1.7.2-0.20211111000755-6aee45608da7

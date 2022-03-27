@@ -66,8 +66,8 @@ func Init() (err error) {
 	// misc operation router
 	misc := Gin.Group("/misc")
 	{
-		misc.Use(middleware.ComerAuthorizationMiddleware())
-		misc.GET("/upload/presign", router.Wrap(upload.GetPresignedURLForUpload))
+		//misc.Use(middleware.ComerAuthorizationMiddleware())
+		misc.POST("/upload", router.Wrap(upload.Upload))
 	}
 
 	// meta information
