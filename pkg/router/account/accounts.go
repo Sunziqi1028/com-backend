@@ -1,12 +1,25 @@
 package account
 
 import (
+	"ceres/pkg/model/account"
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/account"
 	"strconv"
 )
+
+// UserInfo list all accounts of the Comer
+func UserInfo(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	var response account.ComerLoginResponse
+	if err := service.UserInfo(comerID, &response); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(response)
+}
 
 // ListAccounts list all accounts of the Comer
 func ListAccounts(ctx *router.Context) {

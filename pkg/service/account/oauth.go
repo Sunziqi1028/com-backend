@@ -77,7 +77,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 	*response = account.ComerLoginResponse{
 		IsProfiled: isProfiled,
 		Avatar:     profile.Avatar,
-		Name:       profile.Name,
+		Nick:       profile.Name,
 		Address:    address,
 		Token:      token,
 	}
