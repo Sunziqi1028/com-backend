@@ -40,6 +40,7 @@ func Init() (err error) {
 		accounts.Use(middleware.ComerAuthorizationMiddleware())
 		// basic operations
 		accounts.GET("/list", router.Wrap(account.ListAccounts))
+		accounts.GET("/user/info", router.Wrap(account.UserInfo))
 		accounts.POST("/eth/wallet/link", router.Wrap(account.LinkWithWallet))
 		accounts.DELETE("/:accountID/unlink", router.Wrap(account.UnlinkAccount))
 		// profile operations
