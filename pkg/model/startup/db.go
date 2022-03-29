@@ -51,7 +51,7 @@ func ListStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startu
 	if input.Keyword != "" {
 		db = db.Where("name like ?", "%"+input.Keyword+"%")
 	}
-	if input.Mode != nil {
+	if input.Mode != 0 {
 		db = db.Where("mode = ?", input.Mode)
 	}
 	err = db.Order("created_at DESC").Find(startups).Count(&total).Limit(input.Limit).Offset(input.Offset).Error
@@ -69,7 +69,7 @@ func ListFollowedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest
 	if input.Keyword != "" {
 		db = db.Where("name like ?", "%"+input.Keyword+"%")
 	}
-	if input.Mode != nil {
+	if input.Mode != 0 {
 		db = db.Where("mode = ?", input.Mode)
 	}
 	err = db.Order("created_at DESC").Find(startups).Count(&total).Limit(input.Limit).Offset(input.Offset).Error

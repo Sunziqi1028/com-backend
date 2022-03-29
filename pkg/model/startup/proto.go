@@ -7,11 +7,10 @@ import (
 type Mode uint8
 
 const (
-	ModeNONE Mode = 0
-	ModeESG  Mode = 1
-	ModeNGO  Mode = 2
-	ModeDAO  Mode = 3
-	ModeCOM  Mode = 4
+	ModeESG Mode = 1
+	ModeNGO Mode = 2
+	ModeDAO Mode = 3
+	ModeCOM Mode = 4
 )
 
 type Startup struct {

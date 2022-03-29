@@ -7,5 +7,5 @@ import (
 type ListStartupRequest struct {
 	model.ListRequest
 	Keyword string `form:"keyword"`
-	Mode    *Mode  `form:"mode"`
+	Mode    Mode   `form:"mode"`
 }
