@@ -112,6 +112,7 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 		Nick:       profile.Name,
 		Address:    address,
 		Token:      token,
+		ComerID:    comer.ID,
 	}
 
 	return

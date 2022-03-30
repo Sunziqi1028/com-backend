@@ -80,6 +80,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 		Nick:       profile.Name,
 		Address:    address,
 		Token:      token,
+		ComerID:    comer.ID,
 	}
 
 	return nil

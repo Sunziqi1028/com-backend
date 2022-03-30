@@ -34,6 +34,7 @@ func UserInfo(comerID uint64, UserInfo *model.ComerLoginResponse) error {
 	UserInfo.Nick = profile.Name
 	UserInfo.Avatar = profile.Avatar
 	UserInfo.IsProfiled = isProfiled
+	UserInfo.ComerID = comer.ID
 
 	return nil
 }

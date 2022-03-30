@@ -4,6 +4,7 @@ import "ceres/pkg/model/tag"
 
 // ComerLoginResponse comer login response
 type ComerLoginResponse struct {
+	ComerID    uint64 `json:"comerID"`
 	Nick       string `json:"nick"`
 	Avatar     string `json:"avatar"`
 	Address    string `json:"address"`
