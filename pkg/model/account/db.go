@@ -2,6 +2,7 @@ package account
 
 import (
 	"ceres/pkg/model"
+	"ceres/pkg/model/tag"
 
 	"gorm.io/gorm"
 )
@@ -44,7 +45,7 @@ func DeleteAccount(db *gorm.DB, comerID, accountID uint64) error {
 
 //GetComerProfile update the comer address
 func GetComerProfile(db *gorm.DB, comerID uint64, profile *ComerProfile) (err error) {
-	return db.Where("comer_id = ? AND is_deleted = false", comerID).Find(profile).Error
+	return db.Where("comer_id = ? AND is_deleted = false", comerID).Preload("Skills", "category = ?", tag.ComerSkill).Find(profile).Error
 }
 
 //CreateComerProfile update the comer address

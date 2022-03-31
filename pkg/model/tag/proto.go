@@ -25,20 +25,12 @@ func (Tag) TableName() string {
 	return "tag"
 }
 
-type Target string
-
-// const tag category type
-const (
-	ComerSkillTag Target = "comerSkill"
-	StartupTag    Target = "startup"
-)
-
 // TagTargetRel  Comunion tag for startup bounty profile and other position need TagTargetRel.
 type TagTargetRel struct {
 	model.RelationBase
-	TargetID uint64 `column:"target_id"`
-	Target   Target `column:"target"`
-	TagID    uint64 `column:"tag_id"`
+	TargetID uint64   `column:"target_id"`
+	Target   Category `column:"target"`
+	TagID    uint64   `column:"tag_id"`
 }
 
 // TableName identify the table name of this model.

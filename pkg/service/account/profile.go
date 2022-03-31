@@ -13,36 +13,9 @@ import (
 
 // GetComerProfile get current comer profile
 func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err error) {
-	//get comer profile
-	var profile model.ComerProfile
-	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+	if err = model.GetComerProfile(mysql.DB, comerID, &response.ComerProfile); err != nil {
 		log.Warn(err)
 		return err
-	}
-	if profile.ID == 0 {
-		return router.ErrNotFound.WithMsg("user profile does not exists")
-	}
-	//get comer profile skill relations
-	var tagRelList []tag.TagTargetRel
-	if err = tag.GetTagRelList(mysql.DB, comerID, tag.ComerSkillTag, &tagRelList); err != nil {
-		log.Warn(err)
-		return err
-	}
-	//get skills
-	skills := make([]tag.Tag, 0)
-	if len(tagRelList) > 0 {
-		skillIds := make([]uint64, 0)
-		for _, skillRel := range tagRelList {
-			skillIds = append(skillIds, skillRel.TagID)
-		}
-		if err = tag.GetTagListByIDs(mysql.DB, skillIds, &skills); err != nil {
-			return err
-		}
-	}
-
-	*response = model.ComerProfileResponse{
-		ComerProfile: profile,
-		Skills:       skills,
 	}
 
 	return
@@ -86,7 +59,7 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 			}
 			tagRelList = append(tagRelList, tag.TagTargetRel{
 				TagID:    skill.ID,
-				Target:   tag.ComerSkillTag,
+				Target:   tag.ComerSkill,
 				TargetID: comerID,
 			})
 		}
@@ -144,13 +117,13 @@ func UpdateComerProfile(comerID uint64, post *model.UpdateProfileRequest) (err e
 			}
 			tagRelList = append(tagRelList, tag.TagTargetRel{
 				TagID:    skill.ID,
-				Target:   tag.ComerSkillTag,
+				Target:   tag.ComerSkill,
 				TargetID: comerID,
 			})
 			tagIds = append(tagIds, skill.ID)
 		}
 		//delete not used skills
-		if er = tag.DeleteTagRel(tx, comerID, tag.ComerSkillTag, tagIds); er != nil {
+		if er = tag.DeleteTagRel(tx, comerID, tag.ComerSkill, tagIds); er != nil {
 			return er
 		}
 		//batch create comer skill rel

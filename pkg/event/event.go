@@ -3,11 +3,7 @@ package event
 import (
 	"ceres/pkg/config"
 	"ceres/pkg/initialization/eth"
-	"ceres/pkg/initialization/mysql"
-	"ceres/pkg/model/account"
-	model "ceres/pkg/model/startup"
 	"context"
-	"errors"
 	"math/big"
 	"strings"
 
@@ -35,7 +31,7 @@ func SubEvent() {
 		for {
 			select {
 			case err = <-sub.Err():
-				log.Fatal(err)
+				log.Warn(err)
 			case vLog := <-logs:
 				switch vLog.Topics[0].Hex() {
 				case StartupContract.EventHex:
@@ -44,48 +40,7 @@ func SubEvent() {
 						log.Info(err)
 						continue
 					}
-
-					startupTemp := intr[1].(struct {
-						Name          string         `json:"name"`
-						Mode          uint8          `json:"mode"`
-						Hashtag       []string       `json:"hashtag"`
-						Logo          string         `json:"logo"`
-						Mission       string         `json:"mission"`
-						TokenContract common.Address `json:"tokenContract"`
-						Wallets       []struct {
-							Name          string         `json:"name"`
-							WalletAddress common.Address `json:"walletAddress"`
-						} `json:"wallets"`
-						Overview   string `json:"overview"`
-						IsValidate bool   `json:"isValidate"`
-					})
-
-					comer := account.Comer{}
-					comerAddress := intr[2].(common.Address).String()
-					if err = account.GetComerByAddress(mysql.DB, comerAddress, &comer); err != nil {
-						log.Warn(err)
-						continue
-					}
-
-					if comer.ID == 0 {
-						log.Warn(errors.New("comer does not exit"))
-						continue
-					}
-
-					startup := model.Startup{
-						ComerID:              comer.ID,
-						Name:                 startupTemp.Name,
-						Mode:                 model.Mode(startupTemp.Mode),
-						Logo:                 startupTemp.Logo,
-						Mission:              startupTemp.Mission,
-						TokenContractAddress: startupTemp.TokenContract.String(),
-						Overview:             startupTemp.Overview,
-					}
-
-					if err := model.CreateStartup(mysql.DB, &startup); err != nil {
-						log.Warn(err)
-						continue
-					}
+					go HandleStartup(intr[2].(common.Address).String(), intr[1])
 				}
 			}
 		}

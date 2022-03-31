@@ -2,6 +2,7 @@ package account
 
 import (
 	"ceres/pkg/model"
+	"ceres/pkg/model/tag"
 )
 
 type ComerAccountType int
@@ -45,12 +46,13 @@ func (ComerAccount) TableName() string {
 // ComerProfile model
 type ComerProfile struct {
 	model.Base
-	ComerID  uint64 `gorm:"column:comer_id" json:"comerID"`
-	Name     string `gorm:"column:name" json:"name"`
-	Avatar   string `gorm:"column:avatar" json:"avatar"`
-	Location string `gorm:"column:location" json:"location"`
-	Website  string `gorm:"column:website" json:"website"`
-	BIO      string `gorm:"column:bio" json:"bio"`
+	ComerID  uint64    `gorm:"column:comer_id" json:"comerID"`
+	Name     string    `gorm:"column:name" json:"name"`
+	Avatar   string    `gorm:"column:avatar" json:"avatar"`
+	Location string    `gorm:"column:location" json:"location"`
+	Website  string    `gorm:"column:website" json:"website"`
+	BIO      string    `gorm:"column:bio" json:"bio"`
+	Skills   []tag.Tag `gorm:"many2many:tag_target_rel;foreignKey:ComerID;joinForeignKey:TargetID;" json:"skills"`
 }
 
 // TableName the Profile table name for gorm
