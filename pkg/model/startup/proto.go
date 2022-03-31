@@ -24,7 +24,7 @@ type Startup struct {
 	TokenContractAddress string    `gorm:"token_contract_address" json:"tokenContractAddress"`
 	Overview             string    `gorm:"overview" json:"overview"`
 	IsSet                bool      `gorm:"is_set" json:"isSet"`
-	HashTags             []tag.Tag `gorm:"many2many:tag_target_rel;foreignKey:ID;joinForeignKey:TargetID;" json:"HashTags"`
+	HashTags             []tag.Tag `gorm:"many2many:tag_target_rel;foreignKey:ID;joinForeignKey:TargetID;" json:"hashTags"`
 	Wallets              []Wallet  `json:"wallets"`
 }
 
