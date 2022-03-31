@@ -2,6 +2,7 @@ package startup
 
 import (
 	"ceres/pkg/model"
+	"ceres/pkg/model/tag"
 )
 
 type Mode uint8
@@ -15,15 +16,16 @@ const (
 
 type Startup struct {
 	model.Base
-	ComerID              uint64   `gorm:"comer_id" json:"comerID"`
-	Name                 string   `gorm:"name" json:"name"`
-	Mode                 Mode     `gorm:"mode" json:"mode"`
-	Logo                 string   `gorm:"logo" json:"logo"`
-	Mission              string   `gorm:"mission" json:"mission"`
-	TokenContractAddress string   `gorm:"token_contract_address" json:"tokenContractAddress"`
-	Overview             string   `gorm:"overview" json:"overview"`
-	IsSet                bool     `gorm:"is_set" json:"isSet"`
-	Wallets              []Wallet `json:"wallets"`
+	ComerID              uint64    `gorm:"comer_id" json:"comerID"`
+	Name                 string    `gorm:"name" json:"name"`
+	Mode                 Mode      `gorm:"mode" json:"mode"`
+	Logo                 string    `gorm:"logo" json:"logo"`
+	Mission              string    `gorm:"mission" json:"mission"`
+	TokenContractAddress string    `gorm:"token_contract_address" json:"tokenContractAddress"`
+	Overview             string    `gorm:"overview" json:"overview"`
+	IsSet                bool      `gorm:"is_set" json:"isSet"`
+	HashTags             []tag.Tag `gorm:"many2many:tag_target_rel;foreignKey:ID;joinForeignKey:TargetID;" json:"hashTags"`
+	Wallets              []Wallet  `json:"wallets"`
 }
 
 // TableName Startup table name for gorm
