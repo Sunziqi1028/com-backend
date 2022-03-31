@@ -21,36 +21,6 @@ func CreateStartupWallet(db *gorm.DB, wallets []Wallet) (err error) {
 	return db.Create(&wallets).Error
 }
 
-// StartupNameIsExist check startup's  name is existed
-func StartupNameIsExist(db *gorm.DB, name string) (isExit bool, err error) {
-	var count int64
-	err = db.Table("startup").Where("name = ?", name).Count(&count).Error
-	if err != nil {
-		return
-	}
-	if count == 0 {
-		isExit = false
-	} else {
-		isExit = true
-	}
-	return
-}
-
-// StartupTokenContractIsExist check startup's  token contract is existed
-func StartupTokenContractIsExist(db *gorm.DB, tokenContract string) (isExit bool, err error) {
-	var count int64
-	err = db.Table("startup").Where("token_contract_address = ?", tokenContract).Count(&count).Error
-	if err != nil {
-		return
-	}
-	if count == 0 {
-		isExit = false
-	} else {
-		isExit = true
-	}
-	return
-}
-
 // ListStartups  list startups
 func ListStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startups *[]Startup) (total int64, err error) {
 	db = db.Where("is_deleted = false")
@@ -87,6 +57,42 @@ func ListFollowedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest
 	if input.Mode != 0 {
 		db = db.Where("mode = ?", input.Mode)
 	}
-	err = db.Order("created_at DESC").Find(startups).Count(&total).Limit(input.Limit).Offset(input.Offset).Error
+	if err = db.Table("startup").Order("created_at DESC").Count(&total).Error; err != nil {
+		return
+	}
+	if total == 0 {
+		return
+	}
+	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Find(startups).Error
+	return
+}
+
+// StartupNameIsExist check startup's  name is existed
+func StartupNameIsExist(db *gorm.DB, name string) (isExit bool, err error) {
+	var count int64
+	err = db.Table("startup").Where("name = ?", name).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count == 0 {
+		isExit = false
+	} else {
+		isExit = true
+	}
+	return
+}
+
+// StartupTokenContractIsExist check startup's  token contract is existed
+func StartupTokenContractIsExist(db *gorm.DB, tokenContract string) (isExit bool, err error) {
+	var count int64
+	err = db.Table("startup").Where("token_contract_address = ?", tokenContract).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count == 0 {
+		isExit = false
+	} else {
+		isExit = true
+	}
 	return
 }
