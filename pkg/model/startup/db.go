@@ -33,7 +33,7 @@ func ListStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startu
 	if input.Mode != 0 {
 		db = db.Where("mode = ?", input.Mode)
 	}
-	if err = db.Table("startup").Order("created_at DESC").Count(&total).Error; err != nil {
+	if err = db.Table("startup").Count(&total).Error; err != nil {
 		return
 	}
 	if total == 0 {
@@ -57,7 +57,7 @@ func ListFollowedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest
 	if input.Mode != 0 {
 		db = db.Where("mode = ?", input.Mode)
 	}
-	if err = db.Table("startup").Order("created_at DESC").Count(&total).Error; err != nil {
+	if err = db.Table("startup").Count(&total).Error; err != nil {
 		return
 	}
 	if total == 0 {

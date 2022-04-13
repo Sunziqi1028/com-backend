@@ -70,9 +70,9 @@ CREATE TABLE `comer_profile` (
   `comer_id` bigint(20) NOT NULL,
   `name` varchar(50) NOT NULL COMMENT 'name',
   `avatar` varchar(200) NOT NULL COMMENT 'avatar',
-  `location` char(42) DEFAULT '' NOT NULL COMMENT 'location city',
-  `website` varchar(50) DEFAULT '' NOT NULL COMMENT 'website',
-  `bio` text DEFAULT NULL COMMENT 'bio',
+  `location` char(42) NOT NULL DEFAULT '' COMMENT 'location city',
+  `website` varchar(50) NOT NULL DEFAULT '' COMMENT 'website',
+  `bio` text COMMENT 'bio',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is Deleted',
@@ -112,8 +112,8 @@ CREATE TABLE `startup` (
   `id` bigint(20) NOT NULL,
   `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
   `name` varchar(100) NOT NULL COMMENT 'name',
-  `mode` SMALLINT NOT NULL COMMENT '0:NONE, 1:ESG, 2:NGO, 3:DAO, 4:COM',
-  `logo` varchar(40) NOT NULL COMMENT 'logo',
+  `mode` smallint(6) NOT NULL COMMENT '0:NONE, 1:ESG, 2:NGO, 3:DAO, 4:COM',
+  `logo` varchar(200) NOT NULL COMMENT 'logo',
   `mission` varchar(100) NOT NULL COMMENT 'logo',
   `token_contract_address` char(42) NOT NULL COMMENT 'token contract address',
   `overview` text NOT NULL COMMENT 'overview',
@@ -142,6 +142,25 @@ CREATE TABLE `startup_follow_rel` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `startup_followed_comer_id_startup_id_uindex` (`comer_id`,`startup_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `startup_team_member_rel`
+--
+
+DROP TABLE IF EXISTS `startup_team_member_rel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `startup_team_member_rel` (
+  `id` bigint(20) NOT NULL,
+  `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
+  `startup_id` bigint(20) NOT NULL COMMENT 'startup_id',
+  `position` text NOT NULL COMMENT 'title',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `startup_team_rel_comer_id_startup_id_uindex` (`comer_id`,`startup_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -215,4 +234,4 @@ CREATE TABLE `tag_target_rel` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-26 15:19:38
+-- Dump completed on 2022-04-13 10:26:17

@@ -57,3 +57,16 @@ func GetComerAccounts(comerID uint64, response *model.ComerOuterAccountListRespo
 func UnlinkComerAccount(comerID, accountID uint64) error {
 	return model.DeleteAccount(mysql.DB, comerID, accountID)
 }
+
+// GetComerInfo get comer info
+func GetComerInfo(comerID uint64, response *model.GetComerInfoResponse) (err error) {
+	if err = model.GetComerProfile(mysql.DB, comerID, &response.ComerProfile); err != nil {
+		log.Warn(err)
+		return err
+	}
+	if err = model.GetComerByID(mysql.DB, comerID, &response.Comer); err != nil {
+		log.Warn(err)
+		return err
+	}
+	return
+}

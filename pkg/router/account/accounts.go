@@ -68,3 +68,20 @@ func LinkWithWallet(ctx *router.Context) {
 
 	ctx.OK(nil)
 }
+
+// GetComerInfo get comer
+func GetComerInfo(ctx *router.Context) {
+	comerID, err := strconv.ParseUint(ctx.Param("comerID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid comer ID")
+		ctx.HandleError(err)
+		return
+	}
+	var response model.GetComerInfoResponse
+	if err := service.GetComerInfo(comerID, &response); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(response)
+}

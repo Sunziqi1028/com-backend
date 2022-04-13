@@ -6,12 +6,10 @@ import (
 	model "ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/utility/jwt"
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qiniu/x/log"
-	"gorm.io/gorm"
 )
 
 // Middleware constraints
@@ -56,11 +54,13 @@ func JwtAuthorizationMiddleware(ctx *gin.Context) {
 
 	var comer account.Comer
 	if err := model.GetComerByID(mysql.DB, comerID, &comer); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, router.ErrUnauthorized.WithMsg("comer does not exist"))
-		}
 		log.Warnf("get comer fail %v", err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, router.ErrInternalServer)
 		return
+	}
+
+	if comer.ID == 0 {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, router.ErrUnauthorized.WithMsg("comer does not exist"))
 	}
 
 	ctx.Keys = make(map[string]interface{})
