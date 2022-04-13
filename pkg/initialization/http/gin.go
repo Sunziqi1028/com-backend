@@ -35,18 +35,25 @@ func Init() (err error) {
 	}
 
 	// accounts operation router
-	accounts := Gin.Group("/account")
+	accountPriv := Gin.Group("/account")
 	{
-		accounts.Use(middleware.ComerAuthorizationMiddleware())
+		accountPriv.Use(middleware.ComerAuthorizationMiddleware())
 		// basic operations
-		accounts.GET("/list", router.Wrap(account.ListAccounts))
-		accounts.GET("/user/info", router.Wrap(account.UserInfo))
-		accounts.POST("/eth/wallet/link", router.Wrap(account.LinkWithWallet))
-		accounts.DELETE("/:accountID/unlink", router.Wrap(account.UnlinkAccount))
+		accountPriv.GET("/list", router.Wrap(account.ListAccounts))
+		accountPriv.GET("/user/info", router.Wrap(account.UserInfo))
+		accountPriv.POST("/eth/wallet/link", router.Wrap(account.LinkWithWallet))
+		accountPriv.DELETE("/:accountID/unlink", router.Wrap(account.UnlinkAccount))
 		// profile operations
-		accounts.GET("/profile", router.Wrap(account.GetProfile))
-		accounts.POST("/profile", router.Wrap(account.CreateProfile))
-		accounts.PUT("/profile", router.Wrap(account.UpdateProfile))
+		accountPriv.GET("/profile", router.Wrap(account.GetProfile))
+		accountPriv.POST("/profile", router.Wrap(account.CreateProfile))
+		accountPriv.PUT("/profile", router.Wrap(account.UpdateProfile))
+	}
+
+	// accounts operation router
+	accountsPub := Gin.Group("/account")
+	{
+		accountsPub.Use(middleware.GuestAuthorizationMiddleware())
+		accountsPub.GET("/comer/:comerID", router.Wrap(account.GetComerInfo))
 	}
 
 	coresPriv := Gin.Group("/cores")
@@ -55,6 +62,10 @@ func Init() (err error) {
 		coresPriv.GET("/startups/me", router.Wrap(startup.ListStartupsMe))
 		coresPriv.POST("/startups/:startupID/follow", router.Wrap(startup.FollowStartup))
 		coresPriv.GET("/startups/follow", router.Wrap(startup.ListFollowStartups))
+		coresPriv.GET("/startups/:startupID/teamMembers", router.Wrap(startup.ListStartupTeamMembers))
+		coresPriv.POST("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.CreateStartupTeamMember))
+		coresPriv.PUT("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.UpdateStartupTeamMember))
+		coresPriv.DELETE("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.DeleteStartupTeamMember))
 	}
 
 	coresPub := Gin.Group("/cores")

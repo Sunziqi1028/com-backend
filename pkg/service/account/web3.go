@@ -12,12 +12,11 @@ import (
 	"math/rand"
 	"time"
 
-	"gorm.io/gorm"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/qiniu/x/log"
+	"gorm.io/gorm"
 )
 
 const (
@@ -59,14 +58,14 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 	if err != nil {
 		if err.Error() == "eredis get string error eredis exec command get fail, redis: nil" {
 			err = router.ErrBadRequest.WithMsg("Please get nonce")
-			return
+			return err
 		}
 		log.Warn(err)
 		return err
 	}
 	//verify wallet and nonce
 	if err = VerifyEthWallet(address, nonce, signature); err != nil {
-		return
+		return err
 	}
 	var comer account.Comer
 	if err = account.GetComerByAddress(mysql.DB, address, &comer); err != nil {
@@ -84,7 +83,7 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 		// create a new comer
 		err = account.CreateComer(mysql.DB, &comer)
 		if err != nil {
-			return
+			return err
 		}
 		isProfiled = false
 	} else {

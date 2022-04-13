@@ -25,3 +25,8 @@ type ComerOuterAccountListResponse struct {
 	List  []ComerAccount `json:"list"`
 	Total uint64         `json:"total"`
 }
+
+type GetComerInfoResponse struct {
+	Comer
+	ComerProfile ComerProfile `json:"comerProfile"`
+}

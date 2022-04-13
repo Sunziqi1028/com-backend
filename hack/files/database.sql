@@ -113,7 +113,7 @@ CREATE TABLE `startup` (
   `comer_id` bigint(20) NOT NULL COMMENT 'comer_id',
   `name` varchar(100) NOT NULL COMMENT 'name',
   `mode` SMALLINT NOT NULL COMMENT '0:NONE, 1:ESG, 2:NGO, 3:DAO, 4:COM',
-  `logo` varchar(40) NOT NULL COMMENT 'logo',
+  `logo` varchar(200) NOT NULL COMMENT 'logo',
   `mission` varchar(100) NOT NULL COMMENT 'logo',
   `token_contract_address` char(42) NOT NULL COMMENT 'token contract address',
   `overview` text NOT NULL COMMENT 'overview',
