@@ -26,7 +26,7 @@ func CreateStartupTeamMembers(db *gorm.DB, input *StartupTeamMember) (err error)
 
 // UpdateStartupTeamMember  update startup team member title
 func UpdateStartupTeamMember(db *gorm.DB, input *StartupTeamMember) (err error) {
-	return db.Table("startup_team_member_rel").Where("comer_id = ? AND startup_id = ?", input.ComerID, input.StartupID).Update("title", input.Position).Error
+	return db.Table("startup_team_member_rel").Where("comer_id = ? AND startup_id = ?", input.ComerID, input.StartupID).Update("position", input.Position).Error
 }
 
 // DeleteStartupTeamMember delete startup team member
