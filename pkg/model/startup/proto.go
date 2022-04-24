@@ -32,6 +32,8 @@ type Startup struct {
 	Twitter              string    `gorm:"twitter" json:"twitter"`
 	Telegram             string    `gorm:"telegram" json:"telegram"`
 	Docs                 string    `gorm:"docs" json:"docs"`
+	PresaleDate          string    `gorm:"presale_date" json:"presaleDate"`
+	LaunchDate           string    `gorm:"launch_date" json:"launchDate"`
 	Wallets              []Wallet  `json:"wallets"`
 }
 
@@ -62,4 +64,23 @@ type FollowRelation struct {
 // TableName Followed table name for gorm
 func (FollowRelation) TableName() string {
 	return "startup_follow_rel"
+}
+
+// Startup security and social setting
+type StartupBasicSetting struct {
+	KYC           string `gorm:"kyc" json:"kyc"`
+	ContractAudit string `gorm:"contract_audit" json:"contractAudit"`
+	Website       string `gorm:"website" json:"website"`
+	Discord       string `gorm:"discord" json:"discord"`
+	Twitter       string `gorm:"twitter" json:"twitter"`
+	Telegram      string `gorm:"telegram" json:"telegram"`
+	Docs          string `gorm:"docs" json:"docs"`
+}
+
+// Startup finance setting
+type StartupFinanceSetting struct {
+	TokenContractAddress string `gorm:"token_contract_address" json:"tokenContractAddress"`
+	PresaleDate          string `gorm:"presale_date" json:"presaleDate"`
+	LaunchDate           string `gorm:"launch_date" json:"launchDate"`
+	//Wallets              []Wallet  `json:"wallets"`
 }

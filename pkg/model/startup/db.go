@@ -21,6 +21,21 @@ func CreateStartupWallet(db *gorm.DB, wallets []Wallet) (err error) {
 	return db.Create(&wallets).Error
 }
 
+// BatchUpdateStartupWallet  batch update startup wallets
+func BatchUpdateStartupWallet(db *gorm.DB, wallets []Wallet) (err error) {
+	return db.Save(&wallets).Error
+}
+
+//FirstOrCreateWallet first or create wallet
+func FirstOrCreateWallet(db *gorm.DB, wallet *Wallet) error {
+	return db.Where("startup_id = ? AND (wallet_name = ? OR wallet_address = ?)", wallet.StartupID, wallet.WalletName, wallet.WalletAddress).FirstOrCreate(&wallet).Error
+}
+
+//DeleteStartupWallet delete startup wallet where not used
+func DeleteStartupWallet(db *gorm.DB, startupID uint64, walletIds []uint64) error {
+	return db.Delete(&Wallet{}, "startup_id = ? AND id NOT IN ?", startupID, walletIds).Error
+}
+
 // ListStartups  list startups
 func ListStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startups *[]Startup) (total int64, err error) {
 	db = db.Where("is_deleted = false")
@@ -95,4 +110,14 @@ func StartupTokenContractIsExist(db *gorm.DB, tokenContract string) (isExit bool
 		isExit = true
 	}
 	return
+}
+
+// UpdateStartupBasicSetting  update startup security and social setting
+func UpdateStartupBasicSetting(db *gorm.DB, startupID uint64, input *StartupBasicSetting) (err error) {
+	return db.Table("startup").Where("id = ?", startupID).Select("kyc", "contract_audit", "website", "discord", "twitter", "telegram", "docs").Updates(input).Error
+}
+
+// UpdateStartupFinanceSetting  update startup finance setting
+func UpdateStartupFinanceSetting(db *gorm.DB, startupID uint64, input *StartupFinanceSetting) (err error) {
+	return db.Table("startup").Where("id = ?", startupID).Select("token_contract_address", "presale_date", "launch_date").Updates(input).Error
 }
