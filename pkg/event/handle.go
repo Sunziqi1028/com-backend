@@ -12,6 +12,7 @@ import (
 )
 
 func HandleStartup(address string, startupProto interface{}) {
+	log.Info("listen eth HandleStartup: ", startupProto)
 	startupTemp := startupProto.(struct {
 		Name string `json:"name"`
 		Mode uint8  `json:"mode"`
@@ -46,6 +47,7 @@ func HandleStartup(address string, startupProto interface{}) {
 		Overview: startupTemp.Overview,
 	}
 	if err := mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
+		log.Info("listen eth CreateStartup:", startup)
 		//create startup
 		if er = model.CreateStartup(tx, &startup); er != nil {
 			return
