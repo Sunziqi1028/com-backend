@@ -36,6 +36,12 @@ func SubEvent() {
 				log.Info("vLog.BlockHash:", vLog.BlockHash.Hex())
 				log.Info("vLog.BlockNumber:", vLog.BlockNumber)
 				log.Info("vLog.TxHash:", vLog.TxHash.Hex())
+				log.Info("vLog.Topics[0].Hex():", vLog.Topics[0].Hex())
+				log.Info("StartupContract.EventHex:", StartupContract.EventHex)
+				log.Info("startupContract.Event:", StartupContract.Event)
+				log.Info("startupAbi.Events:", startupAbi.Events)
+				log.Info("startupAbi:", startupAbi)
+				log.Info("vLog.Data:", vLog.Data)
 				switch vLog.Topics[0].Hex() {
 				case StartupContract.EventHex:
 					intr, err := startupAbi.Events[StartupContract.Event].Inputs.UnpackValues(vLog.Data)
@@ -43,6 +49,9 @@ func SubEvent() {
 						log.Info(err)
 						continue
 					}
+					log.Info("intr:", intr)
+					log.Info("intr[1]:", intr[1])
+					log.Info("intr[2]:", intr[2].(common.Address).String())
 					go HandleStartup(intr[2].(common.Address).String(), intr[1])
 				}
 			}
