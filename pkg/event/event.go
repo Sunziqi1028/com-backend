@@ -33,6 +33,9 @@ func SubEvent() {
 			case err = <-sub.Err():
 				log.Warn(err)
 			case vLog := <-logs:
+				log.Info("vLog.BlockHash:", vLog.BlockHash.Hex())
+				log.Info("vLog.BlockNumber:", vLog.BlockNumber)
+				log.Info("vLog.TxHash:", vLog.TxHash.Hex())
 				switch vLog.Topics[0].Hex() {
 				case StartupContract.EventHex:
 					intr, err := startupAbi.Events[StartupContract.Event].Inputs.UnpackValues(vLog.Data)
