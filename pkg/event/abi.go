@@ -8,8 +8,9 @@ type Contract struct {
 
 var (
 	StartupContract = Contract{
-		Event:    "created",
-		EventHex: "0x73f46948d120a56e9fea7152c9545282fb4a4bb4d648c110ff98352525745595",
+		Event: "created",
+		//EventHex: "0x73f46948d120a56e9fea7152c9545282fb4a4bb4d648c110ff98352525745595",
+		EventHex: "0x822c16987e5c88fd1ec8ce2935c0b5daf646231496d234745d143a9b62673973",
 		Abi: `[
 	{
 		"inputs": [],
