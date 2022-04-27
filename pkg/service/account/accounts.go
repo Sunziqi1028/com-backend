@@ -70,3 +70,18 @@ func GetComerInfo(comerID uint64, response *model.GetComerInfoResponse) (err err
 	}
 	return
 }
+
+// GetComerInfoByAddress get comer info by address
+func GetComerInfoByAddress(address string, response *model.GetComerInfoResponse) (err error) {
+	if err = model.GetComerByAddress(mysql.DB, address, &response.Comer); err != nil {
+		log.Warn(err)
+		return err
+	}
+	if response.Comer.ID != 0 {
+		if err = model.GetComerProfile(mysql.DB, response.Comer.ID, &response.ComerProfile); err != nil {
+			log.Warn(err)
+			return err
+		}
+	}
+	return
+}

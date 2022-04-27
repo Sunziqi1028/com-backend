@@ -54,6 +54,7 @@ func Init() (err error) {
 	{
 		accountsPub.Use(middleware.GuestAuthorizationMiddleware())
 		accountsPub.GET("/comer/:comerID", router.Wrap(account.GetComerInfo))
+		accountsPub.GET("/comer/address/:address", router.Wrap(account.GetComerInfoByAddress))
 	}
 
 	coresPriv := Gin.Group("/cores")

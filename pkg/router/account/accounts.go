@@ -85,3 +85,24 @@ func GetComerInfo(ctx *router.Context) {
 
 	ctx.OK(response)
 }
+
+// GetComerInfoByAddress get comer by address
+func GetComerInfoByAddress(ctx *router.Context) {
+	address := ctx.Param("address")
+	if address == "" {
+		err := router.ErrBadRequest.WithMsg("Comer's address required")
+		ctx.HandleError(err)
+		return
+	}
+	var response model.GetComerInfoResponse
+	if err := service.GetComerInfoByAddress(address, &response); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	if response.Comer.ID == 0 {
+		ctx.OK(nil)
+	} else {
+		ctx.OK(response)
+	}
+}
