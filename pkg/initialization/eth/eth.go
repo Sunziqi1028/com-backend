@@ -13,7 +13,6 @@ var EthSubChanel = make(chan struct{})
 // Init the eth clien
 func Init() (err error) {
 	Client, err = ethclient.Dial(config.Eth.EndPoint + "/" + config.Eth.InfuraKey)
-	log.Info("--------ethclient.Dial:", config.Eth.EndPoint+"/"+config.Eth.InfuraKey)
 	if err != nil {
 		log.Warn(err)
 		return err
