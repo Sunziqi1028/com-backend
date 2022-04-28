@@ -133,13 +133,10 @@ func UpdateStartupFinanceSetting(startupID, comerID uint64, request *model.Updat
 
 func ConverToDatetime(strTime string) (t time.Time) {
 	var err error
-	const timeFormat1 = "2006-01-02T15:04:05+08:00"
-	const timeFormat2 = "2006-01-02T15:04:05.000+08:00"
-	if t, err = time.ParseInLocation(timeFormat1, strTime, time.Local); err != nil {
-		if t, err = time.ParseInLocation(timeFormat2, strTime, time.Local); err != nil {
-			t = time.Time{}
-			return
-		}
+	const timeFormat = "2006-01-02T15:04:05Z"
+	if t, err = time.ParseInLocation(timeFormat, strTime, time.UTC); err != nil {
+		t = time.Time{}
+		return
 	}
-	return t.UTC()
+	return t
 }
