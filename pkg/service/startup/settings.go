@@ -7,6 +7,7 @@ import (
 	"ceres/pkg/router"
 	"errors"
 	"gorm.io/gorm"
+	"time"
 
 	"github.com/qiniu/x/log"
 )
@@ -25,7 +26,7 @@ func UpdateStartupBasicSetting(startupID uint64, request *model.UpdateStartupBas
 	}
 	var tagIds []uint64
 	var tagRelList []tag.TagTargetRel
-	startupBasicSetting := model.StartupBasicSetting{
+	startupBasicSetting := model.BasicSetting{
 		KYC:           *request.KYC,
 		ContractAudit: *request.ContractAudit,
 		Website:       *request.Website,
@@ -88,11 +89,12 @@ func UpdateStartupFinanceSetting(startupID, comerID uint64, request *model.Updat
 	}
 	var walletIds []uint64
 	var walletList []model.Wallet
-	startupFinanceSetting := model.StartupFinanceSetting{
+	startupFinanceSetting := model.FinanceSetting{
 		TokenContractAddress: *request.TokenContractAddress,
-		PresaleDate:          *request.PresaleDate,
-		LaunchDate:           *request.LaunchDate,
+		PresaleDate:          ConverToDatetime(*request.PresaleDate),
+		LaunchDate:           ConverToDatetime(*request.LaunchDate),
 	}
+
 	if err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
 		for _, v := range request.Wallets {
 			wallet := model.Wallet{
@@ -108,8 +110,6 @@ func UpdateStartupFinanceSetting(startupID, comerID uint64, request *model.Updat
 			wallet.WalletAddress = v.WalletAddress
 			walletList = append(walletList, wallet)
 			walletIds = append(walletIds, wallet.ID)
-			log.Info("--------------walletName:", wallet.WalletName)
-			log.Info("--------------walletAddress:", wallet.WalletAddress)
 		}
 		//batch update startup wallet
 		if er = model.BatchUpdateStartupWallet(tx, walletList); er != nil {
@@ -126,6 +126,16 @@ func UpdateStartupFinanceSetting(startupID, comerID uint64, request *model.Updat
 		return er
 	}); err != nil {
 		log.Warn(err)
+		return
+	}
+	return
+}
+
+func ConverToDatetime(strTime string) (t time.Time) {
+	var err error
+	const timeFormat = "2006-01-02 15:04:05"
+	if t, err = time.Parse(timeFormat, strTime); err != nil {
+		t = time.Time{}
 		return
 	}
 	return

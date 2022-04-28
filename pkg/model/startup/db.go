@@ -2,6 +2,7 @@ package startup
 
 import (
 	"ceres/pkg/model/tag"
+	"database/sql"
 
 	"gorm.io/gorm"
 )
@@ -113,11 +114,25 @@ func StartupTokenContractIsExist(db *gorm.DB, tokenContract string) (isExit bool
 }
 
 // UpdateStartupBasicSetting  update startup security and social setting
-func UpdateStartupBasicSetting(db *gorm.DB, startupID uint64, input *StartupBasicSetting) (err error) {
+func UpdateStartupBasicSetting(db *gorm.DB, startupID uint64, input *BasicSetting) (err error) {
 	return db.Table("startup").Where("id = ?", startupID).Select("kyc", "contract_audit", "website", "discord", "twitter", "telegram", "docs").Updates(input).Error
 }
 
 // UpdateStartupFinanceSetting  update startup finance setting
-func UpdateStartupFinanceSetting(db *gorm.DB, startupID uint64, input *StartupFinanceSetting) (err error) {
-	return db.Table("startup").Where("id = ?", startupID).Select("token_contract_address", "presale_date", "launch_date").Updates(input).Error
+func UpdateStartupFinanceSetting(db *gorm.DB, startupID uint64, input *FinanceSetting) (err error) {
+	var fieldMap map[string]interface{}
+	fieldMap = make(map[string]interface{})
+	fieldMap["token_contract_address"] = input.TokenContractAddress
+	if input.PresaleDate.IsZero() {
+		fieldMap["presale_date"] = sql.NullTime{}
+	} else {
+		fieldMap["presale_date"] = input.PresaleDate
+	}
+	if input.LaunchDate.IsZero() {
+		fieldMap["launch_date"] = sql.NullTime{}
+	} else {
+		fieldMap["launch_date"] = input.LaunchDate
+	}
+
+	return db.Table("startup").Where("id = ?", startupID).Updates(fieldMap).Error
 }

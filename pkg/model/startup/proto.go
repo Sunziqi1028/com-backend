@@ -3,6 +3,9 @@ package startup
 import (
 	"ceres/pkg/model"
 	"ceres/pkg/model/tag"
+	"database/sql"
+	"encoding/json"
+	"time"
 )
 
 type Mode uint8
@@ -32,8 +35,8 @@ type Startup struct {
 	Twitter              string    `gorm:"twitter" json:"twitter"`
 	Telegram             string    `gorm:"telegram" json:"telegram"`
 	Docs                 string    `gorm:"docs" json:"docs"`
-	PresaleDate          string    `gorm:"presale_date" json:"presaleDate"`
-	LaunchDate           string    `gorm:"launch_date" json:"launchDate"`
+	PresaleDate          NullTime  `gorm:"presale_date" json:"presaleDate"`
+	LaunchDate           NullTime  `gorm:"launch_date" json:"launchDate"`
 	Wallets              []Wallet  `json:"wallets"`
 }
 
@@ -66,8 +69,8 @@ func (FollowRelation) TableName() string {
 	return "startup_follow_rel"
 }
 
-// Startup security and social setting
-type StartupBasicSetting struct {
+// BasicSetting Startup security and social setting
+type BasicSetting struct {
 	KYC           string `gorm:"kyc" json:"kyc"`
 	ContractAudit string `gorm:"contract_audit" json:"contractAudit"`
 	Website       string `gorm:"website" json:"website"`
@@ -77,10 +80,36 @@ type StartupBasicSetting struct {
 	Docs          string `gorm:"docs" json:"docs"`
 }
 
-// Startup finance setting
-type StartupFinanceSetting struct {
-	TokenContractAddress string `gorm:"token_contract_address" json:"tokenContractAddress"`
-	PresaleDate          string `gorm:"presale_date" json:"presaleDate"`
-	LaunchDate           string `gorm:"launch_date" json:"launchDate"`
+// FinanceSetting Startup finance setting
+type FinanceSetting struct {
+	TokenContractAddress string    `gorm:"token_contract_address" json:"tokenContractAddress"`
+	PresaleDate          time.Time `gorm:"presale_date" json:"presaleDate"`
+	LaunchDate           time.Time `gorm:"launch_date" json:"launchDate"`
 	//Wallets              []Wallet  `json:"wallets"`
+}
+
+type NullTime struct {
+	sql.NullTime
+}
+
+func (v NullTime) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.Time)
+	} else {
+		return json.Marshal("")
+	}
+}
+
+func (v *NullTime) UnmarshalJSON(data []byte) error {
+	var s *time.Time
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	if s != nil {
+		v.Valid = true
+		v.Time = *s
+	} else {
+		v.Valid = false
+	}
+	return nil
 }

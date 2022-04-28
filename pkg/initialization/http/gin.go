@@ -68,7 +68,7 @@ func Init() (err error) {
 		coresPriv.PUT("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.UpdateStartupTeamMember))
 		coresPriv.DELETE("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.DeleteStartupTeamMember))
 		coresPriv.PUT("/startups/:startupID/basicSetting", router.Wrap(startup.UpdateStartupBasicSetting))
-		coresPriv.PUT("/startups/:startupID/financeSetting", router.Wrap(startup.UpdateStartupFinanceSetting))
+
 	}
 
 	coresPub := Gin.Group("/cores")
@@ -78,6 +78,7 @@ func Init() (err error) {
 		coresPub.GET("/startups/:startupID", router.Wrap(startup.GetStartup))
 		coresPub.GET("/startups/name/:name/isExist", router.Wrap(startup.StartupNameIsExist))
 		coresPub.GET("/startups/tokenContract/:tokenContract/isExist", router.Wrap(startup.StartupTokenContractIsExist))
+		coresPub.PUT("/startups/:startupID/financeSetting", router.Wrap(startup.UpdateStartupFinanceSetting))
 		//coresPub.GET("/startups/:startupId/setting", router.Wrap(startup.GetStartupSetting))
 	}
 
