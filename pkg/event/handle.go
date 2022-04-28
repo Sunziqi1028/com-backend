@@ -12,8 +12,8 @@ import (
 	"github.com/qiniu/x/log"
 )
 
-func HandleStartup(address string, startupProto interface{}) {
-	log.Info("listen eth HandleStartup: ", startupProto)
+func HandleStartup(address string, startupProto interface{}, txHash string) {
+	log.Info("listen startup data: ", startupProto)
 	startupTemp := startupProto.(struct {
 		Name       string `json:"name"`
 		Mode       uint8  `json:"mode"`
@@ -33,12 +33,13 @@ func HandleStartup(address string, startupProto interface{}) {
 		return
 	}
 	startup := model.Startup{
-		ComerID:  comer.ID,
-		Name:     startupTemp.Name,
-		Mode:     model.Mode(startupTemp.Mode),
-		Logo:     startupTemp.Logo,
-		Mission:  startupTemp.Mission,
-		Overview: startupTemp.Overview,
+		ComerID:       comer.ID,
+		Name:          startupTemp.Name,
+		Mode:          model.Mode(startupTemp.Mode),
+		Logo:          startupTemp.Logo,
+		Mission:       startupTemp.Mission,
+		Overview:      startupTemp.Overview,
+		ContractAudit: txHash,
 	}
 	if err := mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
 		//create startup

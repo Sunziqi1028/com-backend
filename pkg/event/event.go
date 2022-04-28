@@ -18,7 +18,7 @@ func SubEvent() {
 	startupAbi := GetABI(StartupContract.Abi)
 	select {
 	case <-eth.EthSubChanel:
-		log.Info("start sub eth client", config.Eth.StartupContractAddress)
+		log.Info("listen for contract:", config.Eth.StartupContractAddress)
 		query := ethereum.FilterQuery{
 			FromBlock: big.NewInt(config.Eth.Epoch),
 			Addresses: []common.Address{common.HexToAddress(config.Eth.StartupContractAddress)},
@@ -40,7 +40,7 @@ func SubEvent() {
 						log.Info(err)
 						continue
 					}
-					go HandleStartup(intr[2].(common.Address).String(), intr[1])
+					go HandleStartup(intr[2].(common.Address).String(), intr[1], vLog.TxHash.String())
 				}
 			}
 		}
