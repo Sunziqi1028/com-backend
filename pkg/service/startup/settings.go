@@ -135,8 +135,10 @@ func ConverToDatetime(strTime string) (t time.Time) {
 	var err error
 	const timeFormat = "2006-01-02T15:04:05Z"
 	if t, err = time.ParseInLocation(timeFormat, strTime, time.UTC); err != nil {
-		t = time.Time{}
-		return
+		if t, err = time.ParseInLocation("2006-01-02", strTime, time.UTC); err != nil {
+			t = time.Time{}
+			return
+		}
 	}
 	return t
 }
