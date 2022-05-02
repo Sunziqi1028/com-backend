@@ -4,6 +4,7 @@ package main
 
 import (
 	"ceres/pkg/event"
+	"ceres/pkg/initialization/avax"
 	"ceres/pkg/initialization/config"
 	"ceres/pkg/initialization/eth"
 	"ceres/pkg/initialization/http"
@@ -19,6 +20,11 @@ import (
 )
 
 func main() {
+	//if err := ego.New().Invoker(
+	//	avax.Init,
+	//).Run(); err != nil {
+	//	elog.Warn(err.Error())
+	//}
 	// Order
 	// init the config file
 	// init the config file
@@ -41,6 +47,7 @@ func main() {
 		http.Init,
 		s3.Init,
 		eth.Init,
+		avax.Init,
 	).Serve(
 		metrics.Vernor,
 		http.Gin,
