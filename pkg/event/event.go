@@ -15,12 +15,14 @@ import (
 	"github.com/qiniu/x/log"
 )
 
-func StartListen() (err error) {
+func StartListen() {
 	var count = 0
 	for {
 		log.Info("eth StartListen:", count)
 		SubEvent()
 		count++
+
+		log.Info("eth StartListen Sleep:", 5*time.Second)
 		time.Sleep(5 * time.Second)
 		eth.Init()
 	}
