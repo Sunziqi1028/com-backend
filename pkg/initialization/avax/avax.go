@@ -13,7 +13,7 @@ import (
 	"github.com/qiniu/x/log"
 )
 
-func Init() (err error) {
+func Init() {
 	var count = 0
 	for {
 		log.Info("------------Avax Init:", count)
@@ -21,7 +21,6 @@ func Init() (err error) {
 		count++
 		time.Sleep(5 * time.Second)
 	}
-	return
 }
 
 func ListenForAvax() (err error) {
