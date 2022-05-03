@@ -24,7 +24,6 @@ func StartListen() (err error) {
 		time.Sleep(5 * time.Second)
 		eth.Init()
 	}
-	return
 }
 
 func SubEvent() {
