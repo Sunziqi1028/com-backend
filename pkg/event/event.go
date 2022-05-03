@@ -6,6 +6,7 @@ import (
 	"context"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -13,6 +14,18 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/qiniu/x/log"
 )
+
+func StartListen() (err error) {
+	var count = 0
+	for {
+		log.Info("eth StartListen:", count)
+		SubEvent()
+		count++
+		time.Sleep(5 * time.Second)
+		eth.Init()
+	}
+	return
+}
 
 func SubEvent() {
 	startupAbi := GetABI(StartupContract.Abi)
@@ -32,6 +45,8 @@ func SubEvent() {
 			select {
 			case err = <-sub.Err():
 				log.Warn(err)
+				eth.Client.Close()
+				return
 			case vLog := <-logs:
 				switch vLog.Topics[0].Hex() {
 				case StartupContract.EventHex:
