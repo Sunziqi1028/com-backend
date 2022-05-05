@@ -31,7 +31,7 @@ jobs:
           key: ${{ secrets.RELEASE_KEY }}
           port: ${{ secrets.RELEASE_PORT }}
           source: "main"
-          target: ${{ secrets.RELEASE_BIN_PATH }}
+          target: "/app/server/comunion"
       - name: Restart server
         uses: appleboy/ssh-action@master
         with:
