@@ -4,32 +4,49 @@ import (
 	"ceres/pkg/config"
 	"ceres/pkg/initialization/eth"
 	"context"
-	"math/big"
-	"strings"
-	"time"
-
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/qiniu/x/log"
+	"math/big"
+	"strings"
+	"sync"
+	"time"
 )
 
 func StartListen() {
 	var count = 0
 	for {
-		log.Info("eth StartListen:", count)
-		SubEvent()
-		count++
+		log.Info("event.StartListen No:", count)
+		waitGroup := &sync.WaitGroup{}
+		waitGroup.Add(1)
 
-		log.Info("eth StartListen Sleep:", 5*time.Second)
+		listenEvent := func() {
+			defer waitGroup.Done()
+			SubEvent()
+		}
+
+		go listenEvent()
+
+		log.Info("event.StartListen Wait start")
+		waitGroup.Wait()
+		log.Info("event.StartListen Wait over")
+
+		eth.Client.Close()
+
+		log.Info("event.StartListen Sleep:", 5*time.Second)
 		time.Sleep(5 * time.Second)
+
 		eth.Init()
+		count++
 	}
 }
 
 func SubEvent() {
+	log.Info("SubEvent enter")
 	startupAbi := GetABI(StartupContract.Abi)
+	log.Info("SubEvent GetABI Done")
 	select {
 	case <-eth.EthSubChanel:
 		log.Info("listen for contract:", config.Eth.StartupContractAddress)
@@ -46,7 +63,6 @@ func SubEvent() {
 			select {
 			case err = <-sub.Err():
 				log.Warn(err)
-				eth.Client.Close()
 				return
 			case vLog := <-logs:
 				switch vLog.Topics[0].Hex() {
