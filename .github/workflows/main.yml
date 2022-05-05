@@ -1,4 +1,4 @@
-name: Deploy
+name: Production deploy
 on:
   push:
     branches:
@@ -31,7 +31,7 @@ jobs:
           key: ${{ secrets.PROD_KEY }}
           port: ${{ secrets.PROD_PORT }}
           source: "main"
-          target: ${{ secrets.PROD_BIN_PATH }}
+          target: "/app/server/comunion"
       - name: Restart server
         uses: appleboy/ssh-action@master
         with:

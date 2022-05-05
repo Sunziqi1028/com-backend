@@ -1,4 +1,4 @@
-name: Deploy
+name: Development deploy
 on:
   push:
     branches:
@@ -40,7 +40,7 @@ jobs:
           passphrase: ${{ secrets.DEV_PASSPHRASE }}
           key: ${{ secrets.DEV_KEY }}
           port: ${{ secrets.DEV_PORT }}
-          script: systemctl restart comunion
+          script: systemctl restart ceres
       - name: Notification
         uses: erguotou520/instant-access-action@0.0.4
         if: ${{ success() }}
