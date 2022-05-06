@@ -28,6 +28,9 @@ func StartListen() {
 		}
 
 		go listenEvent()
+		if count != 0 {
+			eth.Init()
+		}
 
 		log.Info("event.StartListen Wait start")
 		waitGroup.Wait()
@@ -38,7 +41,6 @@ func StartListen() {
 		log.Info("event.StartListen Sleep:", 5*time.Second)
 		time.Sleep(5 * time.Second)
 
-		eth.Init()
 		count++
 	}
 }
