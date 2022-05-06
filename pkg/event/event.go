@@ -29,7 +29,9 @@ func StartListen() {
 
 		go listenEvent()
 		if count != 0 {
-			eth.Init()
+			if err := eth.Init(); err != nil {
+				log.Warn(err)
+			}
 		}
 
 		log.Info("event.StartListen Wait start")
