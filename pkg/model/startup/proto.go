@@ -26,6 +26,7 @@ type Startup struct {
 	Mission              string    `gorm:"mission" json:"mission"`
 	TokenContractAddress string    `gorm:"token_contract_address" json:"tokenContractAddress"`
 	Overview             string    `gorm:"overview" json:"overview"`
+	TxHash               string    `gorm:"tx_hash" json:"blockChainAddress"`
 	IsSet                bool      `gorm:"is_set" json:"isSet"`
 	KYC                  string    `gorm:"kyc" json:"kyc"`
 	ContractAudit        string    `gorm:"contract_audit" json:"contractAudit"`
