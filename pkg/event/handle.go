@@ -33,13 +33,13 @@ func HandleStartup(address string, startupProto interface{}, txHash string) {
 		return
 	}
 	startup := model.Startup{
-		ComerID:       comer.ID,
-		Name:          startupTemp.Name,
-		Mode:          model.Mode(startupTemp.Mode),
-		Logo:          startupTemp.Logo,
-		Mission:       startupTemp.Mission,
-		Overview:      startupTemp.Overview,
-		ContractAudit: txHash,
+		ComerID:  comer.ID,
+		Name:     startupTemp.Name,
+		Mode:     model.Mode(startupTemp.Mode),
+		Logo:     startupTemp.Logo,
+		Mission:  startupTemp.Mission,
+		Overview: startupTemp.Overview,
+		TxHash:   txHash,
 	}
 	if err := mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
 		//create startup

@@ -28,17 +28,21 @@ func StartListen() {
 		}
 
 		go listenEvent()
+		if count != 0 {
+			if err := eth.Init(); err != nil {
+				log.Warn(err)
+			}
+		}
 
 		log.Info("event.StartListen Wait start")
 		waitGroup.Wait()
 		log.Info("event.StartListen Wait over")
 
-		eth.Client.Close()
+		eth.Close()
 
 		log.Info("event.StartListen Sleep:", 5*time.Second)
 		time.Sleep(5 * time.Second)
 
-		eth.Init()
 		count++
 	}
 }
