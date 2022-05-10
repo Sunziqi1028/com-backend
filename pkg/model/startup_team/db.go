@@ -15,7 +15,7 @@ func ListStartupTeamMembers(db *gorm.DB, startupID uint64, input *ListStartupTea
 	if total == 0 {
 		return
 	}
-	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Comer").Preload("ComerProfile").Find(output).Error
+	err = db.Order("created_at ASC").Limit(input.Limit).Offset(input.Offset).Preload("Comer").Preload("ComerProfile").Find(output).Error
 	return
 }
 
