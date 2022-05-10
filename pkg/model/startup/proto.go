@@ -2,6 +2,7 @@ package startup
 
 import (
 	"ceres/pkg/model"
+	"ceres/pkg/model/startup_team"
 	"ceres/pkg/model/tag"
 	"database/sql"
 	"encoding/json"
@@ -19,26 +20,30 @@ const (
 
 type Startup struct {
 	model.Base
-	ComerID              uint64    `gorm:"comer_id" json:"comerID"`
-	Name                 string    `gorm:"name" json:"name"`
-	Mode                 Mode      `gorm:"mode" json:"mode"`
-	Logo                 string    `gorm:"logo" json:"logo"`
-	Mission              string    `gorm:"mission" json:"mission"`
-	TokenContractAddress string    `gorm:"token_contract_address" json:"tokenContractAddress"`
-	Overview             string    `gorm:"overview" json:"overview"`
-	TxHash               string    `gorm:"tx_hash" json:"blockChainAddress"`
-	IsSet                bool      `gorm:"is_set" json:"isSet"`
-	KYC                  string    `gorm:"kyc" json:"kyc"`
-	ContractAudit        string    `gorm:"contract_audit" json:"contractAudit"`
-	HashTags             []tag.Tag `gorm:"many2many:tag_target_rel;foreignKey:ID;joinForeignKey:TargetID;" json:"hashTags"`
-	Website              string    `gorm:"website" json:"website"`
-	Discord              string    `gorm:"discord" json:"discord"`
-	Twitter              string    `gorm:"twitter" json:"twitter"`
-	Telegram             string    `gorm:"telegram" json:"telegram"`
-	Docs                 string    `gorm:"docs" json:"docs"`
-	PresaleDate          NullTime  `gorm:"presale_date" json:"presaleDate"`
-	LaunchDate           NullTime  `gorm:"launch_date" json:"launchDate"`
-	Wallets              []Wallet  `json:"wallets"`
+	ComerID              uint64                           `gorm:"comer_id" json:"comerID"`
+	Name                 string                           `gorm:"name" json:"name"`
+	Mode                 Mode                             `gorm:"mode" json:"mode"`
+	Logo                 string                           `gorm:"logo" json:"logo"`
+	Mission              string                           `gorm:"mission" json:"mission"`
+	TokenContractAddress string                           `gorm:"token_contract_address" json:"tokenContractAddress"`
+	Overview             string                           `gorm:"overview" json:"overview"`
+	TxHash               string                           `gorm:"tx_hash" json:"blockChainAddress"`
+	IsSet                bool                             `gorm:"is_set" json:"isSet"`
+	KYC                  string                           `gorm:"kyc" json:"kyc"`
+	ContractAudit        string                           `gorm:"contract_audit" json:"contractAudit"`
+	HashTags             []tag.Tag                        `gorm:"many2many:tag_target_rel;foreignKey:ID;joinForeignKey:TargetID;" json:"hashTags"`
+	Website              string                           `gorm:"website" json:"website"`
+	Discord              string                           `gorm:"discord" json:"discord"`
+	Twitter              string                           `gorm:"twitter" json:"twitter"`
+	Telegram             string                           `gorm:"telegram" json:"telegram"`
+	Docs                 string                           `gorm:"docs" json:"docs"`
+	PresaleDate          NullTime                         `gorm:"presale_date" json:"presaleDate"`
+	LaunchDate           NullTime                         `gorm:"launch_date" json:"launchDate"`
+	Wallets              []Wallet                         `json:"wallets"`
+	Members              []startup_team.StartupTeamMember `json:"members"`
+	MemberCount          int                              `gorm:"-" json:"memberCount"`
+	Follows              []FollowRelation                 `json:"follows"`
+	FollowCount          int                              `gorm:"-" json:"followCount"`
 }
 
 // TableName Startup table name for gorm
