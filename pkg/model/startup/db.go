@@ -9,7 +9,7 @@ import (
 
 // GetStartup  get startup
 func GetStartup(db *gorm.DB, startupID uint64, startup *Startup) error {
-	return db.Where("is_deleted = false AND id = ?", startupID).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Find(&startup).Error
+	return db.Where("is_deleted = false AND id = ?", startupID).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Preload("Members").Preload("Follows").Find(&startup).Error
 }
 
 // CreateStartup  create startup
@@ -55,7 +55,7 @@ func ListStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startu
 	if total == 0 {
 		return
 	}
-	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Find(startups).Error
+	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Preload("Members").Preload("Follows").Find(startups).Error
 	return
 }
 
@@ -79,7 +79,7 @@ func ListFollowedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest
 	if total == 0 {
 		return
 	}
-	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Find(startups).Error
+	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Preload("Members").Preload("Follows").Find(startups).Error
 	return
 }
 
