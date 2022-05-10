@@ -25,7 +25,10 @@ func ListStartups(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-
+	for i, startup := range response.List {
+		response.List[i].MemberCount = len(startup.Members)
+		response.List[i].FollowCount = len(startup.Follows)
+	}
 	ctx.OK(response)
 }
 
@@ -44,6 +47,10 @@ func ListStartupsMe(ctx *router.Context) {
 	if err := service.ListStartups(comerID, &request, &response); err != nil {
 		ctx.HandleError(err)
 		return
+	}
+	for i, startup := range response.List {
+		response.List[i].MemberCount = len(startup.Members)
+		response.List[i].FollowCount = len(startup.Follows)
 	}
 
 	ctx.OK(response)
