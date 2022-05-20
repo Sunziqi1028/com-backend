@@ -63,6 +63,7 @@ func Init() (err error) {
 		coresPriv.GET("/startups/me", router.Wrap(startup.ListStartupsMe))
 		coresPriv.POST("/startups/:startupID/follow", router.Wrap(startup.FollowStartup))
 		coresPriv.GET("/startups/follow", router.Wrap(startup.ListFollowStartups))
+		coresPriv.GET("/startups/participate", router.Wrap(startup.ListParticipateStartups))
 		coresPriv.GET("/startups/:startupID/teamMembers", router.Wrap(startup.ListStartupTeamMembers))
 		coresPriv.POST("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.CreateStartupTeamMember))
 		coresPriv.PUT("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.UpdateStartupTeamMember))

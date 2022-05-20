@@ -136,3 +136,22 @@ func UpdateStartupFinanceSetting(db *gorm.DB, startupID uint64, input *FinanceSe
 
 	return db.Table("startup").Where("id = ?", startupID).Updates(fieldMap).Error
 }
+
+// ListParticipatedStartups  list participated startups
+func ListParticipatedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startups *[]Startup) (total int64, err error) {
+	db = db.Where("is_deleted = false").Joins("INNER JOIN startup_team_member_rel ON startup_team_member_rel.comer_id = ? AND startup_id = startup.id", comerID)
+	if input.Keyword != "" {
+		db = db.Where("name like ?", "%"+input.Keyword+"%")
+	}
+	if input.Mode != 0 {
+		db = db.Where("mode = ?", input.Mode)
+	}
+	if err = db.Table("startup").Count(&total).Error; err != nil {
+		return
+	}
+	if total == 0 {
+		return
+	}
+	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Preload("Members").Preload("Follows").Find(startups).Error
+	return
+}
