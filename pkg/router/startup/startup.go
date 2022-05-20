@@ -144,3 +144,23 @@ func ListFollowStartups(ctx *router.Context) {
 
 	ctx.OK(response)
 }
+
+// ListParticipateStartups list participate startup
+func ListParticipateStartups(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	var request model.ListStartupRequest
+	if err := ctx.ShouldBindQuery(&request); err != nil {
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
+		ctx.HandleError(err)
+		return
+	}
+
+	var response model.ListStartupsResponse
+	if err := service.ListParticipateStartups(comerID, &request, &response); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(response)
+}
