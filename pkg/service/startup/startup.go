@@ -47,3 +47,12 @@ func StartupTokenContractIsExist(tokenContract string) (isExist bool, err error)
 	}
 	return
 }
+
+func StartupFollowedByComer(startupID, comerID uint64) (isFollowed bool, err error) {
+	isFollowed, err = model.StartupFollowIsExist(mysql.DB, startupID, comerID)
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+	return
+}

@@ -169,3 +169,18 @@ func ListParticipatedStartups(db *gorm.DB, comerID uint64, input *ListStartupReq
 	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Preload("Members").Preload("Follows").Find(startups).Error
 	return
 }
+
+// StartupFollowIsExist check startup and comer is existed
+func StartupFollowIsExist(db *gorm.DB, startupID, comerID uint64) (isExist bool, err error) {
+	var count int64
+	err = db.Table("startup_follow_rel").Where("startup_id = ? AND comer_id = ?", startupID, comerID).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count == 0 {
+		isExist = false
+	} else {
+		isExist = true
+	}
+	return
+}
