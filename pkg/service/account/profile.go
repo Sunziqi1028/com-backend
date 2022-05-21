@@ -39,7 +39,13 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 		Name:     post.Name,
 		Avatar:   post.Avatar,
 		Location: post.Location,
+		TimeZone: *post.TimeZone,
 		Website:  post.Website,
+		Email:    *post.Email,
+		Twitter:  *post.Twitter,
+		Discord:  *post.Discord,
+		Telegram: *post.Telegram,
+		Medium:   *post.Medium,
 		BIO:      post.BIO,
 	}
 	err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
@@ -98,7 +104,13 @@ func UpdateComerProfile(comerID uint64, post *model.UpdateProfileRequest) (err e
 		Name:     post.Name,
 		Avatar:   post.Avatar,
 		Location: post.Location,
+		TimeZone: *post.TimeZone,
 		Website:  post.Website,
+		Email:    *post.Email,
+		Twitter:  *post.Twitter,
+		Discord:  *post.Discord,
+		Telegram: *post.Telegram,
+		Medium:   *post.Medium,
 		BIO:      post.BIO,
 	}
 	err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) { //create skill

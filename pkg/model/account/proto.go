@@ -50,7 +50,13 @@ type ComerProfile struct {
 	Name     string    `gorm:"column:name" json:"name"`
 	Avatar   string    `gorm:"column:avatar" json:"avatar"`
 	Location string    `gorm:"column:location" json:"location"`
+	TimeZone string    `gorm:"column:time_zone" json:"TimeZone"`
 	Website  string    `gorm:"column:website" json:"website"`
+	Email    string    `gorm:"column:email" json:"email"`
+	Twitter  string    `gorm:"column:twitter" json:"twitter"`
+	Discord  string    `gorm:"column:discord" json:"discord"`
+	Telegram string    `gorm:"column:telegram" json:"telegram"`
+	Medium   string    `gorm:"column:medium" json:"medium"`
 	BIO      string    `gorm:"column:bio" json:"bio"`
 	Skills   []tag.Tag `gorm:"many2many:tag_target_rel;foreignKey:ComerID;joinForeignKey:TargetID;" json:"skills"`
 }

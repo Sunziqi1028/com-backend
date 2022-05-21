@@ -64,6 +64,11 @@ func CreateStartupFollowRel(db *gorm.DB, comerID, startupID uint64) error {
 	return db.Create(&FollowRelation{ComerID: comerID, StartupID: startupID}).Error
 }
 
+// DeleteStartupFollowRel delete comer relation for startup and comer
+func DeleteStartupFollowRel(db *gorm.DB, input *FollowRelation) error {
+	return db.Where("comer_id = ? AND startup_id = ?", input.ComerID, input.StartupID).Delete(input).Error
+}
+
 // ListFollowedStartups  list followed startups
 func ListFollowedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startups *[]Startup) (total int64, err error) {
 	db = db.Where("is_deleted = false").Joins("INNER JOIN startup_follow_rel ON startup_follow_rel.comer_id = ? AND startup_id = startup.id", comerID)
@@ -123,10 +128,16 @@ func UpdateStartupFinanceSetting(db *gorm.DB, startupID uint64, input *FinanceSe
 	var fieldMap map[string]interface{}
 	fieldMap = make(map[string]interface{})
 	fieldMap["token_contract_address"] = input.TokenContractAddress
-	if input.PresaleDate.IsZero() {
-		fieldMap["presale_date"] = sql.NullTime{}
+	fieldMap["launch_network"] = input.LaunchNetwork
+	if input.PresaleStart.IsZero() {
+		fieldMap["presale_start"] = sql.NullTime{}
 	} else {
-		fieldMap["presale_date"] = input.PresaleDate
+		fieldMap["presale_start"] = input.PresaleStart
+	}
+	if input.PresaleEnd.IsZero() {
+		fieldMap["presale_end"] = sql.NullTime{}
+	} else {
+		fieldMap["presale_end"] = input.PresaleEnd
 	}
 	if input.LaunchDate.IsZero() {
 		fieldMap["launch_date"] = sql.NullTime{}
