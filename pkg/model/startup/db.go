@@ -129,6 +129,9 @@ func UpdateStartupFinanceSetting(db *gorm.DB, startupID uint64, input *FinanceSe
 	fieldMap = make(map[string]interface{})
 	fieldMap["token_contract_address"] = input.TokenContractAddress
 	fieldMap["launch_network"] = input.LaunchNetwork
+	fieldMap["token_name"] = input.TokenName
+	fieldMap["token_symbol"] = input.TokenSymbol
+	fieldMap["total_supply"] = input.TotalSupply
 	if input.PresaleStart.IsZero() {
 		fieldMap["presale_start"] = sql.NullTime{}
 	} else {

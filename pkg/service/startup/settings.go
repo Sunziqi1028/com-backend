@@ -92,6 +92,9 @@ func UpdateStartupFinanceSetting(startupID, comerID uint64, request *model.Updat
 	startupFinanceSetting := model.FinanceSetting{
 		TokenContractAddress: *request.TokenContractAddress,
 		LaunchNetwork:        *request.LaunchNetwork,
+		TokenName:            *request.TokenName,
+		TokenSymbol:          *request.TokenSymbol,
+		TotalSupply:          *request.TotalSupply,
 		PresaleStart:         ConverToDatetime(*request.PresaleStart),
 		PresaleEnd:           ConverToDatetime(*request.PresaleEnd),
 		LaunchDate:           ConverToDatetime(*request.LaunchDate),

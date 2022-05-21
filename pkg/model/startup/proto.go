@@ -38,6 +38,9 @@ type Startup struct {
 	Telegram             string                           `gorm:"telegram" json:"telegram"`
 	Docs                 string                           `gorm:"docs" json:"docs"`
 	LaunchNetwork        int                              `gorm:"launch_network" json:"launchNetwork"`
+	TokenName            string                           `gorm:"token_name" json:"tokenName"`
+	TokenSymbol          string                           `gorm:"token_symbol" json:"tokenSymbol"`
+	TotalSupply          int64                            `gorm:"total_supply" json:"totalSupply"`
 	PresaleStart         NullTime                         `gorm:"presale_start" json:"presaleStart"`
 	PresaleEnd           NullTime                         `gorm:"presale_end" json:"presaleEnd"`
 	LaunchDate           NullTime                         `gorm:"launch_date" json:"launchDate"`
@@ -92,6 +95,9 @@ type BasicSetting struct {
 type FinanceSetting struct {
 	TokenContractAddress string    `gorm:"token_contract_address" json:"tokenContractAddress"`
 	LaunchNetwork        int       `gorm:"launch_network" json:"launchNetwork"`
+	TokenName            string    `gorm:"token_name" json:"tokenName"`
+	TokenSymbol          string    `gorm:"token_symbol" json:"tokenSymbol"`
+	TotalSupply          int64     `gorm:"total_supply" json:"totalSupply"`
 	PresaleStart         time.Time `gorm:"presale_start" json:"presaleStart"`
 	PresaleEnd           time.Time `gorm:"presale_end" json:"presaleEnd"`
 	LaunchDate           time.Time `gorm:"launch_date" json:"launchDate"`

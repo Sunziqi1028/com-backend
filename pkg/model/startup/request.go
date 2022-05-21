@@ -24,6 +24,9 @@ type UpdateStartupBasicSettingRequest struct {
 type UpdateStartupFinanceSettingRequest struct {
 	TokenContractAddress *string `json:"tokenContractAddress" binding:"required"`
 	LaunchNetwork        *int    `json:"launchNetwork" binding:"required"`
+	TokenName            *string `json:"tokenName" binding:"required"`
+	TokenSymbol          *string `json:"tokenSymbol" binding:"required"`
+	TotalSupply          *int64  `json:"totalSupply" binding:"required"`
 	PresaleStart         *string `json:"presaleStart" binding:"required"`
 	PresaleEnd           *string `json:"presaleEnd" binding:"required"`
 	LaunchDate           *string `json:"launchDate" binding:"required"`
