@@ -11,7 +11,7 @@ func FollowStartup(ComerID, startupID uint64) (err error) {
 	return model.CreateStartupFollowRel(mysql.DB, ComerID, startupID)
 }
 
-func UnFollowStartup(ComerID, startupID uint64) (err error) {
+func UnfollowStartup(ComerID, startupID uint64) (err error) {
 	followRel := model.FollowRelation{
 		StartupID: startupID,
 		ComerID:   ComerID,

@@ -12,3 +12,7 @@ type GetStartupResponse struct {
 type ExistStartupResponse struct {
 	IsExist bool `json:"isExist"`
 }
+
+type FollowedByMeResponse struct {
+	IsFollowed bool `json:"isFollowed"`
+}

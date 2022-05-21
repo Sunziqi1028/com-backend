@@ -62,7 +62,7 @@ func Init() (err error) {
 		coresPriv.Use(middleware.ComerAuthorizationMiddleware())
 		coresPriv.GET("/startups/me", router.Wrap(startup.ListStartupsMe))
 		coresPriv.POST("/startups/:startupID/follow", router.Wrap(startup.FollowStartup))
-		coresPriv.DELETE("/startups/:startupID/unfollow", router.Wrap(startup.UnFollowStartup))
+		coresPriv.DELETE("/startups/:startupID/unfollow", router.Wrap(startup.UnfollowStartup))
 		coresPriv.GET("/startups/follow", router.Wrap(startup.ListFollowStartups))
 		coresPriv.GET("/startups/participate", router.Wrap(startup.ListParticipateStartups))
 		coresPriv.GET("/startups/:startupID/teamMembers", router.Wrap(startup.ListStartupTeamMembers))
@@ -71,6 +71,7 @@ func Init() (err error) {
 		coresPriv.DELETE("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.DeleteStartupTeamMember))
 		coresPriv.PUT("/startups/:startupID/basicSetting", router.Wrap(startup.UpdateStartupBasicSetting))
 		coresPriv.PUT("/startups/:startupID/financeSetting", router.Wrap(startup.UpdateStartupFinanceSetting))
+		coresPriv.GET("/startups/:startupID/followedByMe", router.Wrap(startup.StartupFollowedByMe))
 	}
 
 	coresPub := Gin.Group("/cores")

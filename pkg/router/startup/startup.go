@@ -125,8 +125,8 @@ func FollowStartup(ctx *router.Context) {
 	ctx.OK(nil)
 }
 
-// UnFollowStartup unfollow Startup
-func UnFollowStartup(ctx *router.Context) {
+// UnfollowStartup unfollow Startup
+func UnfollowStartup(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	startupID, err := strconv.ParseUint(ctx.Param("startupID"), 0, 64)
 	if err != nil {
@@ -134,7 +134,7 @@ func UnFollowStartup(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	if err = service.UnFollowStartup(comerID, startupID); err != nil {
+	if err = service.UnfollowStartup(comerID, startupID); err != nil {
 		ctx.HandleError(err)
 		return
 	}
@@ -180,4 +180,22 @@ func ListParticipateStartups(ctx *router.Context) {
 	}
 
 	ctx.OK(response)
+}
+
+// StartupFollowedByMe get startup is followed by me
+func StartupFollowedByMe(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	startupID, err := strconv.ParseUint(ctx.Param("startupID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid startup ID")
+		ctx.HandleError(err)
+		return
+	}
+	isFollowed, err := service.StartupFollowedByComer(startupID, comerID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(model.FollowedByMeResponse{IsFollowed: isFollowed})
 }
