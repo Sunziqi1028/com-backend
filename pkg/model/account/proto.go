@@ -50,7 +50,7 @@ type ComerProfile struct {
 	Name     string    `gorm:"column:name" json:"name"`
 	Avatar   string    `gorm:"column:avatar" json:"avatar"`
 	Location string    `gorm:"column:location" json:"location"`
-	TimeZone string    `gorm:"column:time_zone" json:"TimeZone"`
+	TimeZone string    `gorm:"column:time_zone" json:"timeZone"`
 	Website  string    `gorm:"column:website" json:"website"`
 	Email    string    `gorm:"column:email" json:"email"`
 	Twitter  string    `gorm:"column:twitter" json:"twitter"`
