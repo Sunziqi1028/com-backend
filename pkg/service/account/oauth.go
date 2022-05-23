@@ -6,7 +6,6 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
-
 	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
 )
@@ -82,7 +81,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 		Token:      token,
 		ComerID:    comer.ID,
 	}
-
+	log.Infof("#####RESPONSE %s, %d\n", response.Token, response.ComerID)
 	return nil
 }
 

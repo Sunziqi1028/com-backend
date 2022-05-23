@@ -7,6 +7,7 @@ import (
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
+	"strings"
 
 	"github.com/qiniu/x/log"
 )
@@ -20,7 +21,16 @@ func LoginWithGithubCallback(ctx *router.Context) {
 		return
 	}
 	client := auth.NewGithubOauthClient(code)
-	comerID, err := jwt.Verify(ctx.GetHeader("X-COMUNION-AUTHORIZATION"))
+	var (
+		comerID uint64
+		err     error
+	)
+	header := ctx.GetHeader("X-COMUNION-AUTHORIZATION")
+	if strings.Trim(header, " ") == "" {
+		comerID = 0
+	} else {
+		comerID, err = jwt.Verify(header)
+	}
 	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
 		if err = service.LoginWithOauth(client, model.GithubOauth, &response); err != nil {
@@ -46,7 +56,18 @@ func LoginWithGoogleCallback(ctx *router.Context) {
 		return
 	}
 	client := auth.NewGoogleClient(code)
-	comerID, err := jwt.Verify(ctx.GetHeader("X-COMUNION-AUTHORIZATION"))
+	var (
+		comerID uint64
+		err     error
+	)
+	comunioAuthHeader := ctx.GetHeader("X-COMUNION-AUTHORIZATION")
+	if strings.Trim(comunioAuthHeader, " ") == "" {
+		comerID = 0
+		err = nil
+	} else {
+		comerID, err = jwt.Verify(comunioAuthHeader)
+	}
+
 	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
 		if err = service.LoginWithOauth(client, model.GoogleOauth, &response); err != nil {
