@@ -21,16 +21,8 @@ func LoginWithGithubCallback(ctx *router.Context) {
 		return
 	}
 	client := auth.NewGithubOauthClient(code)
-	var (
-		comerID uint64
-		err     error
-	)
-	header := ctx.GetHeader("X-COMUNION-AUTHORIZATION")
-	if strings.Trim(header, " ") == "" {
-		comerID = 0
-	} else {
-		comerID, err = jwt.Verify(header)
-	}
+	comerID, err := extractComerIdFromJwtToken(ctx)
+
 	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
 		if err = service.LoginWithOauth(client, model.GithubOauth, &response); err != nil {
@@ -46,6 +38,16 @@ func LoginWithGithubCallback(ctx *router.Context) {
 		ctx.OK(nil)
 	}
 }
+func extractComerIdFromJwtToken(ctx *router.Context) (comerID uint64, err error) {
+	comunioAuthHeader := ctx.GetHeader("X-COMUNION-AUTHORIZATION")
+	if strings.Trim(comunioAuthHeader, " ") == "" {
+		comerID = 0
+		err = nil
+	} else {
+		comerID, err = jwt.Verify(comunioAuthHeader)
+	}
+	return
+}
 
 // LoginWithGoogleCallback login with google oauth callback
 func LoginWithGoogleCallback(ctx *router.Context) {
@@ -56,17 +58,7 @@ func LoginWithGoogleCallback(ctx *router.Context) {
 		return
 	}
 	client := auth.NewGoogleClient(code)
-	var (
-		comerID uint64
-		err     error
-	)
-	comunioAuthHeader := ctx.GetHeader("X-COMUNION-AUTHORIZATION")
-	if strings.Trim(comunioAuthHeader, " ") == "" {
-		comerID = 0
-		err = nil
-	} else {
-		comerID, err = jwt.Verify(comunioAuthHeader)
-	}
+	comerID, err := extractComerIdFromJwtToken(ctx)
 
 	if err != nil || comerID == 0 {
 		var response account.ComerLoginResponse
