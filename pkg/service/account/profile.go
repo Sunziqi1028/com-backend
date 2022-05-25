@@ -34,6 +34,18 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 		return router.ErrBadRequest.WithMsg("user profile already exists")
 	}
 	var tagRelList []tag.TagTargetRel
+	if post.Twitter == nil {
+		post.Twitter = new(string)
+	}
+	if post.Discord == nil {
+		post.Discord = new(string)
+	}
+	if post.Telegram == nil {
+		post.Telegram = new(string)
+	}
+	if post.Medium == nil {
+		post.Medium = new(string)
+	}
 	profile = model.ComerProfile{
 		ComerID:  comerID,
 		Name:     post.Name,

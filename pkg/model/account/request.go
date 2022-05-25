@@ -15,10 +15,10 @@ type CreateProfileRequest struct {
 	Website  string   `json:"website"`
 	Email    *string  `json:"email" binding:"required"`
 	SKills   []string `json:"skills" binding:"min=1"`
-	Twitter  *string  `json:"twitter" binding:"required"`
-	Discord  *string  `json:"discord" binding:"required"`
-	Telegram *string  `json:"telegram" binding:"required"`
-	Medium   *string  `json:"medium" binding:"required"`
+	Twitter  *string  `json:"twitter"`
+	Discord  *string  `json:"discord"`
+	Telegram *string  `json:"telegram"`
+	Medium   *string  `json:"medium"`
 	BIO      string   `json:"bio" binding:"min=100"`
 }
 
