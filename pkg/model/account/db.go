@@ -55,5 +55,5 @@ func CreateComerProfile(db *gorm.DB, comerProfile *ComerProfile) error {
 
 //UpdateComerProfile update the comer address
 func UpdateComerProfile(db *gorm.DB, comerProfile *ComerProfile) error {
-	return db.Where("comer_id = ? AND is_deleted = false", comerProfile.ComerID).Select("avatar", "name", "location", "website", "bio").Updates(comerProfile).Error
+	return db.Where("comer_id = ? AND is_deleted = false", comerProfile.ComerID).Select("avatar", "name", "location", "time_zone", "website", "email", "twitter", "discord", "telegram", "medium", "bio").Updates(comerProfile).Error
 }

@@ -91,7 +91,12 @@ func UpdateStartupFinanceSetting(startupID, comerID uint64, request *model.Updat
 	var walletList []model.Wallet
 	startupFinanceSetting := model.FinanceSetting{
 		TokenContractAddress: *request.TokenContractAddress,
-		PresaleDate:          ConverToDatetime(*request.PresaleDate),
+		LaunchNetwork:        *request.LaunchNetwork,
+		TokenName:            *request.TokenName,
+		TokenSymbol:          *request.TokenSymbol,
+		TotalSupply:          *request.TotalSupply,
+		PresaleStart:         ConverToDatetime(*request.PresaleStart),
+		PresaleEnd:           ConverToDatetime(*request.PresaleEnd),
 		LaunchDate:           ConverToDatetime(*request.LaunchDate),
 	}
 

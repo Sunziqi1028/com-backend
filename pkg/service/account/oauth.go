@@ -6,7 +6,6 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
-
 	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
 )
@@ -51,13 +50,18 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 				log.Warn(er)
 				return er
 			}
+			// also create profile ????
 			return
 		})
 		if err != nil {
 			return
 		}
 	} else {
-		if err = account.GetComerProfile(mysql.DB, comer.ID, &profile); err != nil {
+		if err = account.GetComerByID(mysql.DB, comerAccount.ComerID, &comer); err != nil {
+			log.Warn(err)
+			return err
+		}
+		if err = account.GetComerProfile(mysql.DB, comerAccount.ComerID, &profile); err != nil {
 			log.Warn(err)
 			return err
 		}
@@ -67,7 +71,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 	}
 
 	// sign with jwt using the comer UIN
-	token := jwt.Sign(comer.ID)
+	token := jwt.Sign(comerAccount.ComerID)
 
 	address := ""
 	if comer.Address != nil {
@@ -76,13 +80,12 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 
 	*response = account.ComerLoginResponse{
 		IsProfiled: isProfiled,
-		Avatar:     profile.Avatar,
-		Nick:       profile.Name,
+		Avatar:     comerAccount.Avatar,
+		Nick:       comerAccount.Nick,
 		Address:    address,
 		Token:      token,
-		ComerID:    comer.ID,
+		ComerID:    comerAccount.ComerID,
 	}
-
 	return nil
 }
 
