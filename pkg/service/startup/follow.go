@@ -23,7 +23,7 @@ func UnfollowStartup(ComerID, startupID uint64) (err error) {
 }
 
 func ListFollowStartups(ComerID uint64, request *model.ListStartupRequest, response *model.ListStartupsResponse) (err error) {
-	var startups []model.Startup
+	startups := make([]model.Startup, 0)
 	total, err := model.ListFollowedStartups(mysql.DB, ComerID, request, &startups)
 	if err != nil {
 		log.Warn(err)
