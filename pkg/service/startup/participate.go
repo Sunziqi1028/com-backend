@@ -7,7 +7,7 @@ import (
 )
 
 func ListParticipateStartups(ComerID uint64, request *model.ListStartupRequest, response *model.ListStartupsResponse) (err error) {
-	var startups []model.Startup
+	startups := make([]model.Startup, 0)
 	total, err := model.ListParticipatedStartups(mysql.DB, ComerID, request, &startups)
 	if err != nil {
 		log.Warn(err)
