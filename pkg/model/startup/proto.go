@@ -37,7 +37,12 @@ type Startup struct {
 	Twitter              string                           `gorm:"twitter" json:"twitter"`
 	Telegram             string                           `gorm:"telegram" json:"telegram"`
 	Docs                 string                           `gorm:"docs" json:"docs"`
-	PresaleDate          NullTime                         `gorm:"presale_date" json:"presaleDate"`
+	LaunchNetwork        int                              `gorm:"launch_network" json:"launchNetwork"`
+	TokenName            string                           `gorm:"token_name" json:"tokenName"`
+	TokenSymbol          string                           `gorm:"token_symbol" json:"tokenSymbol"`
+	TotalSupply          int64                            `gorm:"total_supply" json:"totalSupply"`
+	PresaleStart         NullTime                         `gorm:"presale_start" json:"presaleStart"`
+	PresaleEnd           NullTime                         `gorm:"presale_end" json:"presaleEnd"`
 	LaunchDate           NullTime                         `gorm:"launch_date" json:"launchDate"`
 	Wallets              []Wallet                         `json:"wallets"`
 	Members              []startup_team.StartupTeamMember `json:"members"`
@@ -89,7 +94,12 @@ type BasicSetting struct {
 // FinanceSetting Startup finance setting
 type FinanceSetting struct {
 	TokenContractAddress string    `gorm:"token_contract_address" json:"tokenContractAddress"`
-	PresaleDate          time.Time `gorm:"presale_date" json:"presaleDate"`
+	LaunchNetwork        int       `gorm:"launch_network" json:"launchNetwork"`
+	TokenName            string    `gorm:"token_name" json:"tokenName"`
+	TokenSymbol          string    `gorm:"token_symbol" json:"tokenSymbol"`
+	TotalSupply          int64     `gorm:"total_supply" json:"totalSupply"`
+	PresaleStart         time.Time `gorm:"presale_start" json:"presaleStart"`
+	PresaleEnd           time.Time `gorm:"presale_end" json:"presaleEnd"`
 	LaunchDate           time.Time `gorm:"launch_date" json:"launchDate"`
 	//Wallets              []Wallet  `json:"wallets"`
 }

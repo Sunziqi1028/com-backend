@@ -3,14 +3,14 @@ Navicat MySQL Data Transfer
 
 Source Server         : test
 Source Server Version : 50737
-Source Host           : 10.168.171.127:3306
+Source Host           : 10.168.171.107:3306
 Source Database       : comunion
 
 Target Server Type    : MYSQL
 Target Server Version : 50737
 File Encoding         : 65001
 
-Date: 2022-05-10 16:31:41
+Date: 2022-05-25 15:46:38
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -28,6 +28,7 @@ CREATE TABLE `comer` (
                          PRIMARY KEY (`id`),
                          UNIQUE KEY `comer_address_uindex` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- ----------------------------
 -- Table structure for `comer_account`
@@ -50,6 +51,7 @@ CREATE TABLE `comer_account` (
                                  KEY `comer_account_comer_id_index` (`comer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
 -- ----------------------------
 -- Table structure for `comer_profile`
 -- ----------------------------
@@ -60,7 +62,13 @@ CREATE TABLE `comer_profile` (
                                  `name` varchar(50) NOT NULL COMMENT 'name',
                                  `avatar` varchar(200) NOT NULL COMMENT 'avatar',
                                  `location` char(42) NOT NULL DEFAULT '' COMMENT 'location city',
+                                 `time_zone` varchar(50) DEFAULT NULL COMMENT 'time zone: UTC-09:30',
                                  `website` varchar(50) DEFAULT '' COMMENT 'website',
+                                 `email` varchar(100) DEFAULT NULL COMMENT 'email',
+                                 `twitter` varchar(100) DEFAULT NULL COMMENT 'twitter',
+                                 `discord` varchar(100) DEFAULT NULL COMMENT 'discord',
+                                 `telegram` varchar(100) DEFAULT NULL COMMENT 'telegram',
+                                 `medium` varchar(100) DEFAULT NULL COMMENT 'medium',
                                  `bio` text COMMENT 'bio',
                                  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -68,6 +76,7 @@ CREATE TABLE `comer_profile` (
                                  PRIMARY KEY (`id`),
                                  UNIQUE KEY `comer_profile_comer_id_uindex` (`comer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- ----------------------------
 -- Table structure for `image`
@@ -84,6 +93,7 @@ CREATE TABLE `image` (
                          PRIMARY KEY (`id`),
                          UNIQUE KEY `image_category_name_uindex` (`category`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- ----------------------------
 -- Table structure for `startup`
@@ -107,7 +117,12 @@ CREATE TABLE `startup` (
                            `twitter` varchar(200) DEFAULT NULL COMMENT 'twitter',
                            `telegram` varchar(200) DEFAULT NULL COMMENT 'telegram',
                            `docs` varchar(200) DEFAULT NULL COMMENT 'docs',
-                           `presale_date` datetime DEFAULT NULL COMMENT 'pre-sale_date',
+                           `launch_network` int(11) DEFAULT NULL COMMENT 'chain id',
+                           `token_name` varchar(100) DEFAULT NULL COMMENT 'token name',
+                           `token_symbol` varchar(50) DEFAULT NULL COMMENT 'token symbol',
+                           `total_supply` bigint(20) DEFAULT NULL COMMENT 'total supply',
+                           `presale_start` datetime DEFAULT NULL COMMENT 'presale start date',
+                           `presale_end` datetime DEFAULT NULL COMMENT 'presale end date',
                            `launch_date` datetime DEFAULT NULL COMMENT 'launch_date',
                            `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
                            `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -115,6 +130,8 @@ CREATE TABLE `startup` (
                            PRIMARY KEY (`id`),
                            UNIQUE KEY `startup_name_uindex` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 -- ----------------------------
 -- Table structure for `startup_follow_rel`
@@ -130,6 +147,8 @@ CREATE TABLE `startup_follow_rel` (
                                       UNIQUE KEY `startup_followed_comer_id_startup_id_uindex` (`comer_id`,`startup_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+
 -- ----------------------------
 -- Table structure for `startup_team_member_rel`
 -- ----------------------------
@@ -144,6 +163,9 @@ CREATE TABLE `startup_team_member_rel` (
                                            PRIMARY KEY (`id`),
                                            UNIQUE KEY `startup_team_rel_comer_id_startup_id_uindex` (`comer_id`,`startup_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------
+
 
 -- ----------------------------
 -- Table structure for `startup_wallet`
@@ -163,6 +185,7 @@ CREATE TABLE `startup_wallet` (
                                   UNIQUE KEY `startup_wallet_startup_id_wallet_name_uindex` (`startup_id`,`wallet_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
 -- ----------------------------
 -- Table structure for `tag`
 -- ----------------------------
@@ -178,7 +201,8 @@ CREATE TABLE `tag` (
                        PRIMARY KEY (`id`),
                        UNIQUE KEY `tag_category_name_uindex` (`name`,`category`),
                        UNIQUE KEY `tag_id_uindex` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=104967365144577 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=114112701034497 DEFAULT CHARSET=utf8mb4;
+
 
 -- ----------------------------
 -- Table structure for `tag_target_rel`
@@ -194,3 +218,4 @@ CREATE TABLE `tag_target_rel` (
                                   PRIMARY KEY (`id`),
                                   UNIQUE KEY `comer_id_skill_id_uindex` (`target`,`target_id`,`tag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

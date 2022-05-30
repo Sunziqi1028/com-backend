@@ -64,6 +64,11 @@ func CreateStartupFollowRel(db *gorm.DB, comerID, startupID uint64) error {
 	return db.Create(&FollowRelation{ComerID: comerID, StartupID: startupID}).Error
 }
 
+// DeleteStartupFollowRel delete comer relation for startup and comer
+func DeleteStartupFollowRel(db *gorm.DB, input *FollowRelation) error {
+	return db.Where("comer_id = ? AND startup_id = ?", input.ComerID, input.StartupID).Delete(input).Error
+}
+
 // ListFollowedStartups  list followed startups
 func ListFollowedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startups *[]Startup) (total int64, err error) {
 	db = db.Where("is_deleted = false").Joins("INNER JOIN startup_follow_rel ON startup_follow_rel.comer_id = ? AND startup_id = startup.id", comerID)
@@ -123,10 +128,19 @@ func UpdateStartupFinanceSetting(db *gorm.DB, startupID uint64, input *FinanceSe
 	var fieldMap map[string]interface{}
 	fieldMap = make(map[string]interface{})
 	fieldMap["token_contract_address"] = input.TokenContractAddress
-	if input.PresaleDate.IsZero() {
-		fieldMap["presale_date"] = sql.NullTime{}
+	fieldMap["launch_network"] = input.LaunchNetwork
+	fieldMap["token_name"] = input.TokenName
+	fieldMap["token_symbol"] = input.TokenSymbol
+	fieldMap["total_supply"] = input.TotalSupply
+	if input.PresaleStart.IsZero() {
+		fieldMap["presale_start"] = sql.NullTime{}
 	} else {
-		fieldMap["presale_date"] = input.PresaleDate
+		fieldMap["presale_start"] = input.PresaleStart
+	}
+	if input.PresaleEnd.IsZero() {
+		fieldMap["presale_end"] = sql.NullTime{}
+	} else {
+		fieldMap["presale_end"] = input.PresaleEnd
 	}
 	if input.LaunchDate.IsZero() {
 		fieldMap["launch_date"] = sql.NullTime{}
@@ -135,4 +149,38 @@ func UpdateStartupFinanceSetting(db *gorm.DB, startupID uint64, input *FinanceSe
 	}
 
 	return db.Table("startup").Where("id = ?", startupID).Updates(fieldMap).Error
+}
+
+// ListParticipatedStartups  list participated startups
+func ListParticipatedStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest, startups *[]Startup) (total int64, err error) {
+	db = db.Where("is_deleted = false").Joins("INNER JOIN startup_team_member_rel ON startup_team_member_rel.comer_id = ? AND startup_id = startup.id", comerID)
+	if input.Keyword != "" {
+		db = db.Where("name like ?", "%"+input.Keyword+"%")
+	}
+	if input.Mode != 0 {
+		db = db.Where("mode = ?", input.Mode)
+	}
+	if err = db.Table("startup").Count(&total).Error; err != nil {
+		return
+	}
+	if total == 0 {
+		return
+	}
+	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Preload("Members").Preload("Follows").Find(startups).Error
+	return
+}
+
+// StartupFollowIsExist check startup and comer is existed
+func StartupFollowIsExist(db *gorm.DB, startupID, comerID uint64) (isExist bool, err error) {
+	var count int64
+	err = db.Table("startup_follow_rel").Where("startup_id = ? AND comer_id = ?", startupID, comerID).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count == 0 {
+		isExist = false
+	} else {
+		isExist = true
+	}
+	return
 }
