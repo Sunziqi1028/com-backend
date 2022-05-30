@@ -90,32 +90,35 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 }
 
 // LinkOauthAccountToComer link a new Oauth account to the current comer
-func LinkOauthAccountToComer(ComerID uint64, client auth.OauthClient, oauthType account.ComerAccountType) (err error) {
+func LinkOauthAccountToComer(comerID uint64, client auth.OauthClient, oauthType account.ComerAccountType) (err error) {
 	oauth, err := client.GetUserProfile()
 	if err != nil {
 		log.Warn(err)
 		return
 	}
+	log.Debugf("LINK_OAUTH_ACCOUNT_TO_COMER--> comerId: %d\n", comerID)
 	// try to find account
 	var comerAccount account.ComerAccount
 	if err = account.GetComerAccount(mysql.DB, oauthType, oauth.GetUserID(), &comerAccount); err != nil {
 		log.Warn(err)
 		return err
 	}
-	if comerAccount.ID != 0 {
-		err = router.ErrBadRequest.WithMsg("Account has bind to another comer")
-		return err
-	}
-	comerAccount = account.ComerAccount{
-		ComerID:   ComerID,
-		OIN:       oauth.GetUserID(),
-		IsPrimary: true,
-		Nick:      oauth.GetUserNick(),
-		Avatar:    oauth.GetUserAvatar(),
-		Type:      oauthType,
-		IsLinked:  true,
-	}
-	if err = account.CreateAccount(mysql.DB, &comerAccount); err != nil {
+	if comerAccount.ID == 0 {
+		comerAccount = account.ComerAccount{
+			ComerID:   comerID,
+			OIN:       oauth.GetUserID(),
+			IsPrimary: true,
+			Nick:      oauth.GetUserNick(),
+			Avatar:    oauth.GetUserAvatar(),
+			Type:      oauthType,
+			IsLinked:  true,
+		}
+		if err = account.CreateAccount(mysql.DB, &comerAccount); err != nil {
+			return err
+		}
+	} else if comerAccount.ComerID != comerID {
+		log.Debugf("Account %s(%s) has bind to another comer: %d", oauth.GetUserID(), oauth.GetUserNick(), comerAccount.ComerID)
+		err = router.ErrBadRequest.WithMsg("Account has bind to another comerId")
 		return err
 	}
 	return
