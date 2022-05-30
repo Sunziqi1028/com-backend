@@ -46,6 +46,7 @@ func extractComerIdFromJwtToken(ctx *router.Context) (comerID uint64, err error)
 	} else {
 		comerID, err = jwt.Verify(comunioAuthHeader)
 	}
+	log.Debugf("EXTRACT COMUNION_COMER_ID FROM JWT_TOKEN: %d\n", comerID)
 	return
 }
 
