@@ -90,7 +90,7 @@ func LoginWithOauth(client auth.OauthClient, oauthType account.ComerAccountType,
 }
 
 // LinkOauthAccountToComer link a new Oauth account to the current comer
-func LinkOauthAccountToComer(comerID uint64, client auth.OauthClient, oauthType account.ComerAccountType) (err error) {
+func LinkOauthAccountToComer(comerID uint64, client auth.OauthClient, oauthType account.ComerAccountType, response *account.ComerLoginResponse) (err error) {
 	oauth, err := client.GetUserProfile()
 	if err != nil {
 		log.Warn(err)
@@ -120,6 +120,30 @@ func LinkOauthAccountToComer(comerID uint64, client auth.OauthClient, oauthType 
 		log.Debugf("Account %s(%s) has bind to another comer: %d", oauth.GetUserID(), oauth.GetUserNick(), comerAccount.ComerID)
 		err = router.ErrBadRequest.WithMsg("Account has bind to another comerId")
 		return err
+	}
+
+	var (
+		comerProfile account.ComerProfile
+		isProfiled   bool
+	)
+	if err := account.GetComerProfile(mysql.DB, comerID, &comerProfile); err != nil {
+		isProfiled = true
+	} else {
+		isProfiled = false
+	}
+
+	// sign with jwt using the comer UIN
+	token := jwt.Sign(comerAccount.ComerID)
+
+	address := ""
+
+	*response = account.ComerLoginResponse{
+		IsProfiled: isProfiled,
+		Avatar:     comerAccount.Avatar,
+		Nick:       comerAccount.Nick,
+		Address:    address,
+		Token:      token,
+		ComerID:    comerID,
 	}
 	return
 }

@@ -31,11 +31,12 @@ func LoginWithGithubCallback(ctx *router.Context) {
 		}
 		ctx.OK(response)
 	} else {
-		if err = service.LinkOauthAccountToComer(comerID, client, model.GithubOauth); err != nil {
+		var response account.ComerLoginResponse
+		if err = service.LinkOauthAccountToComer(comerID, client, model.GithubOauth, &response); err != nil {
 			ctx.HandleError(err)
 			return
 		}
-		ctx.OK(nil)
+		ctx.OK(response)
 	}
 }
 func extractComerIdFromJwtToken(ctx *router.Context) (comerID uint64, err error) {
@@ -69,11 +70,12 @@ func LoginWithGoogleCallback(ctx *router.Context) {
 		}
 		ctx.OK(response)
 	} else {
-		if err = service.LinkOauthAccountToComer(comerID, client, model.GoogleOauth); err != nil {
+		var response account.ComerLoginResponse
+		if err = service.LinkOauthAccountToComer(comerID, client, model.GoogleOauth, &response); err != nil {
 			ctx.HandleError(err)
 			return
 		}
-		ctx.OK(nil)
+		ctx.OK(response)
 	}
 }
 

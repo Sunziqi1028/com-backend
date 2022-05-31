@@ -24,6 +24,7 @@ func Init() (err error) {
 		oauthLogin.Use(middleware.GuestAuthorizationMiddleware())
 		oauthLogin.GET("/github/login/callback", router.Wrap(account.LoginWithGithubCallback))
 		oauthLogin.GET("/google/login/callback", router.Wrap(account.LoginWithGoogleCallback))
+
 	}
 
 	// web3 login router
@@ -47,6 +48,8 @@ func Init() (err error) {
 		accountPriv.GET("/profile", router.Wrap(account.GetProfile))
 		accountPriv.POST("/profile", router.Wrap(account.CreateProfile))
 		accountPriv.PUT("/profile", router.Wrap(account.UpdateProfile))
+		// oauth
+		oauthLogin.GET("/wallet/link-oauth", router.Wrap(account.LinkOauth2Wallet))
 	}
 
 	// accounts operation router

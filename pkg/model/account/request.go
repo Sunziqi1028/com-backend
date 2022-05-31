@@ -37,3 +37,10 @@ type UpdateProfileRequest struct {
 	Medium   *string  `json:"medium" binding:"required"`
 	BIO      string   `json:"bio" binding:"min=100"`
 }
+
+// LinkOauth2WalletRequest link oauth with given wallet
+type LinkOauth2WalletRequest struct {
+	WalletAddress string           `json:"walletAddress" binding:"required"`
+	OauthCode     string           `json:"oauthCode" binding:"required"`
+	OauthType     ComerAccountType `json:"oauthType" binding:"required"`
+}
