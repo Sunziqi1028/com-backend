@@ -147,3 +147,7 @@ func LinkOauthAccountToComer(comerID uint64, client auth.OauthClient, oauthType 
 	}
 	return
 }
+
+func LinkOauthToComer(comerAccountId, comerId uint64) error {
+	return account.BindComerAccountToComerId(mysql.DB, comerAccountId, comerId)
+}

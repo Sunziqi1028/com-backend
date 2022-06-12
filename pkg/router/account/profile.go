@@ -61,7 +61,7 @@ func UpdateProfile(ctx *router.Context) {
 	ctx.OK(nil)
 }
 
-func LinkOauth2Wallet(ctx *router.Context) {
+func LinkOauth2Comer(ctx *router.Context) {
 	comerID, err := extractComerIdFromJwtToken(ctx)
 	if err != nil {
 		ctx.HandleError(err)
@@ -73,13 +73,17 @@ func LinkOauth2Wallet(ctx *router.Context) {
 		return
 	}
 	var walletComer model.Comer
-	if err := model.GetComerByAddress(mysql.DB, linkReq.WalletAddress, &walletComer); err != nil {
+	if err := model.GetComerByID(mysql.DB, comerID, &walletComer); err != nil {
+		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Comer  %d does not exist", comerID)))
+		return
+	}
+	if linkReq.WalletAddressRequired && walletComer.Address == nil {
 		// 钱包对应的Comer必须存在！
-		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Comer with adress %s does not exist", linkReq.WalletAddress)))
+		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Comer  %d does not have wallet address", comerID)))
 		return
 	} else if walletComer.ID != comerID {
 		// 当前登录人和传入的钱包必须是同一个Comer
-		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Invalid walletAddress: %s", linkReq.WalletAddress)))
+		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Invalid walletAddress: %s", linkReq.WalletAddressRequired)))
 		return
 	}
 	if linkReq.OauthType != model.GithubOauth && linkReq.OauthType != model.GoogleOauth {

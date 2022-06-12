@@ -17,7 +17,18 @@ func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err 
 		log.Warn(err)
 		return err
 	}
-
+	var accounts []model.ComerAccount
+	_ = model.GetComerAccountsByComerId(mysql.DB, comerID, &accounts)
+	var accountInfos []model.ComerAccountInfo
+	if accounts != nil {
+		for _, account := range accounts {
+			accountInfos = append(accountInfos, model.ComerAccountInfo{
+				ComerAccountId:   account.ID,
+				ComerAccountType: account.Type,
+			})
+		}
+	}
+	response.ComerAccounts = accountInfos
 	return
 }
 
@@ -93,6 +104,7 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 		}
 		return nil
 	})
+
 	return err
 }
 
