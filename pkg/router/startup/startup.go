@@ -182,6 +182,26 @@ func ListParticipateStartups(ctx *router.Context) {
 	ctx.OK(response)
 }
 
+// ListBeMemberStartups list I am a member of startup
+func ListBeMemberStartups(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	var request model.ListStartupRequest
+	if err := ctx.ShouldBindQuery(&request); err != nil {
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
+		ctx.HandleError(err)
+		return
+	}
+
+	var response model.ListStartupsResponse
+	if err := service.ListBeMemberStartups(comerID, &request, &response); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(response)
+}
+
 // StartupFollowedByMe get startup is followed by me
 func StartupFollowedByMe(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)

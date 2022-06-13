@@ -17,3 +17,15 @@ func ListParticipateStartups(ComerID uint64, request *model.ListStartupRequest, 
 	response.List = startups
 	return
 }
+
+func ListBeMemberStartups(ComerID uint64, request *model.ListStartupRequest, response *model.ListStartupsResponse) (err error) {
+	startups := make([]model.Startup, 0)
+	total, err := model.ListBeMemberStartups(mysql.DB, ComerID, request, &startups)
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+	response.Total = total
+	response.List = startups
+	return
+}
