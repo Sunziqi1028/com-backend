@@ -217,7 +217,6 @@ func loginWithOauth(ctx *router.Context, oauthAccount func(string) (auth.OauthAc
 				loginResponse.Address = *comer.Address
 				loginResponse.OauthLinked = true
 				loginResponse.OauthAccountId = comerAccount.ID
-				return
 			}
 		}
 		comerId = comerAccount.ComerID
