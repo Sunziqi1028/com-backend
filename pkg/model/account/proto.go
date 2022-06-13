@@ -18,7 +18,7 @@ const (
 // Comer the comer model of comunion inner account
 type Comer struct {
 	model.Base
-	Address *string `gorm:"column:address"`
+	Address *string `gorm:"column:address" json:"address"`
 }
 
 // TableName Comer table name for gorm
