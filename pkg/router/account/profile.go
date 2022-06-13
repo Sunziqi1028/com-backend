@@ -83,7 +83,7 @@ func LinkOauth2Comer(ctx *router.Context) {
 		return
 	} else if walletComer.ID != comerID {
 		// 当前登录人和传入的钱包必须是同一个Comer
-		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Invalid walletAddress: %s", linkReq.WalletAddressRequired)))
+		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Invalid walletAddress: %d", walletComer.ID)))
 		return
 	}
 	if linkReq.OauthType != model.GithubOauth && linkReq.OauthType != model.GoogleOauth {
