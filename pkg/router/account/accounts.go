@@ -114,12 +114,12 @@ func GetComerInfoByAddress(ctx *router.Context) {
 
 // OauthFirstLoginLinkedByWalletAddress oauth首次登录时候关联于钱包地址——钱包地址对应的comer不一定存在。不存在则创建！！
 func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
-	address := ctx.Param("address")
+	address := ctx.Query("address")
 	if address == "" {
 		handleError(ctx, errors.New("address required"))
 		return
 	}
-	oauthAccountId, err := strconv.ParseUint(ctx.Param("oauthAccountId"), 10, 64)
+	oauthAccountId, err := strconv.ParseUint(ctx.Query("oauthAccountId"), 10, 64)
 	if oauthAccountId == 0 || err != nil {
 		handleError(ctx, errors.New("oauth account id required"))
 		return
