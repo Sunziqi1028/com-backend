@@ -24,6 +24,10 @@ func Init() (err error) {
 		oauthLogin.Use(middleware.GuestAuthorizationMiddleware())
 		oauthLogin.GET("/github/login/callback", router.Wrap(account.LoginWithGithubCallback))
 		oauthLogin.GET("/google/login/callback", router.Wrap(account.LoginWithGoogleCallback))
+
+		oauthLogin.POST("/register", router.Wrap(account.RegisterWithOauth))
+		oauthLogin.GET("/login-link-by-wallet", router.Wrap(account.OauthFirstLoginLinkedByWalletAddress))
+
 	}
 
 	// web3 login router
@@ -47,6 +51,10 @@ func Init() (err error) {
 		accountPriv.GET("/profile", router.Wrap(account.GetProfile))
 		accountPriv.POST("/profile", router.Wrap(account.CreateProfile))
 		accountPriv.PUT("/profile", router.Wrap(account.UpdateProfile))
+		// link oauth account to wallet, like github、google
+		oauthLogin.POST("/unlink-oauth", router.Wrap(account.UnlinkAccount))
+		oauthLogin.POST("/link-oauth", router.Wrap(account.LinkOauth2Comer))
+		oauthLogin.POST("/link-oauth-with-wallet", router.Wrap(account.LinkOauth2Comer))
 	}
 
 	// accounts operation router
