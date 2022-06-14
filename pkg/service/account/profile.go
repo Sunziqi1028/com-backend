@@ -19,16 +19,22 @@ func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err 
 	}
 	var accounts []model.ComerAccount
 	_ = model.GetComerAccountsByComerId(mysql.DB, comerID, &accounts)
-	var accountInfos []model.ComerAccountInfo
-	if accounts != nil {
-		for _, account := range accounts {
-			accountInfos = append(accountInfos, model.ComerAccountInfo{
-				ComerAccountId:   account.ID,
-				ComerAccountType: account.Type,
-			})
-		}
+	var accountBindingInfos = []model.OauthAccountBindingInfo{
+		{Linked: false, AccountType: 1},
+		{Linked: false, AccountType: 2},
 	}
-	response.ComerAccounts = accountInfos
+	if accounts != nil && len(accounts) > 0 {
+		for _, info := range accountBindingInfos {
+			for _, account := range accounts {
+				if info.AccountType == account.Type {
+					info.Linked = true
+					info.AccountId = account.ID
+				}
+			}
+		}
+
+	}
+	response.ComerAccounts = accountBindingInfos
 	return
 }
 

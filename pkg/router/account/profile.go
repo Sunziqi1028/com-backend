@@ -77,7 +77,7 @@ func LinkOauth2Comer(ctx *router.Context) {
 		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Comer  %d does not exist", comerID)))
 		return
 	}
-	if linkReq.WalletAddressRequired && walletComer.Address == nil {
+	if walletComer.Address == nil {
 		// 钱包对应的Comer必须存在！
 		ctx.HandleError(router.ErrBadRequest.WithMsg(fmt.Sprintf("Comer  %d does not have wallet address", comerID)))
 		return
