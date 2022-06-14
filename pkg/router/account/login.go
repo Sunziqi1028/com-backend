@@ -327,14 +327,14 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 	} else {
 		// 2 已关联到comer
 		if comerAccount.ComerID != 0 && comerAccount.IsLinked {
-			if err := account.GetComerByID(mysql.DB, comerAccount.ComerID, &comer); err != nil {
+			if err = account.GetComerByID(mysql.DB, comerAccount.ComerID, &comer); err != nil {
 				return
 			}
 			if comer.ID == 0 || comer.IsDeleted {
 				err = errors.New(fmt.Sprintf("Comer does not exist or was deleted!"))
 				return
 			}
-			if err := account.GetComerProfile(mysql.DB, comerAccount.ComerID, &comerProfile); err != nil {
+			if err = account.GetComerProfile(mysql.DB, comerAccount.ComerID, &comerProfile); err != nil {
 				return
 			}
 			loginResponse.Nick = comerProfile.Name
