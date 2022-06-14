@@ -40,9 +40,8 @@ type UpdateProfileRequest struct {
 
 // LinkOauth2WalletRequest link oauth with given wallet
 type LinkOauth2WalletRequest struct {
-	WalletAddressRequired bool             `json:"walletAddressRequired" binding:"required"`
-	OauthCode             string           `json:"oauthCode" binding:"required"`
-	OauthType             ComerAccountType `json:"oauthType" binding:"required"`
+	OauthCode string           `json:"oauthCode" binding:"required"`
+	OauthType ComerAccountType `json:"oauthType" binding:"required"`
 }
 
 // RegisterWithOauthRequest register with oauth

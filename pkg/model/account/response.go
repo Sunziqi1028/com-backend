@@ -22,6 +22,7 @@ type ComerLoginResponse struct {
 	Address    string `json:"address"`
 	Token      string `json:"token"`
 	IsProfiled bool   `json:"isProfiled"`
+	FirstLogin bool   `json:"firstLogin"`
 }
 
 // WalletNonceResponse wrap the nonce for formating rule in resposne
@@ -32,11 +33,12 @@ type WalletNonceResponse struct {
 // ComerProfileResponse return the profile of some comer
 type ComerProfileResponse struct {
 	ComerProfile
-	ComerAccounts []ComerAccountInfo
+	ComerAccounts []OauthAccountBindingInfo `json:"comerAccounts"`
 }
-type ComerAccountInfo struct {
-	ComerAccountId   uint64           `json:"comerAccountId"`
-	ComerAccountType ComerAccountType `json:"comerAccountType"`
+type OauthAccountBindingInfo struct {
+	Linked      bool             `json:"linked"`
+	AccountType ComerAccountType `json:"accountType"`
+	AccountId   uint64           `json:"accountId"`
 }
 
 // ComerOuterAccountListResponse response of the comer outer account list
