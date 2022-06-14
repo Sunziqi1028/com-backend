@@ -51,6 +51,12 @@ func Init() (err error) {
 		accountPriv.GET("/profile", router.Wrap(account.GetProfile))
 		accountPriv.POST("/profile", router.Wrap(account.CreateProfile))
 		accountPriv.PUT("/profile", router.Wrap(account.UpdateProfile))
+
+		// comer operations
+		accountPriv.POST("/comer/:comerID/follow", router.Wrap(account.FollowComer))
+		accountPriv.DELETE("/comer/:comerID/unfollow", router.Wrap(account.UnfollowComer))
+		accountPriv.GET("/comer/:comerID/followedByMe", router.Wrap(account.ComerFollowedByMe))
+
 		// link oauth account to wallet, like github、google
 		oauthLogin.POST("/unlink-oauth", router.Wrap(account.UnlinkAccount))
 		oauthLogin.POST("/link-oauth", router.Wrap(account.LinkOauth2Comer))
@@ -73,7 +79,6 @@ func Init() (err error) {
 		coresPriv.DELETE("/startups/:startupID/unfollow", router.Wrap(startup.UnfollowStartup))
 		coresPriv.GET("/startups/follow", router.Wrap(startup.ListFollowStartups))
 		coresPriv.GET("/startups/participate", router.Wrap(startup.ListParticipateStartups))
-		coresPriv.GET("/startups/beMember", router.Wrap(startup.ListBeMemberStartups))
 		coresPriv.GET("/startups/:startupID/teamMembers", router.Wrap(startup.ListStartupTeamMembers))
 		coresPriv.POST("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.CreateStartupTeamMember))
 		coresPriv.PUT("/startups/:startupID/teamMembers/:comerID", router.Wrap(startup.UpdateStartupTeamMember))
@@ -90,6 +95,7 @@ func Init() (err error) {
 		coresPub.GET("/startups/:startupID", router.Wrap(startup.GetStartup))
 		coresPub.GET("/startups/name/:name/isExist", router.Wrap(startup.StartupNameIsExist))
 		coresPub.GET("/startups/tokenContract/:tokenContract/isExist", router.Wrap(startup.StartupTokenContractIsExist))
+		coresPub.GET("/startups/member/:comerID", router.Wrap(startup.ListBeMemberStartups))
 		//coresPub.GET("/startups/:startupId/setting", router.Wrap(startup.GetStartupSetting))
 	}
 

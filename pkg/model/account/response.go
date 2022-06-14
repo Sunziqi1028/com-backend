@@ -47,5 +47,13 @@ type ComerOuterAccountListResponse struct {
 
 type GetComerInfoResponse struct {
 	Comer
-	ComerProfile ComerProfile `json:"comerProfile"`
+	ComerProfile  ComerProfile     `json:"comerProfile"`
+	Follows       []FollowRelation `json:"follows"`
+	FollowsCount  int64            `gorm:"-" json:"followsCount"`
+	Followed      []FollowRelation `json:"followed"`
+	FollowedCount int64            `gorm:"-" json:"followedCount"`
+}
+
+type IsFollowedResponse struct {
+	IsFollowed bool `json:"isFollowed"`
 }

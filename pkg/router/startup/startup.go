@@ -182,9 +182,14 @@ func ListParticipateStartups(ctx *router.Context) {
 	ctx.OK(response)
 }
 
-// ListBeMemberStartups list I am a member of startup
+// ListBeMemberStartups list as a member of startup
 func ListBeMemberStartups(ctx *router.Context) {
-	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	comerID, err := strconv.ParseUint(ctx.Param("comerID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid comer ID")
+		ctx.HandleError(err)
+		return
+	}
 	var request model.ListStartupRequest
 	if err := ctx.ShouldBindQuery(&request); err != nil {
 		log.Warn(err)
@@ -192,7 +197,6 @@ func ListBeMemberStartups(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-
 	var response model.ListStartupsResponse
 	if err := service.ListBeMemberStartups(comerID, &request, &response); err != nil {
 		ctx.HandleError(err)

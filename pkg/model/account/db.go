@@ -62,6 +62,38 @@ func UpdateComerProfile(db *gorm.DB, comerProfile *ComerProfile) error {
 	return db.Where("comer_id = ? AND is_deleted = false", comerProfile.ComerID).Select("avatar", "name", "location", "time_zone", "website", "email", "twitter", "discord", "telegram", "medium", "bio").Updates(comerProfile).Error
 }
 
+// CreateComerFollowRel create comer relation for comer and target comer
+func CreateComerFollowRel(db *gorm.DB, comerID, targetComerID uint64) error {
+	return db.Create(&FollowRelation{ComerID: comerID, TargetComerID: targetComerID}).Error
+}
+
+// DeleteComerFollowRel delete comer relation for comer and target comer
+func DeleteComerFollowRel(db *gorm.DB, input *FollowRelation) error {
+	return db.Where("comer_id = ? AND target_comer_id = ?", input.ComerID, input.TargetComerID).Delete(input).Error
+}
+
+// ComerFollowIsExist check startup and comer is existed
+func ComerFollowIsExist(db *gorm.DB, comerID, targetComerID uint64) (isExist bool, err error) {
+	isExist = false
+	var count int64
+	err = db.Table("comer_follow_rel").Where("comer_id = ? AND target_comer_id = ?", comerID, targetComerID).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count > 0 {
+		isExist = true
+	}
+	return
+}
+
+func ListComerFollow(db *gorm.DB, comerID uint64, followList *[]FollowRelation, count *int64) (err error) {
+	return db.Where("comer_id = ?", comerID).Find(followList).Count(count).Error
+}
+
+func ListComerFollowed(db *gorm.DB, comerID uint64, followList *[]FollowRelation, count *int64) (err error) {
+	return db.Where("target_comer_id = ?", comerID).Find(followList).Count(count).Error
+}
+
 //BindComerAccountToComerId bind comerAccount to comer
 func BindComerAccountToComerId(db *gorm.DB, comerAccountId, comerID uint64) (err error) {
 	return db.Model(&ComerAccount{Base: model.Base{ID: comerAccountId}}).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error
