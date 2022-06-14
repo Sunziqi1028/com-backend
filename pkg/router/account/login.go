@@ -316,7 +316,7 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 				Nick:      oauth.GetUserNick(),
 				Avatar:    oauth.GetUserAvatar(),
 				Type:      oauthType,
-				IsLinked:  false,
+				IsLinked:  true,
 			}
 			if erro = account.CreateAccount(mysql.DB, &comerAccount); erro != nil {
 				return erro
