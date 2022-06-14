@@ -65,3 +65,14 @@ type ComerProfile struct {
 func (ComerProfile) TableName() string {
 	return "comer_profile"
 }
+
+type FollowRelation struct {
+	model.RelationBase
+	ComerID       uint64 `gorm:"comer_id" json:"comerID"`
+	TargetComerID uint64 `gorm:"target_comer_id" json:"targetComerID"`
+}
+
+// TableName Followed table name for gorm
+func (FollowRelation) TableName() string {
+	return "comer_follow_rel"
+}

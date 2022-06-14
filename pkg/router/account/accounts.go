@@ -106,3 +106,60 @@ func GetComerInfoByAddress(ctx *router.Context) {
 		ctx.OK(response)
 	}
 }
+
+// FollowComer follow Comer
+func FollowComer(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	targetComerID, err := strconv.ParseUint(ctx.Param("comerID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid comer ID")
+		ctx.HandleError(err)
+		return
+	}
+	if comerID == targetComerID {
+		err = router.ErrBadRequest.WithMsg("Can not follow myself")
+		ctx.HandleError(err)
+		return
+	}
+	if err = service.FollowComer(comerID, targetComerID); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(nil)
+}
+
+// UnfollowComer unfollow Comer
+func UnfollowComer(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	targetComerID, err := strconv.ParseUint(ctx.Param("comerID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid comer ID")
+		ctx.HandleError(err)
+		return
+	}
+	if err = service.UnfollowComer(comerID, targetComerID); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(nil)
+}
+
+// ComerFollowedByMe get comer is followed by me
+func ComerFollowedByMe(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	targetComerID, err := strconv.ParseUint(ctx.Param("comerID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid comer ID")
+		ctx.HandleError(err)
+		return
+	}
+	isFollowed, err := service.FollowedByComer(comerID, targetComerID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(model.IsFollowedResponse{IsFollowed: isFollowed})
+}

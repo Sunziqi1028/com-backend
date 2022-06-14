@@ -68,6 +68,14 @@ func GetComerInfo(comerID uint64, response *model.GetComerInfoResponse) (err err
 		log.Warn(err)
 		return err
 	}
+	if err = model.ListComerFollow(mysql.DB, comerID, &response.Follows, &response.FollowsCount); err != nil {
+		log.Warn(err)
+		return err
+	}
+	if err = model.ListComerFollowed(mysql.DB, comerID, &response.Followed, &response.FollowedCount); err != nil {
+		log.Warn(err)
+		return err
+	}
 	return
 }
 
