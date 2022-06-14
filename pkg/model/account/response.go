@@ -1,5 +1,19 @@
 package account
 
+type OauthLoginResponse struct {
+	ComerID    uint64 `json:"comerID"`
+	Nick       string `json:"nick"`
+	Avatar     string `json:"avatar"`
+	Address    string `json:"address"`
+	Token      string `json:"token"`
+	IsProfiled bool   `json:"isProfiled"`
+	// OauthType wallet, oauthGithub, oauthGoogle
+	// OauthType ComerAccountType `json:"oauthType"`
+	// OauthLinked
+	OauthLinked    bool   `json:"oauthLinked"`
+	OauthAccountId uint64 `json:"oauthAccountId"`
+}
+
 // ComerLoginResponse comer login response
 type ComerLoginResponse struct {
 	ComerID    uint64 `json:"comerID"`
@@ -18,6 +32,11 @@ type WalletNonceResponse struct {
 // ComerProfileResponse return the profile of some comer
 type ComerProfileResponse struct {
 	ComerProfile
+	ComerAccounts []ComerAccountInfo
+}
+type ComerAccountInfo struct {
+	ComerAccountId   uint64           `json:"comerAccountId"`
+	ComerAccountType ComerAccountType `json:"comerAccountType"`
 }
 
 // ComerOuterAccountListResponse response of the comer outer account list

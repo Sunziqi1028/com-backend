@@ -9,5 +9,6 @@ var Logger *elog.Component
 func Init() error {
 	Logger = elog.Load("ceres.logger").Build()
 	elog.DefaultLogger = Logger
+
 	return nil
 }

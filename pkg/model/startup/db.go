@@ -29,7 +29,7 @@ func BatchUpdateStartupWallet(db *gorm.DB, wallets []Wallet) (err error) {
 
 //FirstOrCreateWallet first or create wallet
 func FirstOrCreateWallet(db *gorm.DB, wallet *Wallet) error {
-	return db.Where("startup_id = ? AND (wallet_name = ? OR wallet_address = ?)", wallet.StartupID, wallet.WalletName, wallet.WalletAddress).FirstOrCreate(&wallet).Error
+	return db.Where("startup_id = ? AND wallet_name = ? ", wallet.StartupID, wallet.WalletName).FirstOrCreate(&wallet).Error
 }
 
 //DeleteStartupWallet delete startup wallet where not used

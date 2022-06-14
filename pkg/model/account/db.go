@@ -31,6 +31,10 @@ func GetComerAccount(db *gorm.DB, accountType ComerAccountType, oin string, come
 	return db.Where("type = ? AND oin = ? AND is_deleted = false", accountType, oin).Find(comerAccount).Error
 }
 
+func GetComerAccountById(db *gorm.DB, accountId uint64, comerAccount *ComerAccount) error {
+	return db.Where("id=? AND is_deleted = false", accountId).Find(comerAccount).Error
+}
+
 func ListAccount(db *gorm.DB, comerID uint64, accountList *[]ComerAccount) (err error) {
 	return db.Where("comer_id = ? AND is_deleted = false", comerID).Find(accountList).Error
 }
@@ -88,4 +92,13 @@ func ListComerFollow(db *gorm.DB, comerID uint64, followList *[]FollowRelation, 
 
 func ListComerFollowed(db *gorm.DB, comerID uint64, followList *[]FollowRelation, count *int64) (err error) {
 	return db.Where("target_comer_id = ?", comerID).Find(followList).Count(count).Error
+}
+
+//BindComerAccountToComerId bind comerAccount to comer
+func BindComerAccountToComerId(db *gorm.DB, comerAccountId, comerID uint64) (err error) {
+	return db.Model(&ComerAccount{Base: model.Base{ID: comerAccountId}}).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error
+}
+
+func GetComerAccountsByComerId(db *gorm.DB, comerId uint64, accounts *[]ComerAccount) (err error) {
+	return db.Where("comer_id = ? and is_deleted = false", comerId).Find(accounts).Error
 }
