@@ -18,7 +18,11 @@ func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err 
 		return err
 	}
 	var accounts []model.ComerAccount
-	_ = model.GetComerAccountsByComerId(mysql.DB, comerID, &accounts)
+	if err = model.GetComerAccountsByComerId(mysql.DB, comerID, &accounts); err != nil {
+		log.Warn(err)
+		return err
+	}
+	log.Infof("comer accounts for %d : %v \n", comerID, accounts)
 	var accountBindingInfos = []model.OauthAccountBindingInfo{
 		{Linked: false, AccountType: 1},
 		{Linked: false, AccountType: 2},
@@ -32,7 +36,6 @@ func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err 
 				}
 			}
 		}
-
 	}
 	response.ComerAccounts = accountBindingInfos
 	return
