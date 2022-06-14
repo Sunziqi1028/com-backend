@@ -39,7 +39,7 @@ func GuestAuthorizationMiddleware() gin.HandlerFunc {
 // JwtAuthorizationMiddleware  handle the authorization
 func JwtAuthorizationMiddleware(ctx *gin.Context) {
 	token := ctx.Request.Header[http.CanonicalHeaderKey(AuthorizationHeader)]
-
+	log.Debugf("JwtAuthorizationMiddleware: %s \n", token)
 	if len(token) == 0 {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, router.ErrUnauthorized)
 		return

@@ -73,8 +73,11 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 		return err
 	}
 	//set default profile status
-	var isProfiled bool
-	var profile account.ComerProfile
+	var (
+		isProfiled bool
+		profile    account.ComerProfile
+		firstLogin = false
+	)
 
 	if comer.ID == 0 {
 		comer = account.Comer{
@@ -86,6 +89,7 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 			return err
 		}
 		isProfiled = false
+		firstLogin = true
 	} else {
 		//get comer profile
 		if err = account.GetComerProfile(mysql.DB, comer.ID, &profile); err != nil {
@@ -112,6 +116,7 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 		Address:    address,
 		Token:      token,
 		ComerID:    comer.ID,
+		FirstLogin: firstLogin,
 	}
 
 	return

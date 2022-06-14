@@ -25,6 +25,7 @@ func Init() (err error) {
 		oauthLogin.GET("/github/login/callback", router.Wrap(account.LoginWithGithubCallback))
 		oauthLogin.GET("/google/login/callback", router.Wrap(account.LoginWithGoogleCallback))
 
+		oauthLogin.Use(middleware.ComerAuthorizationMiddleware())
 		oauthLogin.POST("/register", router.Wrap(account.RegisterWithOauth))
 		oauthLogin.GET("/login-link-by-wallet", router.Wrap(account.OauthFirstLoginLinkedByWalletAddress))
 
@@ -58,7 +59,6 @@ func Init() (err error) {
 		accountPriv.GET("/comer/:comerID/followedByMe", router.Wrap(account.ComerFollowedByMe))
 
 		// link oauth account to wallet, like github、google
-		oauthLogin.POST("/unlink-oauth", router.Wrap(account.UnlinkAccount))
 		oauthLogin.POST("/link-oauth", router.Wrap(account.LinkOauth2Comer))
 		oauthLogin.POST("/link-oauth-with-wallet", router.Wrap(account.LinkOauth2Comer))
 	}
