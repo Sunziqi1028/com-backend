@@ -348,8 +348,8 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 		}
 	}
 	comerId = comerAccount.ComerID
-	loginResponse.ComerID = comerId
 	token := jwt.Sign(comerId)
+	loginResponse.ComerID = comerId
 	loginResponse.Token = token
-	return
+	return nil, loginResponse
 }
