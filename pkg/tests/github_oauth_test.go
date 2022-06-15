@@ -3,7 +3,7 @@ package pkg
 import (
 	"ceres/pkg/utility/auth"
 	"fmt"
-	"github.com/labstack/gommon/random"
+	"github.com/coreos/etcd/pkg/stringutil"
 	"net/http"
 	"testing"
 )
@@ -37,12 +37,11 @@ func (account *MockUserProfile) GetUserNick() string {
 }
 
 func (c MockOauthClient) GetUserProfile() (account auth.OauthAccount, err error) {
-	r := random.New()
 	profile := MockUserProfile{
-		Login:  "MOCK_LOGIN" + r.String(8),
+		Login:  "MOCK_LOGIN" + stringutil.RandomStrings(8, 1)[0],
 		ID:     0,
-		Name:   "MOCK_NAME" + r.String(8),
-		Avatar: "MOCK_AVATAR" + r.String(8),
+		Name:   "MOCK_NAME" + stringutil.RandomStrings(8, 1)[0],
+		Avatar: "MOCK_AVATAR" + stringutil.RandomStrings(8, 1)[0],
 	}
 	return &profile, nil
 }
