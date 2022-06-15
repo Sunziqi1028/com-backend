@@ -298,7 +298,7 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 		return
 	}
 	loginResponse = account.OauthLoginResponse{}
-	loginResponse.ComerID = 0
+
 	loginResponse.IsProfiled = false
 	loginResponse.OauthLinked = false
 	loginResponse.OauthAccountId = comerAccount.ID
@@ -348,6 +348,7 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 		}
 	}
 	comerId = comerAccount.ComerID
+	loginResponse.ComerID = comerId
 	token := jwt.Sign(comerId)
 	loginResponse.Token = token
 	return
