@@ -15,6 +15,10 @@ func ListParticipateStartups(ComerID uint64, request *model.ListStartupRequest, 
 	}
 	response.Total = total
 	response.List = startups
+	for i, startup := range response.List {
+		response.List[i].MemberCount = len(startup.Members)
+		response.List[i].FollowCount = len(startup.Follows)
+	}
 	return
 }
 
@@ -27,5 +31,9 @@ func ListBeMemberStartups(ComerID uint64, request *model.ListStartupRequest, res
 	}
 	response.Total = total
 	response.List = startups
+	for i, startup := range response.List {
+		response.List[i].MemberCount = len(startup.Members)
+		response.List[i].FollowCount = len(startup.Follows)
+	}
 	return
 }
