@@ -121,11 +121,17 @@ func RegisterWithOauth(ctx *router.Context) {
 		return
 	}
 
+	var address string
+	if comer.Address == nil {
+		address = ""
+	} else {
+		address = *comer.Address
+	}
 	loginResponse = model.OauthLoginResponse{
 		ComerID:        comer.ID,
 		Nick:           comerProfile.Name,
 		Avatar:         comerProfile.Avatar,
-		Address:        *comer.Address,
+		Address:        address,
 		Token:          jwt.Sign(comer.ID),
 		IsProfiled:     true,
 		OauthLinked:    true,
@@ -221,11 +227,18 @@ func loginWithRegisteredComer(oauth auth.OauthAccount, oauthType model.ComerAcco
 	if err = model.GetComerAccount(mysql.DB, oauthType, oauth.GetUserID(), &crtComerAccount); err != nil {
 		return
 	}
+
+	var address string
+	if comer.Address == nil {
+		address = ""
+	} else {
+		address = *comer.Address
+	}
 	loginResponse = model.OauthLoginResponse{
 		ComerID:        logonComerId,
 		Nick:           oauth.GetUserNick(),
 		Avatar:         oauth.GetUserAvatar(),
-		Address:        *comer.Address,
+		Address:        address,
 		Token:          jwt.Sign(logonComerId),
 		IsProfiled:     false,
 		OauthLinked:    false,
@@ -321,6 +334,9 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 			if erro = account.CreateAccount(mysql.DB, &comerAccount); erro != nil {
 				return erro
 			}
+			loginResponse.Address = ""
+			loginResponse.OauthLinked = true
+			loginResponse.OauthAccountId = comerAccount.ID
 			return nil
 		}); err != nil {
 			return
@@ -338,11 +354,17 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 			if err = account.GetComerProfile(mysql.DB, comerAccount.ComerID, &comerProfile); err != nil {
 				return
 			}
-			loginResponse.Nick = comerProfile.Name
-			loginResponse.Avatar = comerProfile.Avatar
-			loginResponse.IsProfiled = true
+			if comerProfile.ID != 0 {
+				loginResponse.Nick = comerProfile.Name
+				loginResponse.Avatar = comerProfile.Avatar
+				loginResponse.IsProfiled = true
+			}
 			loginResponse.ComerID = comer.ID
-			loginResponse.Address = *comer.Address
+			if comer.Address == nil {
+				loginResponse.Address = ""
+			} else {
+				loginResponse.Address = *comer.Address
+			}
 			loginResponse.OauthLinked = true
 			loginResponse.OauthAccountId = comerAccount.ID
 		}
