@@ -31,6 +31,8 @@ func GetStartup(startupID uint64, response *model.GetStartupResponse) (err error
 		log.Warn(err)
 		return
 	}
+	response.MemberCount = len(response.Members)
+	response.FollowCount = len(response.Follows)
 	return
 }
 
