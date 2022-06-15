@@ -76,3 +76,25 @@ type FollowRelation struct {
 func (FollowRelation) TableName() string {
 	return "comer_follow_rel"
 }
+
+type FollowComer struct {
+	TargetComerID uint64       `gorm:"target_comer_id" json:"comerID"`
+	Comer         Comer        `gorm:"foreignkey:ID;references:TargetComerID" json:"comer"`
+	ComerProfile  ComerProfile `gorm:"foreignkey:ComerID;references:TargetComerID" json:"comerProfile"`
+}
+
+// TableName FollowComer table name for gorm
+func (FollowComer) TableName() string {
+	return "comer_follow_rel"
+}
+
+type FollowedComer struct {
+	ComerID      uint64       `gorm:"comer_id" json:"comerID"`
+	Comer        Comer        `gorm:"foreignkey:ID;references:ComerID" json:"comer"`
+	ComerProfile ComerProfile `gorm:"foreignkey:ComerID;references:ComerID" json:"comerProfile"`
+}
+
+// TableName FollowComer table name for gorm
+func (FollowedComer) TableName() string {
+	return "comer_follow_rel"
+}

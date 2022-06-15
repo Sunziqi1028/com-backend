@@ -3,7 +3,6 @@ package account
 import (
 	"ceres/pkg/model"
 	"ceres/pkg/model/tag"
-
 	"gorm.io/gorm"
 )
 
@@ -86,12 +85,20 @@ func ComerFollowIsExist(db *gorm.DB, comerID, targetComerID uint64) (isExist boo
 	return
 }
 
-func ListComerFollow(db *gorm.DB, comerID uint64, followList *[]FollowRelation, count *int64) (err error) {
-	return db.Where("comer_id = ?", comerID).Find(followList).Count(count).Error
+func ListFollowComer(db *gorm.DB, comerID uint64, output *[]FollowComer) (total int64, err error) {
+	if comerID != 0 {
+		db = db.Where("comer_id = ?", comerID)
+	}
+	err = db.Order("created_at ASC").Preload("Comer").Preload("ComerProfile").Preload("ComerProfile.Skills").Find(output).Count(&total).Error
+	return
 }
 
-func ListComerFollowed(db *gorm.DB, comerID uint64, followList *[]FollowRelation, count *int64) (err error) {
-	return db.Where("target_comer_id = ?", comerID).Find(followList).Count(count).Error
+func ListFollowedComer(db *gorm.DB, comerID uint64, output *[]FollowedComer) (total int64, err error) {
+	if comerID != 0 {
+		db = db.Where("target_comer_id = ?", comerID)
+	}
+	err = db.Order("created_at ASC").Preload("Comer").Preload("ComerProfile").Preload("ComerProfile.Skills").Find(output).Count(&total).Error
+	return
 }
 
 //BindComerAccountToComerId bind comerAccount to comer
