@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -142,7 +143,7 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	if err = account.GetComerByID(mysql.DB, comerID, &comer); err != nil {
 		return
 	}
-	if comer.Address != nil {
+	if comer.Address != nil && strings.TrimSpace(*comer.Address) != "" {
 		return router.ErrBadRequest.WithMsg("Current comer has linked with a wallet")
 	}
 
@@ -151,8 +152,8 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 			return
 		}
 	}
-	if comer.ID != 0 {
-		return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with a comer")
+	if comer.ID != 0 && comer.ID != comerID {
+		return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with another comer")
 	}
 
 	if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
