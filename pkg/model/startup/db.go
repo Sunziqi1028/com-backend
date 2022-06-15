@@ -185,7 +185,7 @@ func ListBeMemberStartups(db *gorm.DB, comerID uint64, input *ListStartupRequest
 	if total == 0 {
 		return
 	}
-	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Preload("Members").Preload("Follows").Find(startups).Error
+	err = db.Order("created_at DESC").Limit(input.Limit).Offset(input.Offset).Preload("Wallets").Preload("HashTags", "category = ?", tag.Startup).Preload("Members").Preload("Members.Comer").Preload("Members.ComerProfile").Preload("Follows").Find(startups).Error
 	return
 }
 
