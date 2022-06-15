@@ -28,15 +28,18 @@ func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err 
 		{Linked: false, AccountType: 2},
 	}
 	if accounts != nil && len(accounts) > 0 {
+		var mp map[model.ComerAccountType]uint64
+		for _, account := range accounts {
+			mp[account.Type] = account.ID
+		}
 		for _, info := range accountBindingInfos {
-			for _, account := range accounts {
-				if info.AccountType == account.Type {
-					info.Linked = true
-					info.AccountId = account.ID
-				}
+			if v, ok := mp[info.AccountType]; ok {
+				info.AccountId = v
+				info.Linked = true
 			}
 		}
 	}
+	log.Infof("comer accounts bidingInfos for %d : %v \n", comerID, accountBindingInfos)
 	response.ComerAccounts = accountBindingInfos
 	return
 }
