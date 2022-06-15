@@ -32,7 +32,7 @@ type WalletNonceResponse struct {
 
 // ComerProfileResponse return the profile of some comer
 type ComerProfileResponse struct {
-	ComerProfile
+	*ComerProfile
 	ComerAccounts []*OauthAccountBindingInfo `json:"comerAccounts"`
 }
 type OauthAccountBindingInfo struct {

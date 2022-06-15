@@ -18,7 +18,7 @@ func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err 
 		log.Warn(err)
 		return err
 	}
-	response.ComerProfile = profile
+	response.ComerProfile = &profile
 	var accounts []model.ComerAccount
 	if err = model.GetComerAccountsByComerId(mysql.DB, comerID, &accounts); err != nil {
 		log.Warn(err)
