@@ -128,6 +128,7 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	nonce, err := redis.Client.Get(context.TODO(), address)
 	if err != nil {
 		if err.Error() == "eredis get string error eredis exec command get fail, redis: nil" {
+			log.Warn("Please get nonce")
 			err = router.ErrBadRequest.WithMsg("Please get nonce")
 			return
 		}
@@ -136,15 +137,19 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	}
 	//verify wallet and nonce
 	if err = VerifyEthWallet(address, nonce, signature); err != nil {
+		log.Warn(err)
 		return
 	}
 
 	var targetComer account.Comer
 	if err = account.GetComerByID(mysql.DB, comerID, &targetComer); err != nil {
+		log.Warn(err)
 		return
 	}
-	if targetComer.Address != nil && strings.TrimSpace(*targetComer.Address) != "" {
-		if *(targetComer.Address) != address {
+	add := targetComer.Address
+	if add != nil && strings.TrimSpace(*add) != "" {
+		if strings.TrimSpace(*add) != address {
+			log.Warn("Current targetComer has linked with a wallet")
 			return router.ErrBadRequest.WithMsg("Current targetComer has linked with a wallet")
 		}
 		return nil
@@ -153,10 +158,12 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	var comerByAddress account.Comer
 	if err = account.GetComerByAddress(mysql.DB, address, &comerByAddress); err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return
+			log.Warn(err)
+			return err
 		}
 	}
-	if comerByAddress.ID != 0 && comerByAddress.ID != comerID {
+	if comerByAddress.ID != 0 {
+		log.Warn("Current eth wallet account is linked with another targetComer")
 		return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with another targetComer")
 	}
 
@@ -167,9 +174,9 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 
 	_, err = redis.Client.Del(context.TODO(), address)
 	if err != nil {
-		log.Warnf("redis remove nonce key failed %v", err)
+		log.Warnf("redis remove nonce key failed %v\n", err)
 	}
-	return
+	return nil
 }
 
 // VerifyEthWallet verify the signature and login with the wallet
