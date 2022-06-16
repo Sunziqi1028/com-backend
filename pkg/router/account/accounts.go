@@ -71,7 +71,21 @@ func LinkWithWallet(ctx *router.Context) {
 		return
 	}
 
-	ctx.OK(nil)
+	var (
+		profile model.ComerProfile
+		res     model.LinkWalletResponse
+	)
+	if err := account.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	if profile.ID != 0 {
+		res = model.LinkWalletResponse{IsProfiled: true}
+	} else {
+		res = model.LinkWalletResponse{IsProfiled: false}
+	}
+
+	ctx.OK(res)
 }
 
 // GetComerInfo get comer
@@ -215,7 +229,7 @@ func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
 		}
 
 		if existedAccounts == nil || len(existedAccounts) == 0 {
-			if err := service.LinkOauthToComer(oauthAccountId, comer.ID); err != nil {
+			if err := service.LinkOauthToComer(comer.ID); err != nil {
 				handleError(ctx, err)
 				return
 			}
@@ -236,7 +250,7 @@ func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
 				return
 			}
 			if !existed {
-				if err := service.LinkOauthToComer(oauthAccountId, comer.ID); err != nil {
+				if err := service.LinkOauthToComer(comer.ID); err != nil {
 					handleError(ctx, err)
 					return
 				}
@@ -250,7 +264,7 @@ func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
 			if err := model.CreateComer(mysql.DB, &comer); err != nil {
 				return err
 			}
-			if err := service.LinkOauthToComer(oauthAccountId, comer.ID); err != nil {
+			if err := service.LinkOauthToComer(comer.ID); err != nil {
 				return err
 			}
 			return
@@ -273,11 +287,12 @@ func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
 		userName = profile.Name
 		avatar = profile.Avatar
 	}
+
 	loginResponse = model.OauthLoginResponse{
 		ComerID:        comer.ID,
 		Nick:           userName,
 		Avatar:         avatar,
-		Address:        *comer.Address,
+		Address:        address,
 		Token:          jwt.Sign(comer.ID),
 		IsProfiled:     isProfiled,
 		OauthLinked:    true,

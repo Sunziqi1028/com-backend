@@ -60,3 +60,8 @@ type GetComerInfoResponse struct {
 type IsFollowedResponse struct {
 	IsFollowed bool `json:"isFollowed"`
 }
+
+// LinkWalletResponse link wallet response
+type LinkWalletResponse struct {
+	IsProfiled bool `json:"isProfiled"`
+}
