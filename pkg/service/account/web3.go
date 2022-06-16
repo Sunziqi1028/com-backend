@@ -139,21 +139,25 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 		return
 	}
 
-	var comer account.Comer
-	if err = account.GetComerByID(mysql.DB, comerID, &comer); err != nil {
+	var targetComer account.Comer
+	if err = account.GetComerByID(mysql.DB, comerID, &targetComer); err != nil {
 		return
 	}
-	if comer.Address != nil && strings.TrimSpace(*comer.Address) != "" {
-		return router.ErrBadRequest.WithMsg("Current comer has linked with a wallet")
+	if targetComer.Address != nil && strings.TrimSpace(*targetComer.Address) != "" {
+		if *(targetComer.Address) != address {
+			return router.ErrBadRequest.WithMsg("Current targetComer has linked with a wallet")
+		}
+		return nil
 	}
 
-	if err = account.GetComerByAddress(mysql.DB, address, &comer); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+	var comerByAddress account.Comer
+	if err = account.GetComerByAddress(mysql.DB, address, &comerByAddress); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return
 		}
 	}
-	if comer.ID != 0 && comer.ID != comerID {
-		return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with another comer")
+	if comerByAddress.ID != 0 && comerByAddress.ID != comerID {
+		return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with another targetComer")
 	}
 
 	if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
