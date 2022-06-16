@@ -229,7 +229,7 @@ func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
 		}
 
 		if existedAccounts == nil || len(existedAccounts) == 0 {
-			if err := service.LinkOauthToComer(comer.ID); err != nil {
+			if err := service.LinkOauthToComer(oauthAccountId, comer.ID); err != nil {
 				handleError(ctx, err)
 				return
 			}
@@ -250,7 +250,7 @@ func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
 				return
 			}
 			if !existed {
-				if err := service.LinkOauthToComer(comer.ID); err != nil {
+				if err := service.LinkOauthToComer(oauthAccountId, comer.ID); err != nil {
 					handleError(ctx, err)
 					return
 				}
@@ -264,7 +264,7 @@ func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
 			if err := model.CreateComer(mysql.DB, &comer); err != nil {
 				return err
 			}
-			if err := service.LinkOauthToComer(comer.ID); err != nil {
+			if err := service.LinkOauthToComer(oauthAccountId, comer.ID); err != nil {
 				return err
 			}
 			return
