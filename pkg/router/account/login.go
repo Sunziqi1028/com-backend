@@ -275,7 +275,7 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 			return nil, loginResponse
 		} else if /*未关联Comer*/ crtComerAccount.ComerID == 0 {
 			//
-			if err = model.BindComerAccountToComerId(mysql.DB, logonComerId); err != nil {
+			if err = model.BindComerAccountToComerId(mysql.DB, crtComerAccount.ID, logonComerId); err != nil {
 				return
 			}
 			return nil, loginResponse
@@ -286,7 +286,7 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 			}
 			/*其他Comer未绑定钱包,则oauth帐号可以换绑至此Comer*/
 			if anotherComer.ID == 0 || anotherComer.Address == nil || strings.TrimSpace(*anotherComer.Address) == "" {
-				if err = model.BindComerAccountToComerId(mysql.DB, logonComerId); err != nil {
+				if err = model.BindComerAccountToComerId(mysql.DB, crtComerAccount.ID, logonComerId); err != nil {
 					return
 				}
 				return nil, loginResponse
