@@ -352,14 +352,7 @@ func justLoginWithOauth(oauth auth.OauthAccount, oauthType model.ComerAccountTyp
 				err = errors.New(fmt.Sprintf("Comer does not exist or was deleted!"))
 				return
 			}
-			if err = account.GetComerProfile(mysql.DB, comerAccount.ComerID, &comerProfile); err != nil {
-				return
-			}
-			if comerProfile.ID != 0 {
-				loginResponse.Nick = comerProfile.Name
-				loginResponse.Avatar = comerProfile.Avatar
-				loginResponse.IsProfiled = true
-			}
+
 			loginResponse.ComerID = comer.ID
 			if comer.Address == nil || strings.TrimSpace(*comer.Address) == "" {
 				loginResponse.Address = ""
@@ -369,6 +362,14 @@ func justLoginWithOauth(oauth auth.OauthAccount, oauthType model.ComerAccountTyp
 			}
 			loginResponse.OauthAccountId = comerAccount.ID
 		}
+	}
+	if err = account.GetComerProfile(mysql.DB, comerAccount.ComerID, &comerProfile); err != nil {
+		return
+	}
+	if comerProfile.ID != 0 {
+		loginResponse.Nick = comerProfile.Name
+		loginResponse.Avatar = comerProfile.Avatar
+		loginResponse.IsProfiled = true
 	}
 	comerId = comerAccount.ComerID
 	token := jwt.Sign(comerId)
