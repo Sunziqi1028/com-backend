@@ -102,8 +102,8 @@ func ListFollowedComer(db *gorm.DB, comerID uint64, output *[]FollowedComer) (to
 }
 
 //BindComerAccountToComerId bind comerAccount to comer
-func BindComerAccountToComerId(db *gorm.DB, comerAccountId, comerID uint64) (err error) {
-	return db.Model(&ComerAccount{Base: model.Base{ID: comerAccountId}}).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error
+func BindComerAccountToComerId(db *gorm.DB, comerID uint64) (err error) {
+	return db.Model(&ComerAccount{}).Where("comer_id = ? and is_deleted = false", comerID).Updates(ComerAccount{IsLinked: true}).Error
 }
 
 func GetComerAccountsByComerId(db *gorm.DB, comerId uint64, accounts *[]ComerAccount) (err error) {
