@@ -16,13 +16,14 @@ type OauthLoginResponse struct {
 
 // ComerLoginResponse comer login response
 type ComerLoginResponse struct {
-	ComerID    uint64 `json:"comerID"`
-	Nick       string `json:"nick"`
-	Avatar     string `json:"avatar"`
-	Address    string `json:"address"`
-	Token      string `json:"token"`
-	IsProfiled bool   `json:"isProfiled"`
-	FirstLogin bool   `json:"firstLogin"`
+	ComerID       uint64                     `json:"comerID"`
+	Nick          string                     `json:"nick"`
+	Avatar        string                     `json:"avatar"`
+	Address       string                     `json:"address"`
+	Token         string                     `json:"token"`
+	IsProfiled    bool                       `json:"isProfiled"`
+	FirstLogin    bool                       `json:"firstLogin"`
+	ComerAccounts []*OauthAccountBindingInfo `json:"comerAccounts"`
 }
 
 // WalletNonceResponse wrap the nonce for formating rule in resposne
