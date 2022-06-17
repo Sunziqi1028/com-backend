@@ -90,10 +90,11 @@ func RegisterWithOauth(ctx *router.Context) {
 		return
 	}
 	var (
-		comer         model.Comer
-		comerAccount  model.ComerAccount
-		comerProfile  model.ComerProfile
-		loginResponse model.OauthLoginResponse
+		comer           model.Comer
+		comerHasAddress = false
+		comerAccount    model.ComerAccount
+		comerProfile    model.ComerProfile
+		loginResponse   model.OauthLoginResponse
 	)
 
 	if err := account.GetComerAccountById(mysql.DB, request.OauthAccountId, &comerAccount); err != nil {
@@ -113,8 +114,6 @@ func RegisterWithOauth(ctx *router.Context) {
 		handleError(ctx, err)
 		return
 	}
-	comerAccount.ComerID = comer.ID
-	comerAccount.IsLinked = true
 
 	if err := account.GetComerProfile(mysql.DB, comer.ID, &comerProfile); err != nil {
 		handleError(ctx, err)
@@ -122,10 +121,11 @@ func RegisterWithOauth(ctx *router.Context) {
 	}
 
 	var address string
-	if comer.Address == nil {
+	if comer.Address == nil || strings.TrimSpace(*comer.Address) == "" {
 		address = ""
 	} else {
 		address = *comer.Address
+		comerHasAddress = true
 	}
 	loginResponse = model.OauthLoginResponse{
 		ComerID:        comer.ID,
@@ -134,7 +134,7 @@ func RegisterWithOauth(ctx *router.Context) {
 		Address:        address,
 		Token:          jwt.Sign(comer.ID),
 		IsProfiled:     true,
-		OauthLinked:    true,
+		OauthLinked:    comerHasAddress,
 		OauthAccountId: comerAccount.ID,
 	}
 	ctx.OK(loginResponse)
@@ -170,7 +170,7 @@ func loginWithOauth(ctx *router.Context, oauthType model.ComerAccountType, oauth
 	}
 	log.Infof("loginWithOauth oauthInfo: %v\n", oauth)
 	if logonComerId == 0 {
-		err, loginResponse := loginWithUnRegistredComer(oauth, oauthType)
+		err, loginResponse := justLoginWithOauth(oauth, oauthType)
 		if err != nil {
 			handleError(ctx, err)
 			return
@@ -179,7 +179,7 @@ func loginWithOauth(ctx *router.Context, oauthType model.ComerAccountType, oauth
 		log.Infof("loginWithOauth response: %v\n", loginResponse)
 		return
 	} else {
-		err, loginResponse := loginWithRegisteredComer(oauth, oauthType, logonComerId)
+		err, loginResponse := bindOauth(oauth, oauthType, logonComerId)
 		if err != nil {
 			handleError(ctx, err)
 			return
@@ -191,19 +191,19 @@ func loginWithOauth(ctx *router.Context, oauthType model.ComerAccountType, oauth
 
 }
 
-func loginWithRegisteredComer(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonComerId uint64) (err error, loginResponse model.OauthLoginResponse) {
+func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonComerId uint64) (err error, loginResponse model.OauthLoginResponse) {
 
 	var (
 		crtComerAccount model.ComerAccount
-		comer           model.Comer
+		logonComer      model.Comer
 		comerProfile    model.ComerProfile
 	)
 	// link oauth after logon by wallet!!
-	if err = model.GetComerByID(mysql.DB, logonComerId, &comer); err != nil {
+	if err = model.GetComerByID(mysql.DB, logonComerId, &logonComer); err != nil {
 		return
 	}
-	if comer.ID == 0 {
-		err = errors.New(fmt.Sprintf("comer with id %d does not exist", logonComerId))
+	if logonComer.ID == 0 {
+		err = errors.New(fmt.Sprintf("logonComer with id %d does not exist", logonComerId))
 		return
 	}
 	var (
@@ -228,11 +228,15 @@ func loginWithRegisteredComer(oauth auth.OauthAccount, oauthType model.ComerAcco
 		return
 	}
 
-	var address string
-	if comer.Address == nil {
+	var (
+		address         string
+		comerHasAddress = false
+	)
+	if logonComer.Address == nil || strings.TrimSpace(*logonComer.Address) == "" {
 		address = ""
 	} else {
-		address = *comer.Address
+		address = *logonComer.Address
+		comerHasAddress = true
 	}
 	loginResponse = model.OauthLoginResponse{
 		ComerID:        logonComerId,
@@ -241,7 +245,7 @@ func loginWithRegisteredComer(oauth auth.OauthAccount, oauthType model.ComerAcco
 		Address:        address,
 		Token:          jwt.Sign(logonComerId),
 		IsProfiled:     false,
-		OauthLinked:    false,
+		OauthLinked:    comerHasAddress,
 		OauthAccountId: crtComerAccount.ID,
 	}
 	if err = account.GetComerProfile(mysql.DB, logonComerId, &comerProfile); err != nil {
@@ -262,12 +266,11 @@ func loginWithRegisteredComer(oauth auth.OauthAccount, oauthType model.ComerAcco
 				Nick:      oauth.GetUserNick(),
 				Avatar:    oauth.GetUserAvatar(),
 				Type:      oauthType,
-				IsLinked:  true,
+				IsLinked:  comerHasAddress,
 			}
 			if err = model.CreateAccount(mysql.DB, &crtComerAccount); err != nil {
 				return
 			}
-			loginResponse.OauthLinked = true
 			loginResponse.OauthAccountId = crtComerAccount.ID
 			return nil, loginResponse
 		} else if /*未关联Comer*/ crtComerAccount.ComerID == 0 {
@@ -275,7 +278,6 @@ func loginWithRegisteredComer(oauth auth.OauthAccount, oauthType model.ComerAcco
 			if err = model.BindComerAccountToComerId(mysql.DB, crtComerAccount.ID, logonComerId); err != nil {
 				return
 			}
-			loginResponse.OauthLinked = true
 			return nil, loginResponse
 		} else if /*关联到其他Comer了*/ crtComerAccount.ComerID != logonComerId {
 			var anotherComer model.Comer
@@ -283,13 +285,13 @@ func loginWithRegisteredComer(oauth auth.OauthAccount, oauthType model.ComerAcco
 				return
 			}
 			/*其他Comer未绑定钱包,则oauth帐号可以换绑至此Comer*/
-			if anotherComer.ID == 0 || anotherComer.Address == nil {
+			if anotherComer.ID == 0 || anotherComer.Address == nil || strings.TrimSpace(*anotherComer.Address) == "" {
 				if err = model.BindComerAccountToComerId(mysql.DB, crtComerAccount.ID, logonComerId); err != nil {
 					return
 				}
 				return nil, loginResponse
 			} else {
-				err = errors.New(fmt.Sprintf("oauth has linked to anohter comer"))
+				err = errors.New(fmt.Sprintf("oauth has linked to anohter logonComer"))
 				return
 			}
 		}
@@ -298,7 +300,7 @@ func loginWithRegisteredComer(oauth auth.OauthAccount, oauthType model.ComerAcco
 	return nil, loginResponse
 }
 
-func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAccountType) (err error, loginResponse account.OauthLoginResponse) {
+func justLoginWithOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType) (err error, loginResponse account.OauthLoginResponse) {
 
 	var (
 		comerAccount model.ComerAccount
@@ -335,7 +337,6 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 				return erro
 			}
 			loginResponse.Address = ""
-			loginResponse.OauthLinked = true
 			loginResponse.OauthAccountId = comerAccount.ID
 			return nil
 		}); err != nil {
@@ -351,23 +352,24 @@ func loginWithUnRegistredComer(oauth auth.OauthAccount, oauthType model.ComerAcc
 				err = errors.New(fmt.Sprintf("Comer does not exist or was deleted!"))
 				return
 			}
-			if err = account.GetComerProfile(mysql.DB, comerAccount.ComerID, &comerProfile); err != nil {
-				return
-			}
-			if comerProfile.ID != 0 {
-				loginResponse.Nick = comerProfile.Name
-				loginResponse.Avatar = comerProfile.Avatar
-				loginResponse.IsProfiled = true
-			}
+
 			loginResponse.ComerID = comer.ID
-			if comer.Address == nil {
+			if comer.Address == nil || strings.TrimSpace(*comer.Address) == "" {
 				loginResponse.Address = ""
 			} else {
 				loginResponse.Address = *comer.Address
+				loginResponse.OauthLinked = true
 			}
-			loginResponse.OauthLinked = true
 			loginResponse.OauthAccountId = comerAccount.ID
 		}
+	}
+	if err = account.GetComerProfile(mysql.DB, comerAccount.ComerID, &comerProfile); err != nil {
+		return
+	}
+	if comerProfile.ID != 0 {
+		loginResponse.Nick = comerProfile.Name
+		loginResponse.Avatar = comerProfile.Avatar
+		loginResponse.IsProfiled = true
 	}
 	comerId = comerAccount.ComerID
 	token := jwt.Sign(comerId)

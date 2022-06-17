@@ -71,7 +71,21 @@ func LinkWithWallet(ctx *router.Context) {
 		return
 	}
 
-	ctx.OK(nil)
+	var (
+		profile model.ComerProfile
+		res     model.LinkWalletResponse
+	)
+	if err := account.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	if profile.ID != 0 {
+		res = model.LinkWalletResponse{IsProfiled: true}
+	} else {
+		res = model.LinkWalletResponse{IsProfiled: false}
+	}
+
+	ctx.OK(res)
 }
 
 // GetComerInfo get comer
@@ -273,11 +287,12 @@ func OauthFirstLoginLinkedByWalletAddress(ctx *router.Context) {
 		userName = profile.Name
 		avatar = profile.Avatar
 	}
+
 	loginResponse = model.OauthLoginResponse{
 		ComerID:        comer.ID,
 		Nick:           userName,
 		Avatar:         avatar,
-		Address:        *comer.Address,
+		Address:        address,
 		Token:          jwt.Sign(comer.ID),
 		IsProfiled:     isProfiled,
 		OauthLinked:    true,

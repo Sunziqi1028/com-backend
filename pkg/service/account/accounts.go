@@ -36,6 +36,30 @@ func UserInfo(comerID uint64, UserInfo *model.ComerLoginResponse) error {
 	UserInfo.IsProfiled = isProfiled
 	UserInfo.ComerID = comer.ID
 
+	var accounts []model.ComerAccount
+	if err := model.GetComerAccountsByComerId(mysql.DB, comerID, &accounts); err != nil {
+		log.Warn(err)
+		return err
+	}
+	log.Infof("comer accounts for %d : %v \n", comerID, accounts)
+	var accountBindingInfos = []*model.OauthAccountBindingInfo{
+		{Linked: false, AccountType: 1},
+		{Linked: false, AccountType: 2},
+	}
+	if accounts != nil && len(accounts) > 0 {
+		mp := make(map[model.ComerAccountType]uint64)
+		for _, account := range accounts {
+			mp[account.Type] = account.ID
+		}
+		for _, info := range accountBindingInfos {
+			if v, ok := mp[info.AccountType]; ok {
+				info.AccountId = v
+				info.Linked = true
+			}
+		}
+	}
+	log.Infof("comer accounts bidingInfos for %d : %v \n", comerID, accountBindingInfos)
+	UserInfo.ComerAccounts = accountBindingInfos
 	return nil
 }
 
