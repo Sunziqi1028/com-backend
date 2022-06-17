@@ -18,7 +18,7 @@ const (
 // Comer the comer model of comunion inner account
 type Comer struct {
 	model.Base
-	Address *string `gorm:"column:address"`
+	Address *string `gorm:"column:address" json:"address"`
 }
 
 // TableName Comer table name for gorm
@@ -64,4 +64,37 @@ type ComerProfile struct {
 // TableName the Profile table name for gorm
 func (ComerProfile) TableName() string {
 	return "comer_profile"
+}
+
+type FollowRelation struct {
+	model.RelationBase
+	ComerID       uint64 `gorm:"comer_id" json:"comerID"`
+	TargetComerID uint64 `gorm:"target_comer_id" json:"targetComerID"`
+}
+
+// TableName Followed table name for gorm
+func (FollowRelation) TableName() string {
+	return "comer_follow_rel"
+}
+
+type FollowComer struct {
+	TargetComerID uint64       `gorm:"target_comer_id" json:"comerID"`
+	Comer         Comer        `gorm:"foreignkey:ID;references:TargetComerID" json:"comer"`
+	ComerProfile  ComerProfile `gorm:"foreignkey:ComerID;references:TargetComerID" json:"comerProfile"`
+}
+
+// TableName FollowComer table name for gorm
+func (FollowComer) TableName() string {
+	return "comer_follow_rel"
+}
+
+type FollowedComer struct {
+	ComerID      uint64       `gorm:"comer_id" json:"comerID"`
+	Comer        Comer        `gorm:"foreignkey:ID;references:ComerID" json:"comer"`
+	ComerProfile ComerProfile `gorm:"foreignkey:ComerID;references:ComerID" json:"comerProfile"`
+}
+
+// TableName FollowComer table name for gorm
+func (FollowedComer) TableName() string {
+	return "comer_follow_rel"
 }

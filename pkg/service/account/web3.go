@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -73,8 +74,11 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 		return err
 	}
 	//set default profile status
-	var isProfiled bool
-	var profile account.ComerProfile
+	var (
+		isProfiled bool
+		profile    account.ComerProfile
+		firstLogin = false
+	)
 
 	if comer.ID == 0 {
 		comer = account.Comer{
@@ -86,6 +90,7 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 			return err
 		}
 		isProfiled = false
+		firstLogin = true
 	} else {
 		//get comer profile
 		if err = account.GetComerProfile(mysql.DB, comer.ID, &profile); err != nil {
@@ -112,6 +117,7 @@ func LoginWithEthWallet(address, signature string, response *account.ComerLoginR
 		Address:    address,
 		Token:      token,
 		ComerID:    comer.ID,
+		FirstLogin: firstLogin,
 	}
 
 	return
@@ -122,6 +128,7 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	nonce, err := redis.Client.Get(context.TODO(), address)
 	if err != nil {
 		if err.Error() == "eredis get string error eredis exec command get fail, redis: nil" {
+			log.Warn("Please get nonce")
 			err = router.ErrBadRequest.WithMsg("Please get nonce")
 			return
 		}
@@ -130,24 +137,34 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	}
 	//verify wallet and nonce
 	if err = VerifyEthWallet(address, nonce, signature); err != nil {
+		log.Warn(err)
 		return
 	}
 
-	var comer account.Comer
-	if err = account.GetComerByID(mysql.DB, comerID, &comer); err != nil {
+	var targetComer account.Comer
+	if err = account.GetComerByID(mysql.DB, comerID, &targetComer); err != nil {
+		log.Warn(err)
 		return
 	}
-	if comer.Address != nil {
-		return router.ErrBadRequest.WithMsg("Current comer has linked with a wallet")
+	add := targetComer.Address
+	if add != nil && strings.TrimSpace(*add) != "" {
+		if strings.TrimSpace(*add) != address {
+			log.Warn("Current targetComer has linked with a wallet")
+			return router.ErrBadRequest.WithMsg("Current targetComer has linked with a wallet")
+		}
+		return nil
 	}
 
-	if err = account.GetComerByAddress(mysql.DB, address, &comer); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return
+	var comerByAddress account.Comer
+	if err = account.GetComerByAddress(mysql.DB, address, &comerByAddress); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn(err)
+			return err
 		}
 	}
-	if comer.ID != 0 {
-		return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with a comer")
+	if comerByAddress.ID != 0 {
+		log.Warn("Current eth wallet account is linked with another targetComer")
+		return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with another targetComer")
 	}
 
 	if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
@@ -157,9 +174,9 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 
 	_, err = redis.Client.Del(context.TODO(), address)
 	if err != nil {
-		log.Warnf("redis remove nonce key failed %v", err)
+		log.Warnf("redis remove nonce key failed %v\n", err)
 	}
-	return
+	return nil
 }
 
 // VerifyEthWallet verify the signature and login with the wallet

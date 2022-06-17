@@ -13,11 +13,36 @@ import (
 
 // GetComerProfile get current comer profile
 func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err error) {
-	if err = model.GetComerProfile(mysql.DB, comerID, &response.ComerProfile); err != nil {
+	var profile model.ComerProfile
+	if err = model.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
 		log.Warn(err)
 		return err
 	}
-
+	response.ComerProfile = &profile
+	var accounts []model.ComerAccount
+	if err = model.GetComerAccountsByComerId(mysql.DB, comerID, &accounts); err != nil {
+		log.Warn(err)
+		return err
+	}
+	log.Infof("comer accounts for %d : %v \n", comerID, accounts)
+	var accountBindingInfos = []*model.OauthAccountBindingInfo{
+		{Linked: false, AccountType: 1},
+		{Linked: false, AccountType: 2},
+	}
+	if accounts != nil && len(accounts) > 0 {
+		mp := make(map[model.ComerAccountType]uint64)
+		for _, account := range accounts {
+			mp[account.Type] = account.ID
+		}
+		for _, info := range accountBindingInfos {
+			if v, ok := mp[info.AccountType]; ok {
+				info.AccountId = v
+				info.Linked = true
+			}
+		}
+	}
+	log.Infof("comer accounts bidingInfos for %d : %v \n", comerID, accountBindingInfos)
+	response.ComerAccounts = accountBindingInfos
 	return
 }
 
@@ -93,6 +118,7 @@ func CreateComerProfile(comerID uint64, post *model.CreateProfileRequest) (err e
 		}
 		return nil
 	})
+
 	return err
 }
 

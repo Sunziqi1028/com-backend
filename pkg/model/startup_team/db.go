@@ -1,6 +1,7 @@
 package startup_team
 
 import (
+	"ceres/pkg/model/tag"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +16,7 @@ func ListStartupTeamMembers(db *gorm.DB, startupID uint64, input *ListStartupTea
 	if total == 0 {
 		return
 	}
-	err = db.Order("created_at ASC").Limit(input.Limit).Offset(input.Offset).Preload("Comer").Preload("ComerProfile").Find(output).Error
+	err = db.Order("created_at ASC").Limit(input.Limit).Offset(input.Offset).Preload("Comer").Preload("ComerProfile").Preload("ComerProfile.Skills", "category = ?", tag.ComerSkill).Find(output).Error
 	return
 }
 

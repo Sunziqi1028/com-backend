@@ -24,6 +24,11 @@ func Init() (err error) {
 		oauthLogin.Use(middleware.GuestAuthorizationMiddleware())
 		oauthLogin.GET("/github/login/callback", router.Wrap(account.LoginWithGithubCallback))
 		oauthLogin.GET("/google/login/callback", router.Wrap(account.LoginWithGoogleCallback))
+
+		oauthLogin.Use(middleware.ComerAuthorizationMiddleware())
+		oauthLogin.POST("/register", router.Wrap(account.RegisterWithOauth))
+		oauthLogin.GET("/login-link-by-wallet", router.Wrap(account.OauthFirstLoginLinkedByWalletAddress))
+
 	}
 
 	// web3 login router
@@ -47,6 +52,15 @@ func Init() (err error) {
 		accountPriv.GET("/profile", router.Wrap(account.GetProfile))
 		accountPriv.POST("/profile", router.Wrap(account.CreateProfile))
 		accountPriv.PUT("/profile", router.Wrap(account.UpdateProfile))
+
+		// comer operations
+		accountPriv.POST("/comer/:comerID/follow", router.Wrap(account.FollowComer))
+		accountPriv.DELETE("/comer/:comerID/unfollow", router.Wrap(account.UnfollowComer))
+		accountPriv.GET("/comer/:comerID/followedByMe", router.Wrap(account.ComerFollowedByMe))
+
+		// link oauth account to wallet, like github、google
+		oauthLogin.POST("/link-oauth", router.Wrap(account.LinkOauth2Comer))
+		oauthLogin.POST("/link-oauth-with-wallet", router.Wrap(account.LinkOauth2Comer))
 	}
 
 	// accounts operation router
@@ -81,6 +95,7 @@ func Init() (err error) {
 		coresPub.GET("/startups/:startupID", router.Wrap(startup.GetStartup))
 		coresPub.GET("/startups/name/:name/isExist", router.Wrap(startup.StartupNameIsExist))
 		coresPub.GET("/startups/tokenContract/:tokenContract/isExist", router.Wrap(startup.StartupTokenContractIsExist))
+		coresPub.GET("/startups/member/:comerID", router.Wrap(startup.ListBeMemberStartups))
 		//coresPub.GET("/startups/:startupId/setting", router.Wrap(startup.GetStartupSetting))
 	}
 

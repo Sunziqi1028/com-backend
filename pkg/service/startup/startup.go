@@ -19,6 +19,10 @@ func ListStartups(comerID uint64, request *model.ListStartupRequest, response *m
 		return
 	}
 	response.Total = total
+	for i, startup := range response.List {
+		response.List[i].MemberCount = len(startup.Members)
+		response.List[i].FollowCount = len(startup.Follows)
+	}
 	return
 }
 
@@ -27,6 +31,8 @@ func GetStartup(startupID uint64, response *model.GetStartupResponse) (err error
 		log.Warn(err)
 		return
 	}
+	response.MemberCount = len(response.Members)
+	response.FollowCount = len(response.Follows)
 	return
 }
 

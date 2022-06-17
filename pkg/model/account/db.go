@@ -3,8 +3,8 @@ package account
 import (
 	"ceres/pkg/model"
 	"ceres/pkg/model/tag"
-
 	"gorm.io/gorm"
+	"strings"
 )
 
 // GetComerByAddress  get comer entity by comer's address
@@ -29,6 +29,10 @@ func UpdateComerAddress(db *gorm.DB, comerID uint64, address string) (err error)
 
 func GetComerAccount(db *gorm.DB, accountType ComerAccountType, oin string, comerAccount *ComerAccount) error {
 	return db.Where("type = ? AND oin = ? AND is_deleted = false", accountType, oin).Find(comerAccount).Error
+}
+
+func GetComerAccountById(db *gorm.DB, accountId uint64, comerAccount *ComerAccount) error {
+	return db.Where("id=? AND is_deleted = false", accountId).Find(comerAccount).Error
 }
 
 func ListAccount(db *gorm.DB, comerID uint64, accountList *[]ComerAccount) (err error) {
@@ -56,4 +60,75 @@ func CreateComerProfile(db *gorm.DB, comerProfile *ComerProfile) error {
 //UpdateComerProfile update the comer address
 func UpdateComerProfile(db *gorm.DB, comerProfile *ComerProfile) error {
 	return db.Where("comer_id = ? AND is_deleted = false", comerProfile.ComerID).Select("avatar", "name", "location", "time_zone", "website", "email", "twitter", "discord", "telegram", "medium", "bio").Updates(comerProfile).Error
+}
+
+// CreateComerFollowRel create comer relation for comer and target comer
+func CreateComerFollowRel(db *gorm.DB, comerID, targetComerID uint64) error {
+	return db.Create(&FollowRelation{ComerID: comerID, TargetComerID: targetComerID}).Error
+}
+
+// DeleteComerFollowRel delete comer relation for comer and target comer
+func DeleteComerFollowRel(db *gorm.DB, input *FollowRelation) error {
+	return db.Where("comer_id = ? AND target_comer_id = ?", input.ComerID, input.TargetComerID).Delete(input).Error
+}
+
+// ComerFollowIsExist check startup and comer is existed
+func ComerFollowIsExist(db *gorm.DB, comerID, targetComerID uint64) (isExist bool, err error) {
+	isExist = false
+	var count int64
+	err = db.Table("comer_follow_rel").Where("comer_id = ? AND target_comer_id = ?", comerID, targetComerID).Count(&count).Error
+	if err != nil {
+		return
+	}
+	if count > 0 {
+		isExist = true
+	}
+	return
+}
+
+func ListFollowComer(db *gorm.DB, comerID uint64, output *[]FollowComer) (total int64, err error) {
+	if comerID != 0 {
+		db = db.Where("comer_id = ?", comerID)
+	}
+	err = db.Order("created_at ASC").Preload("Comer").Preload("ComerProfile").Preload("ComerProfile.Skills").Find(output).Count(&total).Error
+	return
+}
+
+func ListFollowedComer(db *gorm.DB, comerID uint64, output *[]FollowedComer) (total int64, err error) {
+	if comerID != 0 {
+		db = db.Where("target_comer_id = ?", comerID)
+	}
+	err = db.Order("created_at ASC").Preload("Comer").Preload("ComerProfile").Preload("ComerProfile.Skills").Find(output).Count(&total).Error
+	return
+}
+
+//BindComerAccountToComerId bind comerAccount to comer
+func BindComerAccountToComerId(db *gorm.DB, comerAccountId, comerID uint64) (err error) {
+	var crtAccount ComerAccount
+	db.First(&crtAccount, comerAccountId)
+	if crtAccount.ComerID == comerID {
+		return db.Model(&ComerAccount{}).Where("comer_id = ? and is_deleted = false", comerID).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error
+	}
+	return db.Transaction(func(tx *gorm.DB) (err error) {
+		var comer Comer
+		tx.First(&comer, crtAccount.ComerID)
+		var accounts []ComerAccount
+		if err := db.Where("comer_id = ? and is_deleted = false", comer.ID).Find(accounts).Error; err != nil {
+			return err
+		}
+		if accounts == nil || (len(accounts) == 1 && comer.Address == nil || strings.TrimSpace(*comer.Address) == "") {
+			tx.Delete(&comer)
+		}
+		if err = tx.Model(&ComerAccount{Base: model.Base{ID: comerAccountId}}).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error; err != nil {
+			return
+		}
+		if err = tx.Model(&ComerAccount{}).Where("comer_id = ? and is_deleted = false", comerID).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error; err != nil {
+			return
+		}
+		return nil
+	})
+}
+
+func GetComerAccountsByComerId(db *gorm.DB, comerId uint64, accounts *[]ComerAccount) (err error) {
+	return db.Where("comer_id = ? and is_deleted = false", comerId).Find(accounts).Error
 }

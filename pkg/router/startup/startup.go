@@ -48,11 +48,6 @@ func ListStartupsMe(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	for i, startup := range response.List {
-		response.List[i].MemberCount = len(startup.Members)
-		response.List[i].FollowCount = len(startup.Follows)
-	}
-
 	ctx.OK(response)
 }
 
@@ -175,6 +170,30 @@ func ListParticipateStartups(ctx *router.Context) {
 
 	var response model.ListStartupsResponse
 	if err := service.ListParticipateStartups(comerID, &request, &response); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK(response)
+}
+
+// ListBeMemberStartups list as a member of startup
+func ListBeMemberStartups(ctx *router.Context) {
+	comerID, err := strconv.ParseUint(ctx.Param("comerID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid comer ID")
+		ctx.HandleError(err)
+		return
+	}
+	var request model.ListStartupRequest
+	if err := ctx.ShouldBindQuery(&request); err != nil {
+		log.Warn(err)
+		err = router.ErrBadRequest.WithMsg(err.Error())
+		ctx.HandleError(err)
+		return
+	}
+	var response model.ListStartupsResponse
+	if err := service.ListBeMemberStartups(comerID, &request, &response); err != nil {
 		ctx.HandleError(err)
 		return
 	}
