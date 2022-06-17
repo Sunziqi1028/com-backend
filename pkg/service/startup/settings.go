@@ -27,13 +27,34 @@ func UpdateStartupBasicSetting(startupID uint64, request *model.UpdateStartupBas
 	var tagIds []uint64
 	var tagRelList []tag.TagTargetRel
 	startupBasicSetting := model.BasicSetting{
-		KYC:           *request.KYC,
-		ContractAudit: *request.ContractAudit,
-		Website:       *request.Website,
-		Discord:       *request.Discord,
-		Twitter:       *request.Twitter,
-		Telegram:      *request.Telegram,
-		Docs:          *request.Docs,
+		KYC:           startup.KYC,
+		ContractAudit: startup.ContractAudit,
+		Website:       startup.Website,
+		Discord:       startup.Discord,
+		Twitter:       startup.Twitter,
+		Telegram:      startup.Telegram,
+		Docs:          startup.Docs,
+	}
+	if request.KYC != nil {
+		startupBasicSetting.KYC = *request.KYC
+	}
+	if request.ContractAudit != nil {
+		startupBasicSetting.ContractAudit = *request.ContractAudit
+	}
+	if request.Website != nil {
+		startupBasicSetting.Website = *request.Website
+	}
+	if request.Discord != nil {
+		startupBasicSetting.Discord = *request.Discord
+	}
+	if request.Twitter != nil {
+		startupBasicSetting.Twitter = *request.Twitter
+	}
+	if request.Telegram != nil {
+		startupBasicSetting.Telegram = *request.Telegram
+	}
+	if request.Docs != nil {
+		startupBasicSetting.Docs = *request.Docs
 	}
 	if err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
 		for _, tagName := range request.HashTags {
@@ -56,13 +77,17 @@ func UpdateStartupBasicSetting(startupID uint64, request *model.UpdateStartupBas
 			})
 			tagIds = append(tagIds, hashTag.ID)
 		}
-		//delete not used hashtags
-		if er = tag.DeleteTagRel(tx, startupID, tag.Startup, tagIds); er != nil {
-			return er
+		if len(tagIds) > 0 {
+			//delete not used hashtags
+			if er = tag.DeleteTagRel(tx, startupID, tag.Startup, tagIds); er != nil {
+				return er
+			}
 		}
-		//batch create startup hashtag rel
-		if er = tag.BatchCreateTagRel(tx, tagRelList); er != nil {
-			return er
+		if len(tagRelList) > 0 {
+			//batch create startup hashtag rel
+			if er = tag.BatchCreateTagRel(tx, tagRelList); er != nil {
+				return er
+			}
 		}
 		//update startup basic setting
 		if er = model.UpdateStartupBasicSetting(tx, startupID, &startupBasicSetting); er != nil {
