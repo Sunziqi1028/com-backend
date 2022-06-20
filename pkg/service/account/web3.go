@@ -221,8 +221,16 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 		}
 	} else {
 		for _, comerAccount := range targetComerAccounts {
-			if err = account.BindComerAccountToComerId(mysql.DB, comerAccount.ID, comerByAddress.ID); err != nil {
-				return
+			if comerByAddress.ID != 0 {
+				if err = account.BindComerAccountToComerId(mysql.DB, comerAccount.ID, comerByAddress.ID); err != nil {
+					log.Warn(err)
+					return
+				}
+			} else {
+				if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
+					log.Warn(err)
+					return
+				}
 			}
 		}
 	}
