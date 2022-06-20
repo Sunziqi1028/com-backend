@@ -9,7 +9,7 @@ type EthLoginRequest struct {
 // CreateProfileRequest create a new profile then will let the entity to backend
 type CreateProfileRequest struct {
 	Name     string   `json:"name" binding:"min=1,max=24"`
-	Avatar   string   `json:"avatar" binding:"required"`
+	Avatar   string   `json:"avatar"`
 	Location string   `json:"location"`
 	TimeZone *string  `json:"timeZone" binding:"required"`
 	Website  string   `json:"website"`
@@ -25,7 +25,7 @@ type CreateProfileRequest struct {
 // UpdateProfileRequest  update the comer profile
 type UpdateProfileRequest struct {
 	Name     string   `json:"name" binding:"min=1,max=24"`
-	Avatar   string   `json:"avatar" binding:"required"`
+	Avatar   string   `json:"avatar"`
 	Location string   `json:"location"`
 	TimeZone *string  `json:"timeZone" binding:"required"`
 	Website  string   `json:"website"`
