@@ -63,5 +63,6 @@ type IsFollowedResponse struct {
 
 // LinkWalletResponse link wallet response
 type LinkWalletResponse struct {
-	IsProfiled bool `json:"isProfiled"`
+	IsProfiled bool   `json:"isProfiled"`
+	Token      string `json:"token"`
 }
