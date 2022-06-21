@@ -3,6 +3,7 @@ package account
 import (
 	"ceres/pkg/model"
 	"ceres/pkg/model/tag"
+	"strings"
 )
 
 type ComerAccountType int
@@ -19,6 +20,21 @@ const (
 type Comer struct {
 	model.Base
 	Address *string `gorm:"column:address" json:"address"`
+}
+
+func (c Comer) HasAddress() bool {
+	add := c.Address
+	if add != nil && strings.TrimSpace(*add) != "" {
+		return true
+	}
+	return false
+}
+
+func (c Comer) AddressStr() string {
+	if c.HasAddress() {
+		return *c.Address
+	}
+	return ""
 }
 
 // TableName Comer table name for gorm
@@ -41,6 +57,30 @@ type ComerAccount struct {
 // TableName the ComerAccount table name for gorm
 func (ComerAccount) TableName() string {
 	return "comer_account"
+}
+
+type ComerAccounts []ComerAccount
+
+func (a *ComerAccounts) HasSameOauthType(accounts *ComerAccounts) (has bool) {
+	if a != nil && len(*a) > 0 && accounts != nil && len(*accounts) > 0 {
+		for _, byAddress := range *a {
+			for _, comerAccount := range *accounts {
+				if byAddress.Type == comerAccount.Type {
+					has = true
+					break
+				}
+			}
+		}
+	}
+	return
+}
+
+func (a ComerAccounts) AccountIds() []uint64 {
+	var ids []uint64
+	for _, comerAccount := range a {
+		ids = append(ids, comerAccount.ID)
+	}
+	return ids
 }
 
 // ComerProfile model
