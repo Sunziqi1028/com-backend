@@ -10,6 +10,7 @@ import (
 	"ceres/pkg/utility/jwt"
 	"errors"
 	"fmt"
+	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
 	"strconv"
 )
@@ -81,6 +82,7 @@ func LinkWithWallet(ctx *router.Context) {
 		return
 	}
 	token := jwt.Sign(finalComerId)
+	log.Infof("regenerate token %s after wallet link ......incoming comerId: %d, finalComerId: %d\n", token, comerID, finalComerId)
 	if profile.ID != 0 {
 		res = model.LinkWalletResponse{IsProfiled: true, Token: token}
 	} else {
