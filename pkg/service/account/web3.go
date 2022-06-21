@@ -3,6 +3,7 @@ package account
 import (
 	"ceres/pkg/initialization/mysql"
 	"ceres/pkg/initialization/redis"
+	"ceres/pkg/model"
 	"ceres/pkg/model/account"
 	"ceres/pkg/router"
 	"ceres/pkg/utility/jwt"
@@ -142,12 +143,13 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 		return
 	}
 
+	// 当前登录comer
 	var (
 		targetComer         account.Comer
 		targetComerAccounts []account.ComerAccount
 		targetComerProfile  account.ComerProfile
 		// targetComer 是否 注册完成(即有comerProfile)
-		targetComerRegistedComplete = false
+		targetHasProfile = false
 	)
 	if err = account.GetComerByID(mysql.DB, comerID, &targetComer); err != nil {
 		log.Warn(err)
@@ -155,11 +157,13 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	}
 	add := targetComer.Address
 	if add != nil && strings.TrimSpace(*add) != "" {
+		// 当前comer已经绑定了其他钱包，返回
 		if strings.TrimSpace(*add) != address {
 			log.Warn("Current targetComer has linked with a wallet")
 			return router.ErrBadRequest.WithMsg("Current targetComer has linked with a wallet"), finalComerId
 		}
-		return
+		// 当前comer已经绑定了该传入钱包，直接返回
+		return nil, finalComerId
 	}
 
 	if err = account.GetComerAccountsByComerId(mysql.DB, comerID, &targetComerAccounts); err != nil {
@@ -172,16 +176,17 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 			log.Warn(err)
 			return
 		}
-		targetComerRegistedComplete = false
 	}
 	if targetComerProfile.ID != 0 && !targetComerProfile.IsDeleted {
-		targetComerRegistedComplete = true
+		targetHasProfile = true
 	}
 
+	// 钱包地址对应的comer
 	var (
-		comerByAddress                       account.Comer
-		accountsOfComerByAddress             []account.ComerAccount
-		comerByAddressHasSmeTypeOauthAccount bool
+		comerByAddress       account.Comer
+		addressOauthAccounts []account.ComerAccount
+		// 钱包comer有对应
+		addressComerHasSmeOauthType bool
 	)
 	if err = account.GetComerByAddress(mysql.DB, address, &comerByAddress); err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -190,49 +195,57 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 		}
 	}
 	if comerByAddress.ID != 0 {
-		log.Info("Current eth wallet account is linked with another targetComer")
-		if targetComerRegistedComplete {
-			return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with another targetComer"), finalComerId
-		}
+		log.Infof("Current eth wallet account is linked with another targetComer: %d\n", comerByAddress.ID)
+		// 当前comer已有profile，
+		//if targetHasProfile {
+		//	return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with another targetComer"), finalComerId
+		//}
 
-		if err = account.GetComerAccountsByComerId(mysql.DB, comerByAddress.ID, &accountsOfComerByAddress); err != nil {
+		if err = account.GetComerAccountsByComerId(mysql.DB, comerByAddress.ID, &addressOauthAccounts); err != nil {
 			log.Warn(err)
 			return
 		}
-		if accountsOfComerByAddress != nil && len(accountsOfComerByAddress) > 0 {
-			for _, byAddress := range accountsOfComerByAddress {
+		if addressOauthAccounts != nil && len(addressOauthAccounts) > 0 {
+			for _, byAddress := range addressOauthAccounts {
 				for _, comerAccount := range targetComerAccounts {
 					if byAddress.Type == comerAccount.Type {
-						comerByAddressHasSmeTypeOauthAccount = true
+						addressComerHasSmeOauthType = true
 						break
 					}
 				}
 			}
-			if comerByAddressHasSmeTypeOauthAccount {
+			if addressComerHasSmeOauthType {
 				return router.ErrInternalServer.WithMsg("Current eth wallet account is linked with another targetComer"), finalComerId
 			}
 		}
 	}
 
-	if targetComerRegistedComplete {
+	if targetHasProfile {
 		if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
 			log.Warn(err)
 			return
 		}
 	} else {
-		for _, comerAccount := range targetComerAccounts {
-			if comerByAddress.ID != 0 {
-				if err = account.BindComerAccountToComerId(mysql.DB, comerAccount.ID, comerByAddress.ID); err != nil {
-					log.Warn(err)
-					return
+		// 直接将 targetComerAccounts中comerId改成comerByAddress的ID
+		if comerByAddress.ID != 0 && !addressComerHasSmeOauthType {
+			if err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
+				if err = tx.Model(&account.ComerAccount{ComerID: finalComerId}).Updates(account.ComerAccount{ComerID: comerByAddress.ID, IsLinked: true}).Error; err != nil {
+					return err
 				}
-			} else {
-				if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
-					log.Warn(err)
-					return
+				if err = tx.Delete(&account.Comer{Base: model.Base{ID: finalComerId}}).Error; err != nil {
+					return err
 				}
+				return nil
+			}); err != nil {
+				return
+			}
+		} else {
+			if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
+				log.Warn(err)
+				return
 			}
 		}
+
 	}
 
 	_, err = redis.Client.Del(context.TODO(), address)
