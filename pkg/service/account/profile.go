@@ -42,6 +42,8 @@ func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err 
 		}
 	}
 	log.Infof("comer accounts bidingInfos for %d : %v \n", comerID, accountBindingInfos)
+	// profile may not exist!
+	response.ComerID = comerID
 	response.ComerAccounts = accountBindingInfos
 	return
 }

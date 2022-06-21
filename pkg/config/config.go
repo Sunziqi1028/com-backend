@@ -95,4 +95,5 @@ type EthConfig struct {
 	EndPoint               string
 	InfuraKey              string
 	StartupContractAddress string
+	ChainID                uint64
 }
