@@ -66,7 +66,8 @@ func LinkWithWallet(ctx *router.Context) {
 		return
 	}
 
-	if err := service.LinkEthAccountToComer(comerID, ethLoginRequest.Address, ethLoginRequest.Signature); err != nil {
+	err, finalComerId := service.LinkEthAccountToComer(comerID, ethLoginRequest.Address, ethLoginRequest.Signature)
+	if err != nil {
 		ctx.HandleError(err)
 		return
 	}
@@ -75,14 +76,15 @@ func LinkWithWallet(ctx *router.Context) {
 		profile model.ComerProfile
 		res     model.LinkWalletResponse
 	)
-	if err := account.GetComerProfile(mysql.DB, comerID, &profile); err != nil {
+	if err := account.GetComerProfile(mysql.DB, finalComerId, &profile); err != nil {
 		ctx.HandleError(err)
 		return
 	}
+	token := jwt.Sign(finalComerId)
 	if profile.ID != 0 {
-		res = model.LinkWalletResponse{IsProfiled: true}
+		res = model.LinkWalletResponse{IsProfiled: true, Token: token}
 	} else {
-		res = model.LinkWalletResponse{IsProfiled: false}
+		res = model.LinkWalletResponse{IsProfiled: false, Token: token}
 	}
 
 	ctx.OK(res)

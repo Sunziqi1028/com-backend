@@ -11,14 +11,14 @@ type ListStartupRequest struct {
 }
 
 type UpdateStartupBasicSettingRequest struct {
-	KYC           *string  `json:"kyc" binding:"required"`
-	ContractAudit *string  `json:"contractAudit" binding:"required"`
-	HashTags      []string `json:"hashTags" binding:"required"`
-	Website       *string  `json:"website" binding:"required"`
-	Discord       *string  `json:"discord" binding:"required"`
-	Twitter       *string  `json:"twitter" binding:"required"`
-	Telegram      *string  `json:"telegram" binding:"required"`
-	Docs          *string  `json:"docs" binding:"required"`
+	KYC           *string  `json:"kyc"`
+	ContractAudit *string  `json:"contractAudit"`
+	HashTags      []string `json:"hashTags"`
+	Website       *string  `json:"website"`
+	Discord       *string  `json:"discord"`
+	Twitter       *string  `json:"twitter"`
+	Telegram      *string  `json:"telegram"`
+	Docs          *string  `json:"docs"`
 }
 
 type UpdateStartupFinanceSettingRequest struct {
