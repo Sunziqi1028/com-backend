@@ -144,21 +144,15 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	}
 
 	// 当前登录comer
-	var (
-		targetComer         account.Comer
-		targetComerAccounts []account.ComerAccount
-		targetComerProfile  account.ComerProfile
-		// targetComer 是否 注册完成(即有comerProfile)
-		targetHasProfile = false
-	)
+	var targetComer account.Comer
+
 	if err = account.GetComerByID(mysql.DB, comerID, &targetComer); err != nil {
 		log.Warn(err)
 		return
 	}
-	add := targetComer.Address
-	if add != nil && strings.TrimSpace(*add) != "" {
+	if targetComer.HasAddress() {
 		// 当前comer已经绑定了其他钱包，返回
-		if strings.TrimSpace(*add) != address {
+		if strings.TrimSpace(targetComer.AddressStr()) != address {
 			log.Warn("Current targetComer has linked with a wallet")
 			return router.ErrBadRequest.WithMsg("Current targetComer has linked with a wallet"), finalComerId
 		}
@@ -166,27 +160,55 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 		return nil, finalComerId
 	}
 
-	if err = account.GetComerAccountsByComerId(mysql.DB, comerID, &targetComerAccounts); err != nil {
+	err, finalComerId = linkWhenTargetComerHasNoWallet(comerID, address, targetComer)
+	if err != nil {
 		return
 	}
 
+	_, err = redis.Client.Del(context.TODO(), address)
+	if err != nil {
+		log.Warnf("redis remove nonce key failed %v\n", err)
+	}
+	return
+}
+
+// checkTargetHasProfile 检查target comer是否填写了profile
+func checkTargetHasProfile(comerID uint64) (err error, has bool) {
+	var targetComerProfile account.ComerProfile
 	if err = account.GetComerProfile(mysql.DB, comerID, &targetComerProfile); err != nil {
 		log.Warn(err)
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Warn(err)
 			return
 		}
 	}
 	if targetComerProfile.ID != 0 && !targetComerProfile.IsDeleted {
-		targetHasProfile = true
+		return nil, true
 	}
+	return nil, false
+}
 
+// linkWhenTargetComerHasNoWallet target comer没有钱包时候，关联钱包地址操作
+func linkWhenTargetComerHasNoWallet(comerID uint64, address string, targetComer account.Comer) (err error, finalComerId uint64) {
+	finalComerId = targetComer.ID
+	var (
+		targetComerAccounts []account.ComerAccount
+		// targetComer 是否 注册完成(即有comerProfile)
+		targetHasProfile = false
+	)
+	if err, targetHasProfile = checkTargetHasProfile(comerID); err != nil {
+		return
+	}
+	if err = account.GetComerAccountsByComerId(mysql.DB, comerID, &targetComerAccounts); err != nil {
+		return
+	}
 	// 钱包地址对应的comer
 	var (
 		comerByAddress       account.Comer
 		addressOauthAccounts []account.ComerAccount
-		// 钱包comer有对应
-		addressComerHasSmeOauthType bool
+		// 钱包comer有对应类型的oauth帐号
+		accountsHasSameTypeOauth bool
+		addressAccounts          account.ComerAccounts
+		targetAccounts           account.ComerAccounts = targetComerAccounts
 	)
 	if err = account.GetComerByAddress(mysql.DB, address, &comerByAddress); err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -196,27 +218,15 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 	}
 	if comerByAddress.ID != 0 {
 		log.Infof("Current eth wallet account is linked with another targetComer: %d\n", comerByAddress.ID)
-		// 当前comer已有profile，
-		//if targetHasProfile {
-		//	return router.ErrBadRequest.WithMsg("Current eth wallet account is linked with another targetComer"), finalComerId
-		//}
-
 		if err = account.GetComerAccountsByComerId(mysql.DB, comerByAddress.ID, &addressOauthAccounts); err != nil {
 			log.Warn(err)
 			return
 		}
-		if addressOauthAccounts != nil && len(addressOauthAccounts) > 0 {
-			for _, byAddress := range addressOauthAccounts {
-				for _, comerAccount := range targetComerAccounts {
-					if byAddress.Type == comerAccount.Type {
-						addressComerHasSmeOauthType = true
-						break
-					}
-				}
-			}
-			if addressComerHasSmeOauthType {
-				return router.ErrInternalServer.WithMsg("Current eth wallet account is linked with another targetComer"), finalComerId
-			}
+		addressAccounts = addressOauthAccounts
+		accountsHasSameTypeOauth = addressAccounts.HasSameOauthType(&targetAccounts)
+		if accountsHasSameTypeOauth {
+			err = router.ErrInternalServer.WithMsg("Current eth wallet account is linked with another targetComer")
+			return
 		}
 	}
 
@@ -225,38 +235,30 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 			log.Warn(err)
 			return
 		}
-	} else {
-		// 直接将 targetComerAccounts中comerId改成comerByAddress的ID
-		if comerByAddress.ID != 0 && !addressComerHasSmeOauthType {
-			if err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
-				var ids []uint64
-				for _, comerAccount := range targetComerAccounts {
-					ids = append(ids, comerAccount.ID)
-				}
-				if err = tx.Model(account.ComerAccount{}).Where("id IN ? ", ids).Updates(account.ComerAccount{ComerID: comerByAddress.ID, IsLinked: true}).Error; err != nil {
-					return err
-				}
-				if err = tx.Delete(&account.Comer{Base: model.Base{ID: targetComer.ID}}).Error; err != nil {
-					return err
-				}
-				return nil
-			}); err != nil {
+		return nil, finalComerId
+	}
+	// 直接将 targetComerAccounts中comerId改成comerByAddress的ID
+	if comerByAddress.ID != 0 && !accountsHasSameTypeOauth {
+		if err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
+			targetAccountIds := targetAccounts.AccountIds()
+			if er = tx.Model(account.ComerAccount{}).Where("id IN ? ", targetAccountIds).Updates(account.ComerAccount{ComerID: comerByAddress.ID, IsLinked: true}).Error; err != nil {
 				return
 			}
-		} else {
-			if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
-				log.Warn(err)
+			if er = tx.Delete(&account.Comer{Base: model.Base{ID: targetComer.ID}}).Error; err != nil {
 				return
 			}
+			finalComerId = comerByAddress.ID
+			return nil
+		}); err != nil {
+			return
 		}
-
+		return nil, finalComerId
 	}
-
-	_, err = redis.Client.Del(context.TODO(), address)
-	if err != nil {
-		log.Warnf("redis remove nonce key failed %v\n", err)
+	if err = account.UpdateComerAddress(mysql.DB, comerID, address); err != nil {
+		log.Warn(err)
+		return
 	}
-	return
+	return nil, finalComerId
 }
 
 // VerifyEthWallet verify the signature and login with the wallet
