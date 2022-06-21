@@ -229,10 +229,14 @@ func LinkEthAccountToComer(comerID uint64, address, signature string) (err error
 		// 直接将 targetComerAccounts中comerId改成comerByAddress的ID
 		if comerByAddress.ID != 0 && !addressComerHasSmeOauthType {
 			if err = mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
-				if err = tx.Model(&account.ComerAccount{ComerID: finalComerId}).Updates(account.ComerAccount{ComerID: comerByAddress.ID, IsLinked: true}).Error; err != nil {
+				var ids []uint64
+				for _, comerAccount := range targetComerAccounts {
+					ids = append(ids, comerAccount.ID)
+				}
+				if err = tx.Model(account.ComerAccount{}).Where("id IN ? ", ids).Updates(account.ComerAccount{ComerID: comerByAddress.ID, IsLinked: true}).Error; err != nil {
 					return err
 				}
-				if err = tx.Delete(&account.Comer{Base: model.Base{ID: finalComerId}}).Error; err != nil {
+				if err = tx.Delete(&account.Comer{Base: model.Base{ID: targetComer.ID}}).Error; err != nil {
 					return err
 				}
 				return nil
