@@ -2,6 +2,9 @@ package account
 
 import (
 	model "ceres/pkg/model/account"
+	"ceres/pkg/utility/jwt"
+	"fmt"
+	"github.com/qiniu/x/log"
 	"testing"
 )
 
@@ -24,4 +27,12 @@ func TestGetComerProfile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestXXX(t *testing.T) {
+	uin, err := jwt.Verify("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21lcl91aW4iOiIxMjQ4NjgxMDg2OTM1MDQiLCJleHAiOjE2NTYwNTM5NDYsImlhdCI6MTY1NTc5NDc0Nn0.JRUY4URvntwg4yZaKdvKcKY2K74AC4K1rOkrUdnT3sY")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	fmt.Println(uin)
 }
