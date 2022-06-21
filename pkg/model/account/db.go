@@ -106,24 +106,23 @@ func ListFollowedComer(db *gorm.DB, comerID uint64, output *[]FollowedComer) (to
 func BindComerAccountToComerId(db *gorm.DB, comerAccountId, comerID uint64) (err error) {
 	var crtAccount ComerAccount
 	db.First(&crtAccount, comerAccountId)
-	if crtAccount.ComerID == comerID {
-		return db.Model(&ComerAccount{}).Where("comer_id = ? and is_deleted = false", comerID).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error
+	if crtAccount.ComerID == comerID || crtAccount.ComerID == 0 {
+		return db.Model(&ComerAccount{Base: model.Base{ID: comerAccountId}}).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error
 	}
 	return db.Transaction(func(tx *gorm.DB) (err error) {
 		var comer Comer
 		tx.First(&comer, crtAccount.ComerID)
 		var accounts []ComerAccount
-		if err := db.Where("comer_id = ? and is_deleted = false", comer.ID).Find(accounts).Error; err != nil {
-			return err
+		if err = db.Where("comer_id = ? and is_deleted = false", comer.ID).Find(accounts).Error; err != nil {
+			return
 		}
 		if accounts == nil || (len(accounts) == 1 && comer.Address == nil || strings.TrimSpace(*comer.Address) == "") {
-			tx.Delete(&comer)
-		}
-		if err = tx.Model(&ComerAccount{Base: model.Base{ID: comerAccountId}}).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error; err != nil {
-			return
-		}
-		if err = tx.Model(&ComerAccount{}).Where("comer_id = ? and is_deleted = false", comerID).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error; err != nil {
-			return
+			if err = tx.Delete(&comer).Error; err != nil {
+				return
+			}
+			if err = tx.Model(&ComerAccount{Base: model.Base{ID: comerAccountId}}).Updates(ComerAccount{ComerID: comerID, IsLinked: true}).Error; err != nil {
+				return
+			}
 		}
 		return nil
 	})
