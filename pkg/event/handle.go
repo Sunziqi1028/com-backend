@@ -12,7 +12,7 @@ import (
 	"github.com/qiniu/x/log"
 )
 
-func HandleStartup(address string, startupProto interface{}, txHash string) {
+func HandleStartup(address string, startupProto interface{}, chainID uint64, txHash string) {
 	log.Info("listen startup data: ", startupProto)
 	startupTemp := startupProto.(struct {
 		Name       string `json:"name"`
@@ -39,6 +39,7 @@ func HandleStartup(address string, startupProto interface{}, txHash string) {
 		Logo:     startupTemp.Logo,
 		Mission:  startupTemp.Mission,
 		Overview: startupTemp.Overview,
+		ChainID:  chainID,
 		TxHash:   txHash,
 	}
 	if err := mysql.DB.Transaction(func(tx *gorm.DB) (er error) {
