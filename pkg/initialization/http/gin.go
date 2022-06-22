@@ -55,10 +55,6 @@ func Init() (err error) {
 		accountPriv.POST("/comer/:comerID/follow", router.Wrap(account.FollowComer))
 		accountPriv.DELETE("/comer/:comerID/unfollow", router.Wrap(account.UnfollowComer))
 		accountPriv.GET("/comer/:comerID/followedByMe", router.Wrap(account.ComerFollowedByMe))
-
-		// link oauth account to wallet, like github、google
-		oauthLogin.POST("/link-oauth", router.Wrap(account.LinkOauth2Comer))
-		oauthLogin.POST("/link-oauth-with-wallet", router.Wrap(account.LinkOauth2Comer))
 	}
 
 	// accounts operation router

@@ -137,13 +137,11 @@ func RegisterWithOauth(ctx *router.Context) {
 		OauthAccountId: comerAccount.ID,
 	}
 	ctx.OK(loginResponse)
-	return
 }
 
 func handleError(ctx *router.Context, err error) {
 	log.Warn(err)
 	ctx.HandleError(router.ErrBadRequest.WithMsg(err.Error()))
-	return
 }
 
 func loginWithOauth(ctx *router.Context, oauthType model.ComerAccountType, oauthAccount func(string) (auth.OauthAccount, error)) {
@@ -212,7 +210,7 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 	if err = model.GetComerAccountsByComerId(mysql.DB, logonComerId, &linkedAccounts); err != nil {
 		return
 	}
-	if linkedAccounts == nil || len(linkedAccounts) == 0 {
+	if len(linkedAccounts) == 0 {
 		comerNotLinkedThisTypeOauth = true
 	} else {
 		for _, linkedAccount := range linkedAccounts {
