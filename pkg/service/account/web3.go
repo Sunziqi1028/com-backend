@@ -190,12 +190,10 @@ func checkTargetHasProfile(comerID uint64) (err error, has bool) {
 // linkWhenTargetComerHasNoWallet target comer没有钱包时候，关联钱包地址操作
 func linkWhenTargetComerHasNoWallet(comerID uint64, address string, targetComer account.Comer) (err error, finalComerId uint64) {
 	finalComerId = targetComer.ID
-	var (
-		targetComerAccounts []account.ComerAccount
-		// targetComer 是否 注册完成(即有comerProfile)
-		targetHasProfile = false
-	)
-	if err, targetHasProfile = checkTargetHasProfile(comerID); err != nil {
+	var targetComerAccounts []account.ComerAccount
+	// targetComer 是否 注册完成(即有comerProfile)
+	err, targetHasProfile := checkTargetHasProfile(comerID)
+	if err != nil {
 		return
 	}
 	if err = account.GetComerAccountsByComerId(mysql.DB, comerID, &targetComerAccounts); err != nil {

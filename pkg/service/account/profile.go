@@ -29,7 +29,7 @@ func GetComerProfile(comerID uint64, response *model.ComerProfileResponse) (err 
 		{Linked: false, AccountType: 1},
 		{Linked: false, AccountType: 2},
 	}
-	if accounts != nil && len(accounts) > 0 {
+	if len(accounts) > 0 {
 		mp := make(map[model.ComerAccountType]uint64)
 		for _, account := range accounts {
 			mp[account.Type] = account.ID
