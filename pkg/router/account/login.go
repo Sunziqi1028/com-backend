@@ -8,7 +8,6 @@ import (
 	service "ceres/pkg/service/account"
 	"ceres/pkg/utility/auth"
 	"ceres/pkg/utility/jwt"
-	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"strings"
@@ -102,7 +101,7 @@ func RegisterWithOauth(ctx *router.Context) {
 		return
 	}
 	if comerAccount.ID == 0 {
-		handleError(ctx, errors.New("oauth account does not exist or has been deleted"))
+		handleError(ctx, fmt.Errorf("oauth account does not exist or has been deleted"))
 		return
 	}
 
@@ -203,7 +202,7 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 		return
 	}
 	if logonComer.ID == 0 {
-		err = errors.New(fmt.Sprintf("logonComer with id %d does not exist", logonComerId))
+		err = fmt.Errorf("logonComer with id %d does not exist", logonComerId)
 		return
 	}
 	var (
@@ -229,15 +228,9 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 	}
 
 	var (
-		address         string
-		comerHasAddress = false
+		address         = logonComer.AddressStr()
+		comerHasAddress = logonComer.HasAddress()
 	)
-	if logonComer.Address == nil || strings.TrimSpace(*logonComer.Address) == "" {
-		address = ""
-	} else {
-		address = *logonComer.Address
-		comerHasAddress = true
-	}
 	loginResponse = model.OauthLoginResponse{
 		ComerID:        logonComerId,
 		Nick:           oauth.GetUserNick(),
@@ -285,13 +278,13 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 				return
 			}
 			/*其他Comer未绑定钱包,则oauth帐号可以换绑至此Comer*/
-			if anotherComer.ID == 0 || anotherComer.Address == nil || strings.TrimSpace(*anotherComer.Address) == "" {
+			if anotherComer.ID == 0 || !anotherComer.HasAddress() {
 				if err = model.BindComerAccountToComerId(mysql.DB, crtComerAccount.ID, logonComerId); err != nil {
 					return
 				}
 				return nil, loginResponse
 			} else {
-				err = errors.New(fmt.Sprintf("oauth has linked to anohter logonComer"))
+				err = fmt.Errorf("oauth has linked to another comer")
 				return
 			}
 		}
@@ -349,7 +342,7 @@ func justLoginWithOauth(oauth auth.OauthAccount, oauthType model.ComerAccountTyp
 				return
 			}
 			if comer.ID == 0 || comer.IsDeleted {
-				err = errors.New(fmt.Sprintf("Comer does not exist or was deleted!"))
+				err = fmt.Errorf("comer does not exist or was deleted")
 				return
 			}
 

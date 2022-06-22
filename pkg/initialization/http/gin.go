@@ -27,8 +27,6 @@ func Init() (err error) {
 
 		oauthLogin.Use(middleware.ComerAuthorizationMiddleware())
 		oauthLogin.POST("/register", router.Wrap(account.RegisterWithOauth))
-		oauthLogin.GET("/login-link-by-wallet", router.Wrap(account.OauthFirstLoginLinkedByWalletAddress))
-
 	}
 
 	// web3 login router
