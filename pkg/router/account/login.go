@@ -229,15 +229,9 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 	}
 
 	var (
-		address         string
-		comerHasAddress = false
+		address         = logonComer.AddressStr()
+		comerHasAddress = logonComer.HasAddress()
 	)
-	if logonComer.Address == nil || strings.TrimSpace(*logonComer.Address) == "" {
-		address = ""
-	} else {
-		address = *logonComer.Address
-		comerHasAddress = true
-	}
 	loginResponse = model.OauthLoginResponse{
 		ComerID:        logonComerId,
 		Nick:           oauth.GetUserNick(),
@@ -285,13 +279,13 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 				return
 			}
 			/*其他Comer未绑定钱包,则oauth帐号可以换绑至此Comer*/
-			if anotherComer.ID == 0 || anotherComer.Address == nil || strings.TrimSpace(*anotherComer.Address) == "" {
+			if anotherComer.ID == 0 || !anotherComer.HasAddress() {
 				if err = model.BindComerAccountToComerId(mysql.DB, crtComerAccount.ID, logonComerId); err != nil {
 					return
 				}
 				return nil, loginResponse
 			} else {
-				err = errors.New(fmt.Sprintf("oauth has linked to anohter logonComer"))
+				err = errors.New(fmt.Sprintf("oauth has linked to another comer"))
 				return
 			}
 		}

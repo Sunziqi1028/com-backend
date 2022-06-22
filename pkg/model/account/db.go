@@ -4,7 +4,6 @@ import (
 	"ceres/pkg/model"
 	"ceres/pkg/model/tag"
 	"gorm.io/gorm"
-	"strings"
 )
 
 // GetComerByAddress  get comer entity by comer's address
@@ -113,10 +112,10 @@ func BindComerAccountToComerId(db *gorm.DB, comerAccountId, comerID uint64) (err
 		var comer Comer
 		tx.First(&comer, crtAccount.ComerID)
 		var accounts []ComerAccount
-		if err = db.Where("comer_id = ? and is_deleted = false", comer.ID).Find(accounts).Error; err != nil {
+		if err = db.Where("comer_id = ? and is_deleted = false", comer.ID).Find(&accounts).Error; err != nil {
 			return
 		}
-		if accounts == nil || (len(accounts) == 1 && comer.Address == nil || strings.TrimSpace(*comer.Address) == "") {
+		if accounts == nil || (len(accounts) == 1 && comer.AddressStr() == "") {
 			if err = tx.Delete(&comer).Error; err != nil {
 				return
 			}
