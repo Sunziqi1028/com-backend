@@ -282,7 +282,7 @@ func bindOauth(oauth auth.OauthAccount, oauthType model.ComerAccountType, logonC
 				}
 				return nil, loginResponse
 			} else {
-				err = fmt.Errorf("oauth has linked to another comer")
+				err = fmt.Errorf("the social account has been connected")
 				return
 			}
 		}
