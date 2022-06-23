@@ -3,6 +3,7 @@ package account
 import (
 	"ceres/pkg/initialization/mysql"
 	model "ceres/pkg/model/account"
+	"fmt"
 
 	"github.com/qiniu/x/log"
 )
@@ -79,7 +80,15 @@ func GetComerAccounts(comerID uint64, response *model.ComerOuterAccountListRespo
 
 // UnlinkComerAccount  unlink the comer account
 func UnlinkComerAccount(comerID, accountID uint64) error {
-	return model.DeleteAccount(mysql.DB, comerID, accountID)
+	var comer model.Comer
+	if err := model.GetComerByID(mysql.DB, comerID, &comer); err != nil {
+		return err
+	}
+	if comer.HasAddress() {
+		return model.DeleteAccount(mysql.DB, comerID, accountID)
+	}
+	return fmt.Errorf("can not unlink comer account")
+
 }
 
 // GetComerInfo get comer info
