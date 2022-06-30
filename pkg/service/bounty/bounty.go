@@ -108,9 +108,6 @@ func createBounty(tx *gorm.DB, paymentMode, totalRewardToken int, request *model
 		PaymentMode:        paymentMode,
 		Status:             0,
 		TotalRewardToken:   totalRewardToken,
-		CreatedAt:          time.Now(),
-		UpdatedAt:          time.Now(),
-		IsDeleted:          0,
 	}
 
 	bountyID, err := model.CreateBounty(tx, bounty)
@@ -121,17 +118,15 @@ func createBounty(tx *gorm.DB, paymentMode, totalRewardToken int, request *model
 }
 
 func createTransaction(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) error {
-	chainInfo := &model.Transaction{
+	transaction := &model.Transaction{
 		ChainID:    request.ChainID,
 		TxHash:     request.TxHash,
 		TimeStamp:  time.Now(),
 		Status:     0,
 		SourceType: 2,
 		SourceID:   int64(bountyID),
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
 	}
-	if err := model.CreateTransaction(tx, chainInfo); err != nil {
+	if err := model.CreateTransaction(tx, transaction); err != nil {
 		return err
 	}
 	return nil
@@ -148,8 +143,6 @@ func createDeposit(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) e
 		TokenSymbol: request.Deposit.TokenSymbol,
 		TokenAmount: request.Deposit.TokenAmount,
 		TimeStamp:   time.Now(),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
 	}
 	err := model.CreateDeposit(tx, deposit)
 	if err != nil {
@@ -179,8 +172,6 @@ func createContact(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) [
 			BountyID:       bountyID,
 			ContactType:    contactType,
 			ContactAddress: contactAddress,
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
 		}
 		err := model.CreateContact(tx, contactModel)
 		if err != nil {
@@ -206,8 +197,6 @@ func createPaymentTerms(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 				Terms:        stage.Terms,
 				SeqNum:       stage.SeqNum,
 				Status:       1,
-				CreatedAt:    time.Now(),
-				UpdatedAt:    time.Now(),
 			}
 			err := model.CreatePaymentTerms(tx, paymentTerms)
 			if err != nil {
@@ -241,8 +230,6 @@ func creatPaymentPeriod(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 		Token2Symbol: request.Period.Token2Symbol,
 		Token2Amount: request.Period.Token2Amount,
 		Target:       request.Period.Target,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
 	}
 	err := model.CreatePaymentPeriod(tx, paymentPeriod)
 	if err != nil {
@@ -257,8 +244,6 @@ func createPostUpdate(tx *gorm.DB, bountyID uint64, request *model.BountyRequest
 		SourceID:   bountyID,
 		ComerID:    request.ComerID,
 		Content:    request.Description,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
 		TimeStamp:  time.Now(),
 	}
 	err := model.CreatePostUpdate(tx, postUpdate)

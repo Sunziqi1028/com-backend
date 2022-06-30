@@ -21,8 +21,8 @@ func CreateBounty(db *gorm.DB, bounty *Bounty) (uint64, error) {
 	return bounty.ID, nil
 }
 
-func CreateTransaction(db *gorm.DB, chainInfo *Transaction) error {
-	return db.Create(&chainInfo).Error
+func CreateTransaction(db *gorm.DB, transaction *Transaction) error {
+	return db.Create(&transaction).Error
 }
 
 func CreateContact(db *gorm.DB, contact *BountyContact) error {
