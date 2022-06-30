@@ -93,7 +93,7 @@ func CreateComerBounty(request *model.BountyRequest) error {
 }
 
 func createBounty(tx *gorm.DB, paymentMode, totalRewardToken int, request *model.BountyRequest) (uint64, error) {
-	bounty := &model.BountyModel{
+	bounty := &model.Bounty{
 		StartupID:          request.StartupID,
 		ComerID:            request.ComerID,
 		ChainID:            request.ChainID,
@@ -121,7 +121,7 @@ func createBounty(tx *gorm.DB, paymentMode, totalRewardToken int, request *model
 }
 
 func createTransaction(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) error {
-	chainInfo := &model.TransactionModel{
+	chainInfo := &model.Transaction{
 		ChainID:    request.ChainID,
 		TxHash:     request.TxHash,
 		TimeStamp:  time.Now(),
@@ -138,7 +138,7 @@ func createTransaction(tx *gorm.DB, bountyID uint64, request *model.BountyReques
 }
 
 func createDeposit(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) error {
-	deposit := &model.DepositModel{
+	deposit := &model.BountyDeposit{
 		ChainID:     request.ChainID,
 		TxHash:      request.TxHash,
 		Status:      0,
@@ -175,7 +175,7 @@ func createContact(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) [
 			contactType = 3
 			contactAddress = contact.Telegram
 		}
-		contactModel := &model.ContactModel{
+		contactModel := &model.BountyContact{
 			BountyID:       bountyID,
 			ContactType:    contactType,
 			ContactAddress: contactAddress,
@@ -196,7 +196,7 @@ func createPaymentTerms(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 	var errorLog []string
 	if paymentMode == 1 {
 		for _, stage := range request.PayDetail.Stages {
-			paymentTerms := &model.PaymentTermsModel{
+			paymentTerms := &model.BountyPaymentTerms{
 				BountyID:     bountyID,
 				PaymentMode:  paymentMode,
 				Token1Symbol: stage.Token1Symbol,
@@ -231,7 +231,7 @@ func creatPaymentPeriod(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 		periodType = 3
 	}
 	periodAmount := int64(request.Period.Token1Amount + request.Period.Token2Amount)
-	paymentPeriod := &model.PaymentPeriodModel{
+	paymentPeriod := &model.BountyPaymentPeriod{
 		BountyID:     bountyID,
 		PeriodType:   periodType,
 		PeriodAmount: periodAmount,
@@ -252,7 +252,7 @@ func creatPaymentPeriod(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 }
 
 func createPostUpdate(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) error {
-	postUpdate := &model.PostUpdateModel{
+	postUpdate := &model.PostUpdate{
 		SourceType: 1, //1 bounty
 		SourceID:   bountyID,
 		ComerID:    request.ComerID,
