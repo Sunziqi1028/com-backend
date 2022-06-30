@@ -3,6 +3,7 @@ package http
 import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/account"
+	"ceres/pkg/router/bounty"
 	"ceres/pkg/router/image"
 	"ceres/pkg/router/middleware"
 	"ceres/pkg/router/startup"
@@ -107,6 +108,11 @@ func Init() (err error) {
 		meta.GET("/tags", router.Wrap(tag.GetTagList))
 		meta.GET("/images", router.Wrap(image.GetImageList))
 	}
-
+	bounties := Gin.Group("/bounty")
+	{
+		bounties.Use(middleware.GuestAuthorizationMiddleware())
+		bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
+		bounties.POST("detail", router.Wrap(bounty.CreateBounty))
+	}
 	return
 }
