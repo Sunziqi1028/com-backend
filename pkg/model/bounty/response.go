@@ -45,7 +45,7 @@ type DetailItem struct {
 
 type TabListResponse struct {
 	BountyCount int `json:"bountyCount"`
-	CurrentPageParam
+	PageParam
 	TotalPages int `json:"totalPages"`
 	Records    []*DetailItem
 }

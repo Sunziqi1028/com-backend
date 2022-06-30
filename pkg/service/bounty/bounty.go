@@ -370,3 +370,20 @@ func GetAllContractAddresses() {
 		return
 	}()
 }
+
+func QueryAllBounties(request model.TabListRequest) (response model.TabListResponse, err error) {
+
+	return
+}
+
+func QueryBountiesByStartup(startupId uint64, request model.TabListRequest) (response model.TabListResponse, err error) {
+	return
+}
+
+func QueryComerPostedBountyList(startupId uint64, request model.TabListRequest) (response model.TabListResponse, err error) {
+	return
+}
+
+func QueryComerParticipatedBountyList(startupId uint64, request model.TabListRequest) (response model.TabListResponse, err error) {
+	return
+}
