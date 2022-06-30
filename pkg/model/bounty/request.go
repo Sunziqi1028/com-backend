@@ -89,6 +89,6 @@ func (p PageParam) Valid() error {
 
 // TabListRequest bounty tab list request
 type TabListRequest struct {
-	PageParam
-	SortBy string `json:"sortBy,omitempty"`
+	CurrentPageParam
+	SortBy string `json:"sortBy"`
 }
