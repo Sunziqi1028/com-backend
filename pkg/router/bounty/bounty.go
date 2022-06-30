@@ -48,3 +48,24 @@ func CreateBounty(ctx *router.Context) {
 	}
 	ctx.OK(response)
 }
+
+// GetPublicBountyList bounty list displayed in bounty tab
+func GetPublicBountyList(ctx *router.Context) {
+
+}
+
+// GetBountyListByStartup get bounty list belongs to startup
+func GetBountyListByStartup(ctx *router.Context) {
+
+}
+
+// GetMyPostedBountyList get bounty list posted by me
+func GetMyPostedBountyList(ctx *router.Context) {
+
+}
+
+// GetMyParticipatedBountyList get bounty list
+func GetMyParticipatedBountyList(ctx *router.Context) {
+
+}
+

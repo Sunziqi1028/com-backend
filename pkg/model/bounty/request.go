@@ -69,3 +69,13 @@ type ChainInfo struct {
 	ChainID uint64 `json:"chainID"`
 	TxHash  string `json:"txHash"`
 }
+
+type CurrentPageParam struct {
+	CurrentPage int `json:"currentPage,omitempty" default:"1"`
+}
+
+// TabListRequest bounty tab list request
+type TabListRequest struct {
+	CurrentPageParam
+	SortBy string `json:"sortBy"`
+}
