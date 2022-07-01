@@ -9,10 +9,22 @@
 package bounty
 
 type GetStartupsResponse struct {
-	Startups map[uint64]string
+	StartupID uint64 `json:"startupID"`
+	Name      string `json:"name"`
 }
 
 type CreateBountyResponse struct {
 	Data   string `json:"data"`
 	Status int    `json:"status"`
+}
+
+type ContractInfoResponse struct {
+	ContractAddress string
+	Status          uint64
+}
+
+type GetTransactions struct {
+	ChainID  uint64 `gorm:"column:chain_id"`
+	TxHash   string `gorm:"column:tx_hash"`
+	SourceID uint64 `gorm:"column:source_id"`
 }

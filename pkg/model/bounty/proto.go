@@ -15,8 +15,8 @@ import (
 
 type Bounty struct {
 	model.Base
-	ChainID            uint64    `gorm:"column:chain_id" json:"chainID"`
-	TxHash             string    `gorm:"column:tx_hash" json:"txHash"`
+	ChainID            uint64    `gorm:"column:chain_id;unique_index:chain_tx_uindex" json:"chainID"`
+	TxHash             string    `gorm:"column:tx_hash;unique_index:chain_tx_uindex" json:"txHash"`
 	DepositContract    string    `gorm:"column:deposit_contract" json:"depositContract"`
 	StartupID          uint64    `gorm:"column:startup_id" json:"startupID"`
 	ComerID            uint64    `gorm:"column:comer_id" json:"comerID"`
@@ -57,9 +57,9 @@ func (BountyApplicant) TableName() string {
 
 type BountyContact struct {
 	model.RelationBase
-	BountyID       uint64 `gorm:"column:bounty_id" json:"bountyID"`
-	ContactType    int    `gorm:"column:contact_type" json:"contactType"`
-	ContactAddress string `gorm:"column:contact_address" json:"contactAddress"`
+	BountyID       uint64 `gorm:"column:bounty_id;unique_index:bounty_contact_uindex" json:"bountyID"`
+	ContactType    int    `gorm:"column:contact_type;unique_index:bounty_contact_uindex" json:"contactType"`
+	ContactAddress string `gorm:"column:contact_address;unique_index:bounty_contact_uindex" json:"contactAddress"`
 }
 
 // TableName the BountyContact table name for gorm
@@ -69,8 +69,8 @@ func (BountyContact) TableName() string {
 
 type BountyDeposit struct {
 	model.RelationBase
-	ChainID     uint64    `gorm:"column:chain_id" json:"chainID"`
-	TxHash      string    `gorm:"column:tx_hash" json:"txHash"`
+	ChainID     uint64    `gorm:"column:chain_id;unique_index:chain_tx_uindex" json:"chainID"`
+	TxHash      string    `gorm:"column:tx_hash;unique_index:chain_tx_uindex" json:"txHash"`
 	Status      int       `gorm:"column:status" json:"status"`
 	BountyID    uint64    `gorm:"column:bounty_id" json:"bountyID"`
 	ComerID     uint64    `gorm:"column:comer_id" json:"comerID"`
@@ -87,7 +87,7 @@ func (BountyDeposit) TableName() string {
 
 type BountyPaymentPeriod struct {
 	model.RelationBase
-	BountyID     uint64 `gorm:"column:bounty_id" json:"bountyID"`
+	BountyID     uint64 `gorm:"column:bounty_id;unique_index:bounty_id_uindex" json:"bountyID"`
 	PeriodType   int    `gorm:"column:period_type" json:"periodType"`
 	PeriodAmount int64  `gorm:"column:period_aomunt" json:"periodAmount"`
 	HoursPerDay  int    `gorm:"column:hours_per_day" json:"hoursPerDay"`
@@ -123,8 +123,8 @@ func (BountyPaymentTerms) TableName() string {
 
 type Transaction struct {
 	model.RelationBase
-	ChainID    uint64    `gorm:"column:chain_id" json:"chainID"`
-	TxHash     string    `gorm:"column:tx_hash" json:"txHash"`
+	ChainID    uint64    `gorm:"column:chain_id;unique_index:chain_tx_uindex" json:"chainID"`
+	TxHash     string    `gorm:"column:tx_hash;unique_index:chain_tx_uindex" json:"txHash"`
 	TimeStamp  time.Time `gorm:"column:timestamp"`
 	Status     int       `gorm:"column:status" json:"status,omitempty"` // 0:Pending 1:Success 2:Failure
 	SourceType int       `gorm:"column:source_type" json:"sourceType"`

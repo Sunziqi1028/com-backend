@@ -9,19 +9,22 @@
 package bounty
 
 import (
+	"ceres/pkg/initialization/eth"
 	"ceres/pkg/initialization/mysql"
 	model "ceres/pkg/model/bounty"
-	"ceres/pkg/model/startup"
-	service "ceres/pkg/service/startup"
+	"ceres/pkg/model/tag"
 	"ceres/pkg/utility/tool"
+	"context"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
 	"time"
 )
 
-func GetStartupsByComerID(comerID uint64) (*model.GetStartupsResponse, error) {
-	var startups *model.GetStartupsResponse
+func GetStartupsByComerID(comerID uint64) ([]*model.GetStartupsResponse, error) {
+	var startups []*model.GetStartupsResponse
 	startupsResponse, err := model.GetComerStartups(mysql.DB, comerID, startups)
 	if err != nil {
 		return nil, err
@@ -31,15 +34,6 @@ func GetStartupsByComerID(comerID uint64) (*model.GetStartupsResponse, error) {
 
 // CreateComerBounty create bounty
 func CreateComerBounty(request *model.BountyRequest) error {
-	var startupInfo startup.GetStartupResponse
-	err := service.GetStartup(request.StartupID, &startupInfo)
-	if err != nil {
-		return errors.New(fmt.Sprintf("get deposit total supply err:%s", err))
-	}
-	if int64(request.Deposit.TokenAmount) > startupInfo.TotalSupply {
-		return errors.New("check the deposit amount")
-	}
-
 	tx := mysql.DB.Begin() // begin Transaction
 
 	paymentMode, totalRewardToken := handlePayDetail(request.PayDetail)
@@ -51,6 +45,9 @@ func CreateComerBounty(request *model.BountyRequest) error {
 	if bountyID == 0 {
 		return errors.New("")
 	}
+
+	getContract(request.ChainID, request.TxHash, bountyID)
+
 	err = createDeposit(tx, bountyID, request)
 	if err != nil {
 		tx.Rollback()
@@ -79,6 +76,12 @@ func CreateComerBounty(request *model.BountyRequest) error {
 	if len(errorsLog) > 0 {
 		tx.Rollback()
 		return errors.New(fmt.Sprintf("create contact address err:%v", errorsLog))
+	}
+
+	err = createApplicantsSkills(tx, bountyID, request)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	err = createPostUpdate(tx, bountyID, request)
@@ -123,7 +126,8 @@ func createTransaction(tx *gorm.DB, bountyID uint64, request *model.BountyReques
 		TxHash:     request.TxHash,
 		TimeStamp:  time.Now(),
 		Status:     0,
-		SourceType: 2,
+		SourceType: 1,
+		RetryTimes: 1,
 		SourceID:   int64(bountyID),
 	}
 	if err := model.CreateTransaction(tx, transaction); err != nil {
@@ -253,8 +257,43 @@ func createPostUpdate(tx *gorm.DB, bountyID uint64, request *model.BountyRequest
 	return nil
 }
 
-func CreateApplicantsSkills(tx *gorm.DB, bountyID uint64, tagID uint64) {
+func createApplicantsSkills(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) error {
+	for _, applicantsSkill := range request.ApplicantsSkills {
+		tagID, err := model.GetAndUpdateTagID(tx, applicantsSkill)
+		if err != nil {
+			return err
+		}
+		tarTargetRel := &tag.TagTargetRel{
+			TargetID: bountyID,
+			TagID:    tagID,
+			Target:   tag.Bounty,
+		}
+		err = model.CreateTagTargetRel(tx, tarTargetRel)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
+func getContract(chainID uint64, txHash string, bountyID uint64) {
+	var contractChan = make(chan *model.ContractInfoResponse, 1)
+	go func() {
+		contractAddress, status := GetContractAddress(chainID, txHash)
+		contractInfo := &model.ContractInfoResponse{
+			ContractAddress: contractAddress,
+			Status:          status,
+		}
+		select {
+		case contractChan <- contractInfo:
+			for contract := range contractChan {
+				updateBountyContractAndTransactoinStatus(mysql.DB, bountyID, contract.Status, contract.ContractAddress)
+			}
+		case <-time.After(5 * time.Second):
+			fmt.Println("get contract address time over!")
+		}
+	}()
+	return
 }
 
 func handlePayDetail(request model.PayDetail) (paymentMode, totalRewardToken int) {
@@ -270,4 +309,64 @@ func handlePayDetail(request model.PayDetail) (paymentMode, totalRewardToken int
 		return paymentMode, totalRewardToken
 	}
 	return 0, 0
+}
+
+func updateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint64, contractAddress string) {
+	err := model.UpdateTransactionStatus(tx, bountyID, status)
+	if err != nil {
+		log.Warn(err)
+	}
+	err = model.UpdateBountyDepositContract(tx, bountyID, contractAddress)
+	if err != nil {
+		log.Warn(err)
+	}
+}
+
+func GetContractAddress(chainID uint64, txHashString string) (contractAddress string, status uint64) {
+	txHash := common.HexToHash(txHashString)
+	//tx, isPending, err := eth.Client.TransactionByHash(context.Background(), txHash)
+	receipt, err := eth.Client.TransactionReceipt(context.Background(), txHash)
+	if err != nil {
+		log.Warn(errors.New(fmt.Sprintf("get contract address err:", err)))
+		return "", 0
+	}
+	if receipt.Status == 0 {
+		return "", receipt.Status
+	}
+
+	contractAddress = receipt.ContractAddress.String()
+
+	return contractAddress, receipt.Status
+}
+
+func GetAllContractAddresses() {
+	ticker := time.NewTicker(24 * time.Hour)
+	go func() {
+		for {
+			t := ticker.C
+			fmt.Println("time now is :", t)
+			transactions, err := model.GetTransaction(mysql.DB)
+			if err != nil {
+				return
+			}
+			for _, transaction := range transactions {
+				var contractChan = make(chan *model.ContractInfoResponse, 1)
+				contractAddress, status := GetContractAddress(transaction.ChainID, transaction.TxHash)
+				contractInfo := &model.ContractInfoResponse{
+					ContractAddress: contractAddress,
+					Status:          status,
+				}
+				select {
+				case contractChan <- contractInfo:
+					for contract := range contractChan {
+						updateBountyContractAndTransactoinStatus(mysql.DB, transaction.SourceID, contract.Status, contract.ContractAddress)
+					}
+				case <-time.After(5 * time.Second):
+					fmt.Println("get contract address time over!")
+				}
+				return
+			}
+		}
+		return
+	}()
 }
