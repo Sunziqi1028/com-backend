@@ -310,7 +310,6 @@ func handlePayDetail(request model.PayDetail) (paymentMode, totalRewardToken int
 		totalRewardToken = request.Period.Token1Amount + request.Period.Token2Amount
 		return paymentMode, totalRewardToken
 	}
-	return
 }
 
 func updateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint64, contractAddress string) {
