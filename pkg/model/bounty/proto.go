@@ -89,7 +89,7 @@ type BountyPaymentPeriod struct {
 	model.RelationBase
 	BountyID     uint64 `gorm:"column:bounty_id;unique_index:bounty_id_uindex" json:"bountyID"`
 	PeriodType   int    `gorm:"column:period_type" json:"periodType"`
-	PeriodAmount int64  `gorm:"column:period_aomunt" json:"periodAmount"`
+	PeriodAmount int64  `gorm:"column:period_amount" json:"periodAmount"`
 	HoursPerDay  int    `gorm:"column:hours_per_day" json:"hoursPerDay"`
 	Token1Symbol string `gorm:"column:token1_symbol" json:"token1Symbol,omitempty"`
 	Token1Amount int    `gorm:"column:token1_amount" json:"token1Amount,omitempty"`
