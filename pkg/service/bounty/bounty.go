@@ -373,7 +373,6 @@ func GetAllContractAddresses() {
 	}()
 }
 
-func QueryAllBounties(request model.TabListRequest) (response model.TabListResponse, err error) {
 func QueryAllBounties(request model2.Pagination) (pagination *model2.Pagination, err error) {
 	pagination, err = model.PageSelectBounties(mysql.DB, request)
 	if err != nil {
@@ -389,7 +388,7 @@ func QueryAllBounties(request model2.Pagination) (pagination *model2.Pagination,
 				for _, bounty := range slice {
 					item, err := packItem(*bounty, startupMap, tabBounty)
 					if err != nil {
-						return
+						return pagination, err
 					}
 					log.Infof("bounty detail item: %v\n", item)
 				}
@@ -461,8 +460,8 @@ func QueryBountiesByStartup(startupId uint64, request model2.Pagination) (pagina
 	return pagination, nil
 }
 
-func QueryComerPostedBountyList(startupId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
-	pagination, err = model.PageSelectPostedBounties(mysql.DB, request, startupId)
+func QueryComerPostedBountyList(comerId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
+	pagination, err = model.PageSelectPostedBounties(mysql.DB, request, comerId)
 	if err != nil {
 		return nil, err
 	}
@@ -479,8 +478,8 @@ func QueryComerPostedBountyList(startupId uint64, request model2.Pagination) (pa
 	return pagination, nil
 }
 
-func QueryComerParticipatedBountyList(startupId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
-	pagination, err = model.PageSelectParticipatedBounties(mysql.DB, request, startupId)
+func QueryComerParticipatedBountyList(comerId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
+	pagination, err = model.PageSelectParticipatedBounties(mysql.DB, request, comerId)
 	if err != nil {
 		return nil, err
 	}

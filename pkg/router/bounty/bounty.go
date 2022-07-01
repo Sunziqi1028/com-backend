@@ -69,7 +69,7 @@ func GetPublicBountyList(ctx *router.Context) {
 
 // GetBountyListByStartup get bounty list belongs to startup
 func GetBountyListByStartup(ctx *router.Context) {
-	var request bounty.TabListRequest
+	var request model.Pagination
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.HandleError(err)
 		return
@@ -84,7 +84,7 @@ func GetBountyListByStartup(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	request.PageSize = 3
+	request.Limit = 3
 
 	if response, err := service.QueryBountiesByStartup(startupId, request); err != nil {
 		ctx.HandleError(err)
@@ -96,12 +96,12 @@ func GetBountyListByStartup(ctx *router.Context) {
 // GetMyPostedBountyList get bounty list posted by me
 func GetMyPostedBountyList(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	var request bounty.TabListRequest
+	var request model.Pagination
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	request.PageSize = 8
+	request.Limit = 8
 
 	if response, err := service.QueryComerPostedBountyList(comerID, request); err != nil {
 		ctx.HandleError(err)
@@ -113,12 +113,12 @@ func GetMyPostedBountyList(ctx *router.Context) {
 // GetMyParticipatedBountyList get bounty list
 func GetMyParticipatedBountyList(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	var request bounty.TabListRequest
+	var request model.Pagination
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	request.PageSize = 8
+	request.Limit = 8
 
 	if response, err := service.QueryComerParticipatedBountyList(comerID, request); err != nil {
 		ctx.HandleError(err)
