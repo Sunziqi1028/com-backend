@@ -47,7 +47,7 @@ func CreatePostUpdate(db *gorm.DB, postUpdate *PostUpdate) error {
 }
 
 func UpdateBountyDepositContract(db *gorm.DB, bountyID uint64, depositContract string) error {
-	return db.Model(&Bounty{}).Where("bounty_id = ?", bountyID).Update("deposit_contract", depositContract).Error
+	return db.Model(&Bounty{}).Where("id = ?", bountyID).Update("deposit_contract", depositContract).Error
 }
 
 func UpdateTransactionStatus(db *gorm.DB, bountyID uint64, status uint64) error {
