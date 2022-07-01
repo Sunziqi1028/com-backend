@@ -4,6 +4,7 @@ package main
 
 import (
 	"ceres/pkg/event"
+	"ceres/pkg/initialization/bounty"
 	"ceres/pkg/initialization/config"
 	"ceres/pkg/initialization/eth"
 	"ceres/pkg/initialization/http"
@@ -42,6 +43,7 @@ func main() {
 		http.Init,
 		s3.Init,
 		eth.Init,
+		bounty.Init,
 	).Serve(
 		metrics.Vernor,
 		http.Gin,
