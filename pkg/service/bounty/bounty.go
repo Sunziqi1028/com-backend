@@ -310,7 +310,7 @@ func handlePayDetail(request model.PayDetail) (paymentMode, totalRewardToken int
 		totalRewardToken = request.Period.Token1Amount + request.Period.Token2Amount
 		return paymentMode, totalRewardToken
 	}
-	return 0, 0
+	return
 }
 
 func updateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint64, contractAddress string) {
@@ -329,7 +329,7 @@ func GetContractAddress(chainID uint64, txHashString string) (contractAddress st
 	//tx, isPending, err := eth.Client.TransactionByHash(context.Background(), txHash)
 	receipt, err := eth.Client.TransactionReceipt(context.Background(), txHash)
 	if err != nil {
-		log.Warn(errors.New(fmt.Sprintf("get contract address err:", err)))
+		log.Warn(err)
 		return "", 0
 	}
 	if receipt.Status == 0 {
@@ -362,6 +362,7 @@ func GetAllContractAddresses() {
 				case contractChan <- contractInfo:
 					for contract := range contractChan {
 						updateBountyContractAndTransactoinStatus(mysql.DB, transaction.SourceID, contract.Status, contract.ContractAddress)
+						return
 					}
 				case <-time.After(5 * time.Second):
 					fmt.Println("get contract address time over!")
@@ -369,7 +370,6 @@ func GetAllContractAddresses() {
 				return
 			}
 		}
-		return
 	}()
 }
 
