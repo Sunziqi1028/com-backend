@@ -21,7 +21,7 @@ type Bounty struct {
 	StartupID          uint64    `gorm:"column:startup_id" json:"startupID"`
 	ComerID            uint64    `gorm:"column:comer_id" json:"comerID"`
 	Title              string    `gorm:"column:title" json:"title"`
-	ApplyCutoffDate    time.Time `gorm:"column:apply_cutoff_date" json:"applyCutoffDate"`
+	ApplyCutoffDate    time.Time `gorm:"column:apply_cutoff_date" json:"expiresIn"`
 	DiscussionLink     string    `gorm:"column:discussion_link" json:"discussionLink"`
 	DepositTokenSymbol string    `gorm:"column:deposit_token_symbol" json:"depositTokenSymbol"`
 	ApplicantDeposit   int       `gorm:"column:applicant_deposit" json:"applicationDeposit"`
