@@ -12,6 +12,7 @@ import (
 	model "ceres/pkg/model/bounty"
 	"ceres/pkg/router"
 	service "ceres/pkg/service/bounty"
+	"fmt"
 	"strconv"
 )
 
@@ -23,6 +24,7 @@ func GetComerStartups(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
+	fmt.Println(comerID, "router/bounty.go line:27")
 	response, err := service.GetStartupsByComerID(comerID)
 	if err != nil {
 		ctx.HandleError(err)
@@ -38,6 +40,9 @@ func CreateBounty(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
+
+	fmt.Println(request, "router/bounty.go line:43")
+
 	if err := service.CreateComerBounty(request); err != nil {
 		ctx.HandleError(err)
 		return
