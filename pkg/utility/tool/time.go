@@ -11,8 +11,7 @@ package tool
 import "time"
 
 func ParseTimeString2Time(expireIn string) time.Time {
-	expireIn += "00:00:00"
-	timeTemplate := "2006-01-02 15:04:05"
+	timeTemplate := "2006-01-02"
 	tamp, _ := time.ParseInLocation(timeTemplate, expireIn, time.Local)
 	return tamp
 }

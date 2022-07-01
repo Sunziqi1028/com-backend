@@ -10,7 +10,7 @@ package bounty
 
 type GetStartupsResponse struct {
 	StartupID uint64 `gorm:"column:id" json:"startupID"`
-	Name      string `json:"name"`
+	Name      string `gorm:"column:name" json:"name"`
 }
 
 type CreateBountyResponse struct {

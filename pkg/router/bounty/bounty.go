@@ -24,7 +24,7 @@ func GetComerStartups(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	fmt.Println(comerID, "router/bounty.go line:27")
+	fmt.Println(comerID, "router/bounty.go line:27") // 注释
 	response, err := service.GetStartupsByComerID(comerID)
 	if err != nil {
 		ctx.HandleError(err)
@@ -41,7 +41,7 @@ func CreateBounty(ctx *router.Context) {
 		return
 	}
 
-	fmt.Println(request, "router/bounty.go line:43")
+	fmt.Println(request, "router/bounty.go line:43") // 注释
 
 	if err := service.CreateComerBounty(request); err != nil {
 		ctx.HandleError(err)
