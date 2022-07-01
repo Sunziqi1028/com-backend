@@ -113,6 +113,13 @@ func Init() (err error) {
 		bounties.Use(middleware.GuestAuthorizationMiddleware())
 		bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
 		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
+		bounties.POST("detail", router.Wrap(bounty.CreateBounty))
+
+		bounties.Use(middleware.ComerAuthorizationMiddleware())
+		bounties.POST("/list", router.Wrap(bounty.GetPublicBountyList))
+		bounties.POST("/:startupId/bounties", router.Wrap(bounty.GetBountyListByStartup))
+		bounties.POST("/my-participated", router.Wrap(bounty.GetMyParticipatedBountyList))
+		bounties.POST("/my-posted", router.Wrap(bounty.GetMyPostedBountyList))
 	}
 	return
 }

@@ -8,6 +8,8 @@
 
 package bounty
 
+import "ceres/pkg/router"
+
 type BountyRequest struct {
 	BountyDetail `json:"bountyDetail"`
 	PayDetail    `json:"PayDetail"`
@@ -73,6 +75,16 @@ type ChainInfo struct {
 type PageParam struct {
 	CurrentPage int `json:"currentPage,omitempty"`
 	PageSize    int `json:"pageSize,omitempty"`
+}
+
+func (p PageParam) Valid() error {
+	if p.CurrentPage <= 0 {
+		return router.ErrBadRequest.WithMsg("current page should not less or equal to 0")
+	}
+	if p.PageSize <= 0 {
+		return router.ErrBadRequest.WithMsg("page size should not less or equal to 0")
+	}
+	return nil
 }
 
 // TabListRequest bounty tab list request

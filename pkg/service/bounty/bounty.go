@@ -11,7 +11,9 @@ package bounty
 import (
 	"ceres/pkg/initialization/eth"
 	"ceres/pkg/initialization/mysql"
+	model2 "ceres/pkg/model"
 	model "ceres/pkg/model/bounty"
+	"ceres/pkg/model/startup"
 	"ceres/pkg/model/tag"
 	"ceres/pkg/utility/tool"
 	"context"
@@ -372,18 +374,125 @@ func GetAllContractAddresses() {
 }
 
 func QueryAllBounties(request model.TabListRequest) (response model.TabListResponse, err error) {
+func QueryAllBounties(request model2.Pagination) (pagination *model2.Pagination, err error) {
+	pagination, err = model.PageSelectBounties(mysql.DB, request)
+	if err != nil {
+		return nil, err
+	}
+
+	if pagination.Rows != nil {
+		if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
+			log.Infof("bounties: %v\n", slice)
+			if len(slice) > 0 {
+				startupMap := new(map[uint64]startup.Startup)
+				// 遍历
+				for _, bounty := range slice {
+					item, err := packItem(*bounty, startupMap, tabBounty)
+					if err != nil {
+						return
+					}
+					log.Infof("bounty detail item: %v\n", item)
+				}
+			}
+		}
+	}
+
+	return pagination, nil
+}
+
+type ItemType int
+
+const (
+	tabBounty = iota + 1
+	startupBounty
+	myPostedBounty
+	myParticipatedBounty
+)
+
+func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemType ItemType) (item interface{}, err error) {
+	log.Infof("bounty: %v\n", bounty)
+	// 取出 logo
+	if su, ok := (*startupMap)[bounty.StartupID]; ok {
+		log.Infof("startup logo: %s \n", su.Logo)
+	} else {
+		// 查询startup表，放入map
+	}
+	// paymentMode用以计算 rewards
+	paymentMode := bounty.PaymentMode
+	// stage , 查询paymentTerms并统计
+	if paymentMode == 1 {
+
+	} else if paymentMode == 2 {
+		// period, 查询PaymentPeriod
+	}
+	// 申请者deposit要求, 由bounty_id去target_tag_rel表查询
+
+	// 申请人数，统计bounty_applicant
+
+	// bounty状态，bounty tab和startup bounty中是一致的；my posted和my participated中状态不一致
+	if itemType == tabBounty || itemType == startupBounty {
+
+	} else if itemType == myPostedBounty {
+
+	} else if itemType == myParticipatedBounty {
+
+	}
 
 	return
 }
 
-func QueryBountiesByStartup(startupId uint64, request model.TabListRequest) (response model.TabListResponse, err error) {
-	return
+func QueryBountiesByStartup(startupId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
+	// 按照发布顺序降序查询
+	request.Sort = "created_at desc"
+	pagination, err = model.PageSelectBountiesByStartupId(mysql.DB, request, startupId)
+	if err != nil {
+		return nil, err
+	}
+
+	if pagination.Rows != nil {
+		if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
+			log.Infof("bounties: %v\n", slice)
+			if len(slice) > 0 {
+
+			}
+		}
+	}
+
+	return pagination, nil
 }
 
-func QueryComerPostedBountyList(startupId uint64, request model.TabListRequest) (response model.TabListResponse, err error) {
-	return
+func QueryComerPostedBountyList(startupId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
+	pagination, err = model.PageSelectPostedBounties(mysql.DB, request, startupId)
+	if err != nil {
+		return nil, err
+	}
+
+	if pagination.Rows != nil {
+		if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
+			log.Infof("bounties: %v\n", slice)
+			if len(slice) > 0 {
+
+			}
+		}
+	}
+
+	return pagination, nil
 }
 
-func QueryComerParticipatedBountyList(startupId uint64, request model.TabListRequest) (response model.TabListResponse, err error) {
-	return
+func QueryComerParticipatedBountyList(startupId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
+	pagination, err = model.PageSelectParticipatedBounties(mysql.DB, request, startupId)
+	if err != nil {
+		return nil, err
+	}
+
+	if pagination.Rows != nil {
+		if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
+			log.Infof("bounties: %v\n", slice)
+			if len(slice) > 0 {
+
+			}
+		}
+	}
+
+	return pagination, nil
 }

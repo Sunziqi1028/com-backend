@@ -9,7 +9,8 @@
 package bounty
 
 import (
-	model "ceres/pkg/model/bounty"
+	model "ceres/pkg/model"
+	bounty "ceres/pkg/model/bounty"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/bounty"
@@ -34,7 +35,7 @@ func GetComerStartups(ctx *router.Context) {
 
 // CreateBounty create bounty
 func CreateBounty(ctx *router.Context) {
-	request := new(model.BountyRequest)
+	request := new(bounty.BountyRequest)
 	if err := ctx.ShouldBindJSON(request); err != nil {
 		ctx.HandleError(err)
 		return
@@ -43,7 +44,7 @@ func CreateBounty(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	response := &model.CreateBountyResponse{
+	response := &bounty.CreateBountyResponse{
 		Data:   "create bounty successful!",
 		Status: 0,
 	}
@@ -52,12 +53,12 @@ func CreateBounty(ctx *router.Context) {
 
 // GetPublicBountyList bounty list displayed in bounty tab
 func GetPublicBountyList(ctx *router.Context) {
-	var request model.TabListRequest
+	var request model.Pagination
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	request.PageSize = 10
+	request.Limit = 10
 
 	if response, err := service.QueryAllBounties(request); err != nil {
 		ctx.HandleError(err)
@@ -68,7 +69,7 @@ func GetPublicBountyList(ctx *router.Context) {
 
 // GetBountyListByStartup get bounty list belongs to startup
 func GetBountyListByStartup(ctx *router.Context) {
-	var request model.TabListRequest
+	var request bounty.TabListRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.HandleError(err)
 		return
@@ -95,7 +96,7 @@ func GetBountyListByStartup(ctx *router.Context) {
 // GetMyPostedBountyList get bounty list posted by me
 func GetMyPostedBountyList(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	var request model.TabListRequest
+	var request bounty.TabListRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.HandleError(err)
 		return
@@ -112,7 +113,7 @@ func GetMyPostedBountyList(ctx *router.Context) {
 // GetMyParticipatedBountyList get bounty list
 func GetMyParticipatedBountyList(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
-	var request model.TabListRequest
+	var request bounty.TabListRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.HandleError(err)
 		return

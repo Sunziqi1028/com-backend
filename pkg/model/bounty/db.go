@@ -2,6 +2,7 @@ package bounty
 
 import (
 	"ceres/pkg/model/tag"
+	"ceres/pkg/model"
 	"gorm.io/gorm"
 )
 
@@ -86,4 +87,40 @@ func GetTransaction(db *gorm.DB) (transactionResponse []*GetTransactions, err er
 		return nil, err
 	}
 	return transactionResponse, nil
+}
+
+func PageSelectBounties(db *gorm.DB, pagination model.Pagination) (*model.Pagination, error) {
+	var bounties []*Bounty
+	if err := db.Scopes(model.Paginate(bounties, &pagination, db)).Find(&bounties).Error; err != nil {
+		return nil, err
+	}
+	pagination.Rows = bounties
+	return &pagination, nil
+}
+
+func PageSelectBountiesByStartupId(db *gorm.DB, pagination model.Pagination, startupId uint64) (*model.Pagination, error) {
+	var bounties []*Bounty
+	if err := db.Scopes(model.Paginate(bounties, &pagination, db)).Where("startup_id = ?", startupId).Find(&bounties).Error; err != nil {
+		return nil, err
+	}
+	pagination.Rows = bounties
+	return &pagination, nil
+}
+
+func PageSelectPostedBounties(db *gorm.DB, pagination model.Pagination, comerId uint64) (*model.Pagination, error) {
+	var bounties []*Bounty
+	if err := db.Scopes(model.Paginate(bounties, &pagination, db)).Where("comer_id = ?", comerId).Find(&bounties).Error; err != nil {
+		return nil, err
+	}
+	pagination.Rows = bounties
+	return &pagination, nil
+}
+
+func PageSelectParticipatedBounties(db *gorm.DB, pagination model.Pagination, comerId uint64) (*model.Pagination, error) {
+	var bounties []*Bounty
+	if err := db.Scopes(model.Paginate(bounties, &pagination, db)).Where("comer_id = ?", comerId).Find(&bounties).Error; err != nil {
+		return nil, err
+	}
+	pagination.Rows = bounties
+	return &pagination, nil
 }
