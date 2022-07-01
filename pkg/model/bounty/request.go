@@ -51,6 +51,7 @@ type StageType struct {
 
 type PeriodType struct {
 	PeriodType   string `json:"days,weeks,months,omitempty"`
+	PeriodAmount int    `json:"periodAmount,omitempty"`
 	HoursPerDay  int    `json:"HoursPerDay,omitempty"`
 	Token1Symbol string `json:"token1Symbol,omitempty"`
 	Token1Amount int    `json:"token1Amount,omitempty"`

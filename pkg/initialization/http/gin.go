@@ -112,7 +112,7 @@ func Init() (err error) {
 	{
 		bounties.Use(middleware.GuestAuthorizationMiddleware())
 		bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
-		bounties.POST("detail", router.Wrap(bounty.CreateBounty))
+		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
 	}
 	return
 }
