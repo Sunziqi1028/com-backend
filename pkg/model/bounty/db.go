@@ -51,7 +51,7 @@ func UpdateBountyDepositContract(db *gorm.DB, bountyID uint64, depositContract s
 }
 
 func UpdateTransactionStatus(db *gorm.DB, bountyID uint64, status uint64) error {
-	return db.Model(&Transaction{}).Where("bounty_id = ?", bountyID).Update("status", int(status)).Error
+	return db.Model(&Transaction{}).Where("source_id = ?", bountyID).Update("status", int(status)).Error
 }
 
 func GetAndUpdateTagID(db *gorm.DB, name string) (tagID uint64, err error) {
