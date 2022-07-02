@@ -36,6 +36,7 @@ func GetComerStartups(ctx *router.Context) {
 			GetStartups: nil,
 		}
 		ctx.OK(response)
+		return
 	}
 	response := &model.GetStartupsResponse{
 		Data:        "get startup success!",
