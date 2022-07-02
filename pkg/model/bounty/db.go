@@ -55,7 +55,7 @@ func UpdateTransactionStatus(db *gorm.DB, bountyID uint64, status uint64) error 
 }
 
 func GetAndUpdateTagID(db *gorm.DB, name string) (tagID uint64, err error) {
-	err = db.Table("tag").Select("id").Where("name = ? and catagory = comerSkill", name).Find(&tagID).Error
+	err = db.Table("tag").Select("id").Where("name = ? and category = comerSkill", name).Find(&tagID).Error
 	if err != nil {
 		return 0, err
 	}
