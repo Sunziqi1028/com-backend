@@ -23,8 +23,8 @@ import (
 	"time"
 )
 
-func GetStartupsByComerID(comerID uint64) ([]*model.GetStartupsResponse, error) {
-	var startups []*model.GetStartupsResponse
+func GetStartupsByComerID(comerID uint64) ([]*model.GetStartups, error) {
+	var startups []*model.GetStartups
 	startupsResponse, err := model.GetComerStartups(mysql.DB, comerID, startups)
 	if err != nil {
 		return nil, err

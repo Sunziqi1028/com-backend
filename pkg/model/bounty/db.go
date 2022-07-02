@@ -7,7 +7,7 @@ import (
 
 // TODO: bounty model
 
-func GetComerStartups(db *gorm.DB, comerID uint64, startups []*GetStartupsResponse) ([]*GetStartupsResponse, error) {
+func GetComerStartups(db *gorm.DB, comerID uint64, startups []*GetStartups) ([]*GetStartups, error) {
 	err := db.Table("startup").Select("id, name").Where("comer_id = ? and is_deleted = 0", comerID).Order("convert(name using gbk)").Find(&startups).Error
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func UpdateTransactionStatus(db *gorm.DB, bountyID uint64, status uint64) error 
 }
 
 func GetAndUpdateTagID(db *gorm.DB, name string) (tagID uint64, err error) {
-	err = db.Table("tag").Select("id").Where("name = ? and category = 'comerSkill'", name).Find(&tagID).Error
+	err = db.Table("tag").Select("id").Where("name = ? and category = 'comerSkill", name).Find(&tagID).Error
 	if err != nil {
 		return 0, err
 	}

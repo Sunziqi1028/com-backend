@@ -9,14 +9,18 @@
 package bounty
 
 type GetStartupsResponse struct {
+	GetStartups []*GetStartups `json:"startups"`
+	Data        string         `json:"data"`
+}
+
+type GetStartups struct {
 	StartupID uint64 `gorm:"column:id" json:"startupID"`
 	Name      string `gorm:"column:name" json:"name"`
 }
 
-type CreateBountyResponse struct {
-	Data   string `json:"data"`
-	Status int    `json:"status"`
-}
+//type CreateBountyResponse struct {
+//	Data string `json:"data"`
+//}
 
 type ContractInfoResponse struct {
 	ContractAddress string
