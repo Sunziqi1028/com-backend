@@ -10,7 +10,7 @@ package bounty
 
 type BountyRequest struct {
 	BountyDetail `json:"bountyDetail"  binding:"required"`
-	PayDetail    `json:"payDetail"  binding:"required"`
+	PayDetail    `json:"payDetail"`
 	Deposit      `json:"deposit"  binding:"required"`
 	ChainInfo    `json:"chainInfo"  binding:"required"`
 }
@@ -38,23 +38,23 @@ type PayDetail struct {
 }
 
 type StageType struct {
-	SeqNum       int    `json:"id" binding:"required"`
-	Token1Symbol string `json:"token1Symbol" binding:"required"`
-	Token1Amount int    `json:"token1Amount" binding:"required"`
-	Token2Symbol string `json:"token2Symbol" binding:"required"`
-	Token2Amount int    `json:"token2Amount" binding:"required"`
-	Terms        string `json:"terms" binding:"required"`
+	SeqNum       int    `json:"id,omitempty"`
+	Token1Symbol string `json:"token1Symbol,omitempty"`
+	Token1Amount int    `json:"token1Amount,omitempty"`
+	Token2Symbol string `json:"token2Symbol,omitempty"`
+	Token2Amount int    `json:"token2Amount,omitempty"`
+	Terms        string `json:"terms,omitempty"`
 }
 
 type PeriodType struct {
-	PeriodType   uint8  `json:"periodType" binding:"required"` // 1:Days 2:Weeks 3:Months
-	PeriodAmount int    `json:"periodAmount" binding:"required"`
-	HoursPerDay  int    `json:"HoursPerDay" binding:"required"`
-	Token1Symbol string `json:"token1Symbol" binding:"required"`
-	Token1Amount int    `json:"token1Amount" binding:"required"`
-	Token2Symbol string `json:"token2Symbol" binding:"required"`
-	Token2Amount int    `json:"token2Amount" binding:"required"`
-	Target       string `json:"target" binding:"required"`
+	PeriodType   uint8  `json:"periodType,omitempty"` // 1:Days 2:Weeks 3:Months
+	PeriodAmount int    `json:"periodAmount,omitempty"`
+	HoursPerDay  int    `json:"HoursPerDay,omitempty"`
+	Token1Symbol string `json:"token1Symbol,omitempty"`
+	Token1Amount int    `json:"token1Amount,omitempty"`
+	Token2Symbol string `json:"token2Symbol,omitempty"`
+	Token2Amount int    `json:"token2Amount,omitempty"`
+	Target       string `json:"target,omitempty"`
 }
 
 type Deposit struct {
