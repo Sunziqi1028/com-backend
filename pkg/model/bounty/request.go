@@ -25,7 +25,7 @@ type BountyDetail struct {
 	Contacts          []Contact `json:"contact"  binding:"required"`
 	DiscussionLink    string    `json:"discussionLink"`
 	ApplicantsSkills  []string  `json:"applicantsSkills"  binding:"required"`
-	ApplicantsDeposit int       `json:"applicantsDeposit"  binding:"required"`
+	ApplicantsDeposit int       `json:"applicantsDeposit"`
 	Description       string    `json:"description"  binding:"required"`
 }
 
@@ -61,7 +61,7 @@ type PeriodType struct {
 
 type Deposit struct {
 	TokenSymbol string `json:"tokenSymbol" binding:"required"`
-	TokenAmount int    `json:"tokenAmount" binding:"required"`
+	TokenAmount int    `json:"tokenAmount"`
 }
 
 type ChainInfo struct {
