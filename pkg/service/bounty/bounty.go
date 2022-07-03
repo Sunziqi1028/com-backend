@@ -351,10 +351,10 @@ func iter(pagination *model2.Pagination, crtComerId uint64) (err error) {
 	if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
 		log.Infof("bounties: %v\n", slice)
 		if len(slice) > 0 {
-			startupMap := new(map[uint64]startup.Startup)
+			startupMap := make(map[uint64]startup.Startup)
 			// 遍历
 			for _, bounty := range slice {
-				item, err := packItem(*bounty, startupMap, tabBounty, crtComerId)
+				item, err := packItem(*bounty, &startupMap, tabBounty, crtComerId)
 				if err != nil {
 					return err
 				}
@@ -368,7 +368,7 @@ func iter(pagination *model2.Pagination, crtComerId uint64) (err error) {
 	return nil
 }
 
-var bountyStatusMap map[int]string = map[int]string{
+var bountyStatusMap = map[int]string{
 	0: "Pending",
 	1: "Ready to work",
 	2: "Work started",
@@ -477,7 +477,7 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 
 func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []model.Reward) {
 	if len(terms) > 0 {
-		var termsByTokenSymbol map[string]int
+		termsByTokenSymbol := make(map[string]int)
 		var token1Symbol string // 其实固定是 UVU !!
 		var token2Symbol string
 		for _, term := range terms {
@@ -515,7 +515,7 @@ func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []mo
 
 func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards []model.Reward) {
 	if len(periods) > 0 {
-		var termsByTokenSymbol map[string]int
+		termsByTokenSymbol := make(map[string]int)
 		var token1Symbol string // 其实固定是 UVU !!
 		var token2Symbol string
 		for _, term := range periods {
