@@ -356,6 +356,7 @@ func iter(pagination *model2.Pagination, crtComerId uint64) (err error) {
 			for _, bounty := range slice {
 				item, err := packItem(*bounty, &startupMap, tabBounty, crtComerId)
 				if err != nil {
+					log.Infof("##### iteration occurred error: %v\n", err)
 					return err
 				}
 				items = append(items, item)
@@ -388,7 +389,6 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 	var st startup.Startup
 	// 取出 logo
 	if su, ok := (*startupMap)[bounty.StartupID]; ok {
-		log.Infof("startup logo: %s \n", su.Logo)
 		st = su
 	} else {
 		// 查询startup表，放入map
@@ -397,6 +397,7 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 		}
 		(*startupMap)[bounty.StartupID] = st
 	}
+	log.Infof("startup logo: %s \n", st.Logo)
 	logo := st.Logo
 	detailItem.Logo = logo
 	// paymentMode用以计算 rewards
@@ -412,12 +413,14 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 		calcRewardWhenIsPaymentTerms(terms, rewards)
 		detailItem.PaymentType = "Stage"
 	} else if paymentMode == 2 {
-		var terms []model.BountyPaymentPeriod
+		var periods []model.BountyPaymentPeriod
 		// period, 查询PaymentPeriod
-		if err := model.GetPaymentPeriodsByBountyId(mysql.DB, bounty.ID, &terms); err != nil {
-			return nil, err
+		if err := model.GetPaymentPeriodsByBountyId(mysql.DB, bounty.ID, &periods); err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, err
+			}
 		}
-		calcRewardWhenIsPaymentPeriod(terms, rewards)
+		calcRewardWhenIsPaymentPeriod(periods, rewards)
 		detailItem.PaymentType = "Period"
 	}
 
@@ -515,37 +518,37 @@ func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []mo
 
 func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards []model.Reward) {
 	if len(periods) > 0 {
-		termsByTokenSymbol := make(map[string]int)
+		byTokenSymbol := make(map[string]int)
 		var token1Symbol string // 其实固定是 UVU !!
 		var token2Symbol string
-		for _, term := range periods {
-			if term.Token1Symbol != "" {
-				token1Symbol = term.Token1Symbol
-				if v, ok := termsByTokenSymbol[token1Symbol]; ok {
-					termsByTokenSymbol[token1Symbol] = v + term.Token1Amount
+		for _, period := range periods {
+			if period.Token1Symbol != "" {
+				token1Symbol = period.Token1Symbol
+				if v, ok := byTokenSymbol[token1Symbol]; ok {
+					byTokenSymbol[token1Symbol] = v + period.Token1Amount
 				} else {
-					termsByTokenSymbol[token1Symbol] = term.Token1Amount
+					byTokenSymbol[token1Symbol] = period.Token1Amount
 				}
 			}
-			if term.Token2Symbol != "" {
-				token2Symbol = term.Token2Symbol
-				if v, ok := termsByTokenSymbol[token2Symbol]; ok {
-					termsByTokenSymbol[token2Symbol] = v + term.Token2Amount
+			if period.Token2Symbol != "" {
+				token2Symbol = period.Token2Symbol
+				if v, ok := byTokenSymbol[token2Symbol]; ok {
+					byTokenSymbol[token2Symbol] = v + period.Token2Amount
 				} else {
-					termsByTokenSymbol[token2Symbol] = term.Token2Amount
+					byTokenSymbol[token2Symbol] = period.Token2Amount
 				}
 			}
 		}
 		if token1Symbol != "" {
 			rewards = append(rewards, model.Reward{
-				TokenSymbol: "UVU",
-				Amount:      termsByTokenSymbol["UVU"],
+				TokenSymbol: token1Symbol,
+				Amount:      byTokenSymbol[token1Symbol],
 			})
 		}
 		if token2Symbol != "" {
 			rewards = append(rewards, model.Reward{
 				TokenSymbol: token2Symbol,
-				Amount:      termsByTokenSymbol[token2Symbol],
+				Amount:      byTokenSymbol[token2Symbol],
 			})
 		}
 	}
