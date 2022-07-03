@@ -120,3 +120,33 @@ type BountyPaymentTerms struct {
 func (BountyPaymentTerms) TableName() string {
 	return "bounty_payment_terms"
 }
+
+type Transaction struct {
+	model.RelationBase
+	ChainID    uint64    `gorm:"column:chain_id;unique_index:chain_tx_uindex" json:"chainID"`
+	TxHash     string    `gorm:"column:tx_hash;unique_index:chain_tx_uindex" json:"txHash"`
+	TimeStamp  time.Time `gorm:"column:timestamp"`
+	Status     int       `gorm:"column:status" json:"status,omitempty"` // 0:Pending 1:Success 2:Failure
+	SourceType int       `gorm:"column:source_type" json:"sourceType"`
+	SourceID   int64     `gorm:"column:source_id" json:"sourceID"`
+	RetryTimes int       `gorm:"column:retry_times" json:"retryTimes"`
+}
+
+// TableName the Transaction table name for gorm
+func (Transaction) TableName() string {
+	return "transaction"
+}
+
+type PostUpdate struct {
+	model.RelationBase
+	SourceType int       `gorm:"sourceType"`
+	SourceID   uint64    `gorm:"sourceID"`
+	ComerID    uint64    `gorm:"comerID"`
+	Content    string    `gorm:"column:content"`
+	TimeStamp  time.Time `gorm:"column:timestamp"` // post time
+}
+
+// TableName the PostUpdate table name for gorm
+func (PostUpdate) TableName() string {
+	return "post_update"
+}

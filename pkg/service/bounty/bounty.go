@@ -275,6 +275,7 @@ func handlePayDetail(request model.PayDetail) (paymentMode, totalRewardToken int
 	}
 }
 
+// QueryAllBounties query all bounties, display in bounty tab
 func QueryAllBounties(request model2.Pagination) (pagination *model2.Pagination, err error) {
 	pagination, err = model.PageSelectBounties(mysql.DB, request)
 	if err != nil {
@@ -282,19 +283,8 @@ func QueryAllBounties(request model2.Pagination) (pagination *model2.Pagination,
 	}
 
 	if pagination.Rows != nil {
-		if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
-			log.Infof("bounties: %v\n", slice)
-			if len(slice) > 0 {
-				startupMap := new(map[uint64]startup.Startup)
-				// 遍历
-				for _, bounty := range slice {
-					item, err := packItem(*bounty, startupMap, tabBounty)
-					if err != nil {
-						return pagination, err
-					}
-					log.Infof("bounty detail item: %v\n", item)
-				}
-			}
+		if err := iter(pagination, 0); err != nil {
+			return pagination, err
 		}
 	}
 
@@ -310,38 +300,6 @@ const (
 	myParticipatedBounty
 )
 
-func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemType ItemType) (item interface{}, err error) {
-	log.Infof("bounty: %v\n", bounty)
-	// 取出 logo
-	if su, ok := (*startupMap)[bounty.StartupID]; ok {
-		log.Infof("startup logo: %s \n", su.Logo)
-	} else {
-		// 查询startup表，放入map
-	}
-	// paymentMode用以计算 rewards
-	paymentMode := bounty.PaymentMode
-	// stage , 查询paymentTerms并统计
-	if paymentMode == 1 {
-
-	} else if paymentMode == 2 {
-		// period, 查询PaymentPeriod
-	}
-	// 申请者deposit要求, 由bounty_id去target_tag_rel表查询
-
-	// 申请人数，统计bounty_applicant
-
-	// bounty状态，bounty tab和startup bounty中是一致的；my posted和my participated中状态不一致
-	if itemType == tabBounty || itemType == startupBounty {
-
-	} else if itemType == myPostedBounty {
-
-	} else if itemType == myParticipatedBounty {
-
-	}
-
-	return
-}
-
 func QueryBountiesByStartup(startupId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
 	// 按照发布顺序降序查询
 	request.Sort = "created_at desc"
@@ -351,11 +309,8 @@ func QueryBountiesByStartup(startupId uint64, request model2.Pagination) (pagina
 	}
 
 	if pagination.Rows != nil {
-		if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
-			log.Infof("bounties: %v\n", slice)
-			if len(slice) > 0 {
-
-			}
+		if err := iter(pagination, 0); err != nil {
+			return pagination, err
 		}
 	}
 
@@ -369,11 +324,8 @@ func QueryComerPostedBountyList(comerId uint64, request model2.Pagination) (pagi
 	}
 
 	if pagination.Rows != nil {
-		if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
-			log.Infof("bounties: %v\n", slice)
-			if len(slice) > 0 {
-
-			}
+		if err := iter(pagination, comerId); err != nil {
+			return pagination, err
 		}
 	}
 
@@ -387,13 +339,214 @@ func QueryComerParticipatedBountyList(comerId uint64, request model2.Pagination)
 	}
 
 	if pagination.Rows != nil {
-		if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
-			log.Infof("bounties: %v\n", slice)
-			if len(slice) > 0 {
-
-			}
+		if err := iter(pagination, comerId); err != nil {
+			return pagination, err
 		}
 	}
-
 	return pagination, nil
+}
+
+func iter(pagination *model2.Pagination, crtComerId uint64) (err error) {
+	var items []*model.DetailItem
+	if slice, ok := (pagination.Rows).([]*model.Bounty); ok {
+		log.Infof("bounties: %v\n", slice)
+		if len(slice) > 0 {
+			startupMap := new(map[uint64]startup.Startup)
+			// 遍历
+			for _, bounty := range slice {
+				item, err := packItem(*bounty, startupMap, tabBounty, crtComerId)
+				if err != nil {
+					return err
+				}
+				items = append(items, item)
+				log.Infof("bounty detail item: %v\n", item)
+			}
+
+		}
+	}
+	pagination.Rows = items
+	return nil
+}
+
+var bountyStatusMap map[int]string = map[int]string{
+	0: "Pending",
+	1: "Ready to work",
+	2: "Work started",
+	3: "Completed",
+	4: "Expired",
+}
+
+var bountyDepositStatusMap = map[int]string{
+	0: "Pending",
+	1: "Success",
+	2: "Failure",
+}
+
+func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemType ItemType, crtComerId uint64) (detailItem *model.DetailItem, err error) {
+	log.Infof("bounty: %v\n", bounty)
+	detailItem = &model.DetailItem{}
+	var st startup.Startup
+	// 取出 logo
+	if su, ok := (*startupMap)[bounty.StartupID]; ok {
+		log.Infof("startup logo: %s \n", su.Logo)
+		st = su
+	} else {
+		// 查询startup表，放入map
+		if err := startup.GetStartup(mysql.DB, bounty.StartupID, &st); err != nil {
+			return detailItem, err
+		}
+		(*startupMap)[bounty.StartupID] = st
+	}
+	logo := st.Logo
+	detailItem.Logo = logo
+	// paymentMode用以计算 rewards
+	paymentMode := bounty.PaymentMode
+	var rewards []model.Reward
+	// stage , 查询paymentTerms并统计
+	if paymentMode == 1 {
+		// todo 同一个bounty的terms的所有token2Symbol 一致吧！！！？
+		var terms []model.BountyPaymentTerms
+		if err := model.GetPaymentTermsByBountyId(mysql.DB, bounty.ID, &terms); err != nil {
+			return nil, err
+		}
+		calcRewardWhenIsPaymentTerms(terms, rewards)
+		detailItem.PaymentType = "Stage"
+	} else if paymentMode == 2 {
+		var terms []model.BountyPaymentPeriod
+		// period, 查询PaymentPeriod
+		if err := model.GetPaymentPeriodsByBountyId(mysql.DB, bounty.ID, &terms); err != nil {
+			return nil, err
+		}
+		calcRewardWhenIsPaymentPeriod(terms, rewards)
+		detailItem.PaymentType = "Period"
+	}
+
+	detailItem.Rewards = rewards
+	// 申请者deposit要求, 由bounty_id去tag_target_rel表查询
+	requirementSkills, err := model.GetBountyTagNames(mysql.DB, bounty.ID)
+	if err != nil {
+		return nil, err
+	}
+	detailItem.ApplicationSkills = requirementSkills
+	// 申请人数，统计bounty_applicant
+	applicantCount, err := model.GetApplicantCountOfBounty(mysql.DB, bounty.ID)
+	if err != nil {
+		return nil, err
+	}
+	detailItem.ApplicantCount = int(applicantCount)
+	var status string
+	// bounty状态，bounty tab和startup bounty中是一致的；my posted和my participated中状态不一致
+	if itemType == tabBounty || itemType == startupBounty {
+		status = bountyStatusMap[bounty.Status]
+	} else if itemType == myPostedBounty {
+		bountyDeposit, err := model.GetBountyDepositByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
+		if err != nil {
+			return nil, err
+		}
+		status = bountyDepositStatusMap[bountyDeposit.Status]
+	} else if itemType == myParticipatedBounty {
+		bountyApplicant, err := model.GetApplicantByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
+		if err != nil {
+			return nil, err
+		}
+		// todo 需要优化！！！
+		switch bountyApplicant.Status {
+		case 0:
+			// 提交
+			status = "Pending"
+		case 1:
+			// 已申请
+			status = "Applied"
+		case 2:
+			// 通过申请
+			status = "Approved"
+		case 3:
+			//
+			status = "Submitted"
+		case 4:
+			status = "Revoked"
+		case 5:
+			status = "Rejected"
+		case 6:
+			status = "Quited"
+		}
+	}
+	detailItem.Status = status
+	return detailItem, nil
+}
+
+func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []model.Reward) {
+	if len(terms) > 0 {
+		var termsByTokenSymbol map[string]int
+		var token1Symbol string // 其实固定是 UVU !!
+		var token2Symbol string
+		for _, term := range terms {
+			if term.Token1Symbol != "" {
+				token1Symbol = term.Token1Symbol
+				if v, ok := termsByTokenSymbol[token1Symbol]; ok {
+					termsByTokenSymbol[token1Symbol] = v + term.Token1Amount
+				} else {
+					termsByTokenSymbol[token1Symbol] = term.Token1Amount
+				}
+			}
+			if term.Token2Symbol != "" {
+				token2Symbol = term.Token2Symbol
+				if v, ok := termsByTokenSymbol[token2Symbol]; ok {
+					termsByTokenSymbol[token2Symbol] = v + term.Token2Amount
+				} else {
+					termsByTokenSymbol[token2Symbol] = term.Token2Amount
+				}
+			}
+		}
+		if token1Symbol != "" {
+			rewards = append(rewards, model.Reward{
+				TokenSymbol: "UVU",
+				Amount:      termsByTokenSymbol["UVU"],
+			})
+		}
+		if token2Symbol != "" {
+			rewards = append(rewards, model.Reward{
+				TokenSymbol: token2Symbol,
+				Amount:      termsByTokenSymbol[token2Symbol],
+			})
+		}
+	}
+}
+
+func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards []model.Reward) {
+	if len(periods) > 0 {
+		var termsByTokenSymbol map[string]int
+		var token1Symbol string // 其实固定是 UVU !!
+		var token2Symbol string
+		for _, term := range periods {
+			if term.Token1Symbol != "" {
+				token1Symbol = term.Token1Symbol
+				if v, ok := termsByTokenSymbol[token1Symbol]; ok {
+					termsByTokenSymbol[token1Symbol] = v + term.Token1Amount
+				} else {
+					termsByTokenSymbol[token1Symbol] = term.Token1Amount
+				}
+			}
+			if term.Token2Symbol != "" {
+				token2Symbol = term.Token2Symbol
+				if v, ok := termsByTokenSymbol[token2Symbol]; ok {
+					termsByTokenSymbol[token2Symbol] = v + term.Token2Amount
+				} else {
+					termsByTokenSymbol[token2Symbol] = term.Token2Amount
+				}
+			}
+		}
+		if token1Symbol != "" {
+			rewards = append(rewards, model.Reward{
+				TokenSymbol: "UVU",
+				Amount:      termsByTokenSymbol["UVU"],
+			})
+		}
+		if token2Symbol != "" {
+			rewards = append(rewards, model.Reward{
+				TokenSymbol: token2Symbol,
+				Amount:      termsByTokenSymbol[token2Symbol],
+			})
+		}
+	}
 }

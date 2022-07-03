@@ -9,7 +9,8 @@
 package bounty
 
 import (
-	model "ceres/pkg/model"
+	"ceres/pkg/model"
+	"ceres/pkg/model/bounty"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/bounty"
@@ -19,7 +20,7 @@ import (
 
 // CreateBounty create bounty
 func CreateBounty(ctx *router.Context) {
-	request := new(model.BountyRequest)
+	request := new(bounty.BountyRequest)
 	if err := ctx.ShouldBindJSON(request); err != nil {
 		ctx.HandleError(err)
 		return
