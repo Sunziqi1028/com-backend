@@ -8,7 +8,32 @@
 
 package bounty
 
+import "time"
+
 type ContractInfoResponse struct {
 	ContractAddress string
 	Status          uint64
+}
+
+type DetailItem struct {
+	Logo              string    `json:"logo"`
+	Title             string    `json:"title"`
+	Status            string    `json:"status"`
+	PaymentType       string    `json:"paymentType"`
+	CreatedTime       time.Time `json:"createdTime"`
+	Rewards           []Reward  `json:"rewards"`
+	ApplicantCount    int       `json:"applicantCount"`
+	ApplicationSkills []string  `json:"applicationSkills"`
+}
+
+type TabListResponse struct {
+	BountyCount int `json:"bountyCount"`
+	PageParam
+	TotalPages int `json:"totalPages"`
+	Records    []*DetailItem
+}
+
+type Reward struct {
+	TokenSymbol string `json:"tokenSymbol"`
+	Amount      int    `json:"amount"`
 }
