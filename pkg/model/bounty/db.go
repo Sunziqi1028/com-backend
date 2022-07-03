@@ -65,20 +65,20 @@ func CreateTagTargetRel(db *gorm.DB, tagTargetRel *tag.TagTargetRel) error {
 
 // GetPaymentTermsByBountyId get payment_terms list
 func GetPaymentTermsByBountyId(db *gorm.DB, bountyId uint64, termList *[]BountyPaymentTerms) error {
-	return db.Where("bounty_id = ? ", bountyId).Find(termList).Error
+	return db.Model(&BountyPaymentTerms{}).Where("bounty_id = ? ", bountyId).Find(termList).Error
 }
 
 func GetPaymentPeriodsByBountyId(db *gorm.DB, bountyId uint64, termList *[]BountyPaymentPeriod) error {
-	return db.Where("bounty_id = ? ", bountyId).Find(termList).Error
+	return db.Model(&BountyPaymentPeriod{}).Where("bounty_id = ? ", bountyId).Find(termList).Error
 }
 
 func GetBountyTagNames(db *gorm.DB, bountyId uint64) (tagNames []string, err error) {
 	var tagIds []uint64
-	if err := db.Where("target= ? and target_id = ?", "bounty", bountyId).Select("tag_id").Find(&tagIds).Error; err != nil {
+	if err := db.Model(&tag.TagTargetRel{}).Where("target= ? and target_id = ?", "bounty", bountyId).Select("tag_id").Find(&tagIds).Error; err != nil {
 		return nil, err
 	}
 	if len(tagIds) >= 0 {
-		if err := db.Where("id in ?", tagIds).Select("name").Find(&tagNames).Error; err != nil {
+		if err := db.Model(&tag.Tag{}).Where("id in ?", tagIds).Select("name").Find(&tagNames).Error; err != nil {
 			return nil, err
 		}
 	}
@@ -107,7 +107,7 @@ func GetBountyDepositByBountyAndComer(db *gorm.DB, bountyID uint64, crtComerId u
 }
 func PageSelectBounties(db *gorm.DB, pagination model.Pagination) (*model.Pagination, error) {
 	var bounties []*Bounty
-	if err := db.Scopes(model.Paginate(bounties, &pagination, db)).Find(&bounties).Error; err != nil {
+	if err := db.Scopes(model.Paginate(&Bounty{}, &pagination, db)).Find(&bounties).Error; err != nil {
 		return nil, err
 	}
 	pagination.Rows = bounties
@@ -116,7 +116,7 @@ func PageSelectBounties(db *gorm.DB, pagination model.Pagination) (*model.Pagina
 
 func PageSelectBountiesByStartupId(db *gorm.DB, pagination model.Pagination, startupId uint64) (*model.Pagination, error) {
 	var bounties []*Bounty
-	if err := db.Scopes(model.Paginate(bounties, &pagination, db)).Where("startup_id = ?", startupId).Find(&bounties).Error; err != nil {
+	if err := db.Scopes(model.Paginate(&Bounty{}, &pagination, db)).Where("startup_id = ?", startupId).Find(&bounties).Error; err != nil {
 		return nil, err
 	}
 	pagination.Rows = bounties
@@ -125,7 +125,7 @@ func PageSelectBountiesByStartupId(db *gorm.DB, pagination model.Pagination, sta
 
 func PageSelectPostedBounties(db *gorm.DB, pagination model.Pagination, comerId uint64) (*model.Pagination, error) {
 	var bounties []*Bounty
-	if err := db.Scopes(model.Paginate(bounties, &pagination, db)).Where("comer_id = ?", comerId).Find(&bounties).Error; err != nil {
+	if err := db.Scopes(model.Paginate(&Bounty{}, &pagination, db)).Where("comer_id = ?", comerId).Find(&bounties).Error; err != nil {
 		return nil, err
 	}
 	pagination.Rows = bounties
@@ -136,9 +136,13 @@ func PageSelectParticipatedBounties(db *gorm.DB, pagination model.Pagination, co
 	var bounties []Bounty
 	var countSql = fmt.Sprintf("select count(b.id) from bounty t left join bounty_applicant ba on b.id = ba.bounty_id where comerId=%d ba.status not in (4,5)", comerId)
 	var cnt int64
-	db.Raw(countSql).Scan(&cnt)
+	if err := db.Raw(countSql).Scan(&cnt).Error; err != nil {
+		return &pagination, err
+	}
 	var sql = fmt.Sprintf("select b.* from bounty t left join bounty_applicant ba on b.id = ba.bounty_id where comerId=%d ba.status not in (4,5) limit %d,%d order by b.created_at desc", comerId, pagination.GetLimit(), pagination.GetOffset())
-	db.Raw(sql).Scan(&bounties)
+	if err := db.Raw(sql).Scan(&bounties).Error; err != nil {
+		return &pagination, err
+	}
 
 	pagination.Rows = bounties
 	pagination.TotalRows = cnt
