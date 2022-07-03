@@ -3,6 +3,7 @@ package model
 import (
 	"ceres/pkg/initialization/utility"
 	"math"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -68,8 +69,8 @@ func (p *Pagination) GetPage() int {
 }
 
 func (p *Pagination) GetSort() string {
-	if p.Sort == "" {
-		p.Sort = "ID desc"
+	if p.Sort == "" || strings.TrimSpace(p.Sort) == "" {
+		p.Sort = "created_at desc"
 	}
 	return p.Sort
 }
