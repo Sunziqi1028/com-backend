@@ -10,7 +10,6 @@ package bounty
 
 import (
 	model "ceres/pkg/model"
-	bounty "ceres/pkg/model/bounty"
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/bounty"
@@ -18,41 +17,22 @@ import (
 	"strconv"
 )
 
-// GetComerStartups get all startups of one comerID
-func GetComerStartups(ctx *router.Context) {
-	comerID, err := strconv.ParseUint(ctx.Param("comerID"), 0, 64)
-	if err != nil {
-		err = router.ErrBadRequest.WithMsg("Invalid comer ID")
-		ctx.HandleError(err)
-		return
-	}
-	fmt.Println(comerID, "router/bounty.go line:27") // 注释
-	response, err := service.GetStartupsByComerID(comerID)
-	if err != nil {
-		ctx.HandleError(err)
-		return
-	}
-	ctx.OK(response)
-}
-
 // CreateBounty create bounty
 func CreateBounty(ctx *router.Context) {
-	request := new(bounty.BountyRequest)
+	request := new(model.BountyRequest)
 	if err := ctx.ShouldBindJSON(request); err != nil {
 		ctx.HandleError(err)
 		return
 	}
 
-	fmt.Println(request, "router/bounty.go line:43") // 注释
+	fmt.Println(request, "router/bounty.go line:26") // 注释
 
 	if err := service.CreateComerBounty(request); err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	response := &bounty.CreateBountyResponse{
-		Data:   "create bounty successful!",
-		Status: 0,
-	}
+	response := "create bounty successful!"
+
 	ctx.OK(response)
 }
 

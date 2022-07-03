@@ -62,3 +62,12 @@ func StartupFollowedByComer(startupID, comerID uint64) (isFollowed bool, err err
 	}
 	return
 }
+
+func GetStartupsByComerID(comerID uint64) ([]*model.ListComerStartup, error) {
+	var startups []*model.ListComerStartup
+	startupsResponse, err := model.ListComerStartups(mysql.DB, comerID, startups)
+	if err != nil {
+		return nil, err
+	}
+	return startupsResponse, nil
+}

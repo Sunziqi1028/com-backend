@@ -203,3 +203,12 @@ func StartupFollowIsExist(db *gorm.DB, startupID, comerID uint64) (isExist bool,
 	}
 	return
 }
+
+// GetComerStartups  list comer all startups
+func ListComerStartups(db *gorm.DB, comerID uint64, startups []*ListComerStartup) ([]*ListComerStartup, error) {
+	err := db.Table("startup").Select("id, name").Where("comer_id = ? and is_deleted = 0", comerID).Order("convert(name using gbk)").Find(&startups).Error
+	if err != nil {
+		return nil, err
+	}
+	return startups, nil
+}

@@ -91,6 +91,7 @@ func Init() (err error) {
 		coresPub.GET("/startups/name/:name/isExist", router.Wrap(startup.StartupNameIsExist))
 		coresPub.GET("/startups/tokenContract/:tokenContract/isExist", router.Wrap(startup.StartupTokenContractIsExist))
 		coresPub.GET("/startups/member/:comerID", router.Wrap(startup.ListBeMemberStartups))
+		coresPub.GET("/startups/comer/:comerID", router.Wrap(startup.ListStartupsComer))
 		//coresPub.GET("/startups/:startupId/setting", router.Wrap(startup.GetStartupSetting))
 	}
 
@@ -111,7 +112,7 @@ func Init() (err error) {
 	bounties := Gin.Group("/bounty")
 	{
 		bounties.Use(middleware.GuestAuthorizationMiddleware())
-		bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
+		//bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
 		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
 		bounties.POST("detail", router.Wrap(bounty.CreateBounty))
 
