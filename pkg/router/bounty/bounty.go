@@ -45,6 +45,24 @@ func GetPublicBountyList(ctx *router.Context) {
 		return
 	}
 	request.Limit = 10
+	_sort := request.Sort
+	switch _sort {
+	case "Created:Recent":
+		_sort = "created_at desc"
+	case "Created:Oldest":
+		_sort = "created_at asc"
+	case "Value:Highest":
+		_sort = "total_reward_token desc"
+	case "Value:Lowest":
+		_sort = "total_reward_token asc"
+	case "Deposit:Highest":
+		_sort = "founder_deposit desc"
+	case "Deposit:Lowest":
+		_sort = "founder_deposit asc"
+	default:
+		_sort = "created_at desc"
+	}
+	request.Sort = _sort
 
 	if response, err := service.QueryAllBounties(request); err != nil {
 		ctx.HandleError(err)
