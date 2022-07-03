@@ -6,11 +6,13 @@
  * @Date: 2022/7/1 20:38
  */
 
-package bounty
+package ether
 
-import "ceres/pkg/service/bounty"
+import (
+	"ceres/pkg/service/ether"
+)
 
 func Init() error {
-	bounty.GetAllContractAddresses()
+	ether.GetAllContractAddresses()
 	return nil
 }

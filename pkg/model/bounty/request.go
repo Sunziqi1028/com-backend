@@ -9,29 +9,27 @@
 package bounty
 
 type BountyRequest struct {
-	BountyDetail `json:"bountyDetail"`
-	PayDetail    `json:"PayDetail"`
-	Deposit      `json:"deposit"`
-	ChainInfo    `json:"chainInfo"`
-	//status       int `json:"status"`
+	BountyDetail `json:"bountyDetail"  binding:"required"`
+	PayDetail    `json:"payDetail"  binding:"required"`
+	Deposit      `json:"deposit"  binding:"required"`
+	ChainInfo    `json:"chainInfo"  binding:"required"`
 }
 
 type BountyDetail struct {
-	StartupID         uint64    `json:"startupID"`
-	ComerID           uint64    `json:"comerID"`
-	Title             string    `json:"title"`
-	ExpiresIn         string    `json:"expiresIn"`
-	Contacts          []Contact `json:"contact"`
+	StartupID         uint64    `json:"startupID"  binding:"required"`
+	ComerID           uint64    `json:"comerID"  binding:"required"`
+	Title             string    `json:"title"  binding:"required"`
+	ExpiresIn         string    `json:"expiresIn"  binding:"required"`
+	Contacts          []Contact `json:"contact"  binding:"required"`
 	DiscussionLink    string    `json:"discussionLink"`
-	ApplicantsSkills  []string  `json:"applicantsSkills"`
-	ApplicantsDeposit int       `json:"applicantsDeposit"`
-	Description       string    `json:"description"`
+	ApplicantsSkills  []string  `json:"applicantsSkills"  binding:"required"`
+	ApplicantsDeposit int       `json:"applicantsDeposit"  binding:"required"`
+	Description       string    `json:"description"  binding:"required"`
 }
 
 type Contact struct {
-	Email    string `json:"email,omitempty"`
-	Telegram string `json:"telegram,omitempty"`
-	Discord  string `json:"discord,omitempty"`
+	ContactType    uint8  `json:"contactType" binding:"required"` // 1:Email 2:Discord 3:Telegram
+	ContactAddress string `json:"contactAddress" binding:"required"`
 }
 
 type PayDetail struct {
@@ -40,32 +38,31 @@ type PayDetail struct {
 }
 
 type StageType struct {
-	SeqNum       int    `json:"id,omitempty"`
-	Token1Symbol string `json:"token1Symbol,omitempty"`
-	Token1Amount int    `json:"token1Amount,omitempty"`
-	Token2Symbol string `json:"token2Symbol,omitempty"`
-	Token2Amount int    `json:"token2Amount,omitempty"`
-	Terms        string `json:"terms,omitempty"`
-	//Status       int    `json:"status,omitempty"` // unpaid paid
+	SeqNum       int    `json:"id" binding:"required"`
+	Token1Symbol string `json:"token1Symbol" binding:"required"`
+	Token1Amount int    `json:"token1Amount" binding:"required"`
+	Token2Symbol string `json:"token2Symbol" binding:"required"`
+	Token2Amount int    `json:"token2Amount" binding:"required"`
+	Terms        string `json:"terms" binding:"required"`
 }
 
 type PeriodType struct {
-	PeriodType   string `json:"days,weeks,months,omitempty"`
-	PeriodAmount int    `json:"periodAmount,omitempty"`
-	HoursPerDay  int    `json:"HoursPerDay,omitempty"`
-	Token1Symbol string `json:"token1Symbol,omitempty"`
-	Token1Amount int    `json:"token1Amount,omitempty"`
-	Token2Symbol string `json:"token2Symbol,omitempty"`
-	Token2Amount int    `json:"token2Amount,omitempty"`
-	Target       string `json:"target"`
+	PeriodType   uint8  `json:"periodType" binding:"required"` // 1:Days 2:Weeks 3:Months
+	PeriodAmount int    `json:"periodAmount" binding:"required"`
+	HoursPerDay  int    `json:"HoursPerDay" binding:"required"`
+	Token1Symbol string `json:"token1Symbol" binding:"required"`
+	Token1Amount int    `json:"token1Amount" binding:"required"`
+	Token2Symbol string `json:"token2Symbol" binding:"required"`
+	Token2Amount int    `json:"token2Amount" binding:"required"`
+	Target       string `json:"target" binding:"required"`
 }
 
 type Deposit struct {
-	TokenSymbol string `json:"tokenSymbol,omitempty"`
-	TokenAmount int    `json:"tokenAmount,omitempty"`
+	TokenSymbol string `json:"tokenSymbol" binding:"required"`
+	TokenAmount int    `json:"tokenAmount" binding:"required"`
 }
 
 type ChainInfo struct {
-	ChainID uint64 `json:"chainID"`
-	TxHash  string `json:"txHash"`
+	ChainID uint64 `json:"chainID" binding:"required"`
+	TxHash  string `json:"txHash" binding:"required"`
 }

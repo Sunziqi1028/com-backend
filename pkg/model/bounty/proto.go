@@ -58,7 +58,7 @@ func (BountyApplicant) TableName() string {
 type BountyContact struct {
 	model.RelationBase
 	BountyID       uint64 `gorm:"column:bounty_id;unique_index:bounty_contact_uindex" json:"bountyID"`
-	ContactType    int    `gorm:"column:contact_type;unique_index:bounty_contact_uindex" json:"contactType"`
+	ContactType    uint8  `gorm:"column:contact_type;unique_index:bounty_contact_uindex" json:"contactType"`
 	ContactAddress string `gorm:"column:contact_address;unique_index:bounty_contact_uindex" json:"contactAddress"`
 }
 
@@ -88,7 +88,7 @@ func (BountyDeposit) TableName() string {
 type BountyPaymentPeriod struct {
 	model.RelationBase
 	BountyID     uint64 `gorm:"column:bounty_id;unique_index:bounty_id_uindex" json:"bountyID"`
-	PeriodType   int    `gorm:"column:period_type" json:"periodType"`
+	PeriodType   uint8  `gorm:"column:period_type" json:"periodType"`
 	PeriodAmount int64  `gorm:"column:period_amount" json:"periodAmount"`
 	HoursPerDay  int    `gorm:"column:hours_per_day" json:"hoursPerDay"`
 	Token1Symbol string `gorm:"column:token1_symbol" json:"token1Symbol,omitempty"`
@@ -119,34 +119,4 @@ type BountyPaymentTerms struct {
 // TableName the BountyPaymentTerms table name for gorm
 func (BountyPaymentTerms) TableName() string {
 	return "bounty_payment_terms"
-}
-
-type Transaction struct {
-	model.RelationBase
-	ChainID    uint64    `gorm:"column:chain_id;unique_index:chain_tx_uindex" json:"chainID"`
-	TxHash     string    `gorm:"column:tx_hash;unique_index:chain_tx_uindex" json:"txHash"`
-	TimeStamp  time.Time `gorm:"column:timestamp"`
-	Status     int       `gorm:"column:status" json:"status,omitempty"` // 0:Pending 1:Success 2:Failure
-	SourceType int       `gorm:"column:source_type" json:"sourceType"`
-	SourceID   int64     `gorm:"column:source_id" json:"sourceID"`
-	RetryTimes int       `gorm:"column:retry_times" json:"retryTimes"`
-}
-
-// TableName the Transaction table name for gorm
-func (Transaction) TableName() string {
-	return "transaction"
-}
-
-type PostUpdate struct {
-	model.RelationBase
-	SourceType int       `gorm:"sourceType"`
-	SourceID   uint64    `gorm:"sourceID"`
-	ComerID    uint64    `gorm:"comerID"`
-	Content    string    `gorm:"column:content"`
-	TimeStamp  time.Time `gorm:"column:timestamp"` // post time
-}
-
-// TableName the PostUpdate table name for gorm
-func (PostUpdate) TableName() string {
-	return "post_update"
 }

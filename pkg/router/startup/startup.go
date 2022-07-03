@@ -5,6 +5,7 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/startup"
+	"fmt"
 	"strconv"
 
 	"github.com/qiniu/x/log"
@@ -217,4 +218,25 @@ func StartupFollowedByMe(ctx *router.Context) {
 	}
 
 	ctx.OK(model.FollowedByMeResponse{IsFollowed: isFollowed})
+}
+
+func ListStartupsComer(ctx *router.Context) {
+	comerID, err := strconv.ParseUint(ctx.Param("comerID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid comer ID")
+		ctx.HandleError(err)
+		return
+	}
+	fmt.Println(comerID, "router/startup.go line:230") // 注释
+	responseTmp, err := service.GetStartupsByComerID(comerID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	response := &model.ListComerStartupsResponse{
+		Total: len(responseTmp),
+		List:  responseTmp,
+	}
+	ctx.OK(response)
 }
