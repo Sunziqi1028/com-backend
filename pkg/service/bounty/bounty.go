@@ -475,6 +475,7 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 			status = "Quited"
 		}
 	}
+	detailItem.DepositRequirements = bounty.ApplicantDeposit
 	detailItem.Status = status
 	return detailItem, nil
 }
