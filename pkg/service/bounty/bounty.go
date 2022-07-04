@@ -301,6 +301,7 @@ const (
 )
 
 func QueryBountiesByStartup(startupId uint64, request model2.Pagination) (pagination *model2.Pagination, err error) {
+	// todo check startup exist!
 	// 按照发布顺序降序查询
 	request.Sort = "created_at desc"
 	pagination, err = model.PageSelectBountiesByStartupId(mysql.DB, request, startupId)
