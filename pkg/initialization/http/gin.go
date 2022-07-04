@@ -3,6 +3,7 @@ package http
 import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/account"
+	"ceres/pkg/router/bounty"
 	"ceres/pkg/router/image"
 	"ceres/pkg/router/middleware"
 	"ceres/pkg/router/startup"
@@ -90,6 +91,7 @@ func Init() (err error) {
 		coresPub.GET("/startups/name/:name/isExist", router.Wrap(startup.StartupNameIsExist))
 		coresPub.GET("/startups/tokenContract/:tokenContract/isExist", router.Wrap(startup.StartupTokenContractIsExist))
 		coresPub.GET("/startups/member/:comerID", router.Wrap(startup.ListBeMemberStartups))
+		coresPub.GET("/startups/comer/:comerID", router.Wrap(startup.ListStartupsComer))
 		//coresPub.GET("/startups/:startupId/setting", router.Wrap(startup.GetStartupSetting))
 	}
 
@@ -107,6 +109,17 @@ func Init() (err error) {
 		meta.GET("/tags", router.Wrap(tag.GetTagList))
 		meta.GET("/images", router.Wrap(image.GetImageList))
 	}
+	bounties := Gin.Group("/bounty")
+	{
+		bounties.Use(middleware.GuestAuthorizationMiddleware())
+		//bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
+		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
 
+		bounties.Use(middleware.ComerAuthorizationMiddleware())
+		bounties.POST("/list", router.Wrap(bounty.GetPublicBountyList))
+		bounties.POST("/:startupId/bounties", router.Wrap(bounty.GetBountyListByStartup))
+		bounties.POST("/my-participated", router.Wrap(bounty.GetMyParticipatedBountyList))
+		bounties.POST("/my-posted", router.Wrap(bounty.GetMyPostedBountyList))
+	}
 	return
 }

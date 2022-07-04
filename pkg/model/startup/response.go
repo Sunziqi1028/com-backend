@@ -16,3 +16,13 @@ type ExistStartupResponse struct {
 type FollowedByMeResponse struct {
 	IsFollowed bool `json:"isFollowed"`
 }
+
+type ListComerStartupsResponse struct {
+	List  []*ListComerStartup `json:"list"`
+	Total int                 `json:"total"`
+}
+
+type ListComerStartup struct {
+	StartupID uint64 `gorm:"column:id" json:"startupID"`
+	Name      string `gorm:"column:name" json:"name"`
+}
