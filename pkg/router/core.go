@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/qiniu/x/log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -80,6 +81,7 @@ var (
 )
 
 func (ctx *Context) HandleError(err error) {
+	log.Infof("#### [HandleError] : %v\n", err)
 	switch err.(type) {
 	case ResError:
 		ctx.Context.JSON(

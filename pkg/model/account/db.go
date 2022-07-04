@@ -8,12 +8,12 @@ import (
 
 // GetComerByAddress  get comer entity by comer's address
 func GetComerByAddress(db *gorm.DB, address string, comer *Comer) error {
-	return db.Where("address = ? AND is_deleted = false", address).Find(comer).Error
+	return db.Model(&Comer{}).Where("address = ? AND is_deleted = false", address).Find(comer).Error
 }
 
 // GetComerByID  get comer entity by comer's ID
 func GetComerByID(db *gorm.DB, comerID uint64, comer *Comer) (err error) {
-	return db.Where("id = ? AND is_deleted = false", comerID).Find(comer).Error
+	return db.Model(&Comer{}).Where("id = ? AND is_deleted = false", comerID).Find(comer).Error
 }
 
 // CreateComer create a comer
@@ -27,15 +27,15 @@ func UpdateComerAddress(db *gorm.DB, comerID uint64, address string) (err error)
 }
 
 func GetComerAccount(db *gorm.DB, accountType ComerAccountType, oin string, comerAccount *ComerAccount) error {
-	return db.Where("type = ? AND oin = ? AND is_deleted = false", accountType, oin).Find(comerAccount).Error
+	return db.Model(&ComerAccount{}).Where("type = ? AND oin = ? AND is_deleted = false", accountType, oin).Find(comerAccount).Error
 }
 
 func GetComerAccountById(db *gorm.DB, accountId uint64, comerAccount *ComerAccount) error {
-	return db.Where("id=? AND is_deleted = false", accountId).Find(comerAccount).Error
+	return db.Model(&ComerAccount{}).Where("id=? AND is_deleted = false", accountId).Find(comerAccount).Error
 }
 
 func ListAccount(db *gorm.DB, comerID uint64, accountList *[]ComerAccount) (err error) {
-	return db.Where("comer_id = ? AND is_deleted = false", comerID).Find(accountList).Error
+	return db.Model(&ComerAccount{}).Where("comer_id = ? AND is_deleted = false", comerID).Find(accountList).Error
 }
 
 func CreateAccount(db *gorm.DB, comerAccount *ComerAccount) (err error) {
@@ -112,7 +112,7 @@ func BindComerAccountToComerId(db *gorm.DB, comerAccountId, comerID uint64) (err
 		var comer Comer
 		tx.First(&comer, crtAccount.ComerID)
 		var accounts []ComerAccount
-		if err = db.Where("comer_id = ? and is_deleted = false", comer.ID).Find(&accounts).Error; err != nil {
+		if err = tx.Model(&ComerAccount{}).Where("comer_id = ? and is_deleted = false", comer.ID).Find(&accounts).Error; err != nil {
 			return
 		}
 		if accounts == nil || (len(accounts) == 1 && comer.AddressStr() == "") {
@@ -128,5 +128,5 @@ func BindComerAccountToComerId(db *gorm.DB, comerAccountId, comerID uint64) (err
 }
 
 func GetComerAccountsByComerId(db *gorm.DB, comerId uint64, accounts *[]ComerAccount) (err error) {
-	return db.Where("comer_id = ? and is_deleted = false", comerId).Find(accounts).Error
+	return db.Model(&ComerAccount{}).Where("comer_id = ? and is_deleted = false", comerId).Find(accounts).Error
 }

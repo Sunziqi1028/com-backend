@@ -16,14 +16,15 @@ type ContractInfoResponse struct {
 }
 
 type DetailItem struct {
-	Logo              string    `json:"logo"`
-	Title             string    `json:"title"`
-	Status            string    `json:"status"`
-	PaymentType       string    `json:"paymentType"`
-	CreatedTime       time.Time `json:"createdTime"`
-	Rewards           []Reward  `json:"rewards"`
-	ApplicantCount    int       `json:"applicantCount"`
-	ApplicationSkills []string  `json:"applicationSkills"`
+	Logo                string    `json:"logo"`
+	Title               string    `json:"title"`
+	Status              string    `json:"status"`
+	PaymentType         string    `json:"paymentType"`
+	CreatedTime         time.Time `json:"createdTime"`
+	Rewards             []Reward  `json:"rewards"`
+	ApplicantCount      int       `json:"applicantCount"`
+	ApplicationSkills   []string  `json:"applicationSkills"`
+	DepositRequirements int       `json:"depositRequirements"`
 }
 
 type TabListResponse struct {
