@@ -78,13 +78,13 @@ func GetBountyListByStartup(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	startupId, err := strconv.ParseUint(ctx.Param("accountID"), 0, 64)
+	startupId, err := strconv.ParseUint(ctx.Param("startupId"), 0, 64)
 	if err != nil {
 		ctx.HandleError(err)
 		return
 	}
 	if startupId == 0 {
-		err := router.ErrBadRequest.WithMsg("Invalid startupIdk")
+		err := router.ErrBadRequest.WithMsg("Invalid startupId!")
 		ctx.HandleError(err)
 		return
 	}
