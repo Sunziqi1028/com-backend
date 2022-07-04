@@ -134,12 +134,12 @@ func PageSelectPostedBounties(db *gorm.DB, pagination model.Pagination, comerId 
 
 func PageSelectParticipatedBounties(db *gorm.DB, pagination model.Pagination, comerId uint64) (*model.Pagination, error) {
 	var bounties []Bounty
-	var countSql = fmt.Sprintf("select count(b.id) from bounty t left join bounty_applicant ba on b.id = ba.bounty_id where ba.comer_id=%d and ba.status not in (4,5)", comerId)
+	var countSql = fmt.Sprintf("select count(b.id) from bounty b left join bounty_applicant ba on b.id = ba.bounty_id where ba.comer_id=%d and ba.status not in (4,5)", comerId)
 	var cnt int64
 	if err := db.Raw(countSql).Scan(&cnt).Error; err != nil {
 		return &pagination, err
 	}
-	var sql = fmt.Sprintf("select b.* from bounty t left join bounty_applicant ba on b.id = ba.bounty_id where ba.comer_id=%d and ba.status not in (4,5) order by b.created_at desc limit %d,%d", comerId, pagination.GetLimit(), pagination.GetOffset())
+	var sql = fmt.Sprintf("select b.* from bounty b left join bounty_applicant ba on b.id = ba.bounty_id where ba.comer_id=%d and ba.status not in (4,5) order by b.created_at desc limit %d,%d", comerId, pagination.GetLimit(), pagination.GetOffset())
 	if err := db.Raw(sql).Scan(&bounties).Error; err != nil {
 		return &pagination, err
 	}
