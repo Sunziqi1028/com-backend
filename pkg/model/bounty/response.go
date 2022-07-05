@@ -16,6 +16,8 @@ type ContractInfoResponse struct {
 }
 
 type DetailItem struct {
+	BountyId            uint64    `json:"bountyId"`
+	StartupId           uint64    `json:"startupId"`
 	Logo                string    `json:"logo"`
 	Title               string    `json:"title"`
 	Status              string    `json:"status"`

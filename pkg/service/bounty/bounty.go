@@ -401,6 +401,10 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 	log.Infof("startup logo: %s \n", st.Logo)
 	logo := st.Logo
 	detailItem.Logo = logo
+	detailItem.Title = bounty.Title
+	detailItem.StartupId = st.ID
+	detailItem.BountyId = bounty.ID
+	detailItem.CreatedTime = bounty.CreatedAt
 	// paymentMode用以计算 rewards
 	paymentMode := bounty.PaymentMode
 	var rewards []model.Reward
