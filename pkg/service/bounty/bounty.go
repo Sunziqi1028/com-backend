@@ -410,11 +410,11 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 	var rewards []model.Reward
 	// stage , 查询paymentTerms并统计
 	if paymentMode == 1 {
-		// todo 同一个bounty的terms的所有token2Symbol 一致吧！！！？
 		var terms []model.BountyPaymentTerms
 		if err := model.GetPaymentTermsByBountyId(mysql.DB, bounty.ID, &terms); err != nil {
 			return nil, err
 		}
+		log.Infof("##### bountyPaymentTerms: %v \n", terms)
 		calcRewardWhenIsPaymentTerms(terms, rewards)
 		detailItem.PaymentType = "Stage"
 	} else if paymentMode == 2 {
@@ -425,6 +425,7 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 				return nil, err
 			}
 		}
+		log.Infof("##### bountyPaymentPeriods: %v \n", periods)
 		calcRewardWhenIsPaymentPeriod(periods, rewards)
 		detailItem.PaymentType = "Period"
 	}
@@ -487,7 +488,7 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []model.Reward) {
 	if len(terms) > 0 {
 		termsByTokenSymbol := make(map[string]int)
-		var token1Symbol string // 其实固定是 UVU !!
+		var token1Symbol string
 		var token2Symbol string
 		for _, term := range terms {
 			if term.Token1Symbol != "" {
@@ -509,8 +510,8 @@ func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []mo
 		}
 		if token1Symbol != "" {
 			rewards = append(rewards, model.Reward{
-				TokenSymbol: "UVU",
-				Amount:      termsByTokenSymbol["UVU"],
+				TokenSymbol: token1Symbol,
+				Amount:      termsByTokenSymbol[token1Symbol],
 			})
 		}
 		if token2Symbol != "" {
