@@ -56,7 +56,7 @@
     epoch = 0
     #endPoint = "wss://goerli.infura.io/ws/v3"
     endPoint = "wss://api.avax-test.network/ext/bc/C/ws"
-    infuraKey = "b55f1af18d6e438e96ed174494a223a8"
+    #infuraKey = "b55f1af18d6e438e96ed174494a223a8"
     startupContractAddress = "0x447336D5e7E594DB2f8C72FF54aF34557d2Da752"
 
 [ceres.aws]
