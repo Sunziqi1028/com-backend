@@ -15,6 +15,7 @@ import (
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/bounty"
 	"fmt"
+	"github.com/qiniu/x/log"
 	"strconv"
 )
 
@@ -37,15 +38,17 @@ func CreateBounty(ctx *router.Context) {
 	ctx.OK(response)
 }
 
-// GetPublicBountyList bounty list displayed in bounty tab
-func GetPublicBountyList(ctx *router.Context) {
-	var request model.Pagination
-	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.HandleError(err)
+func parsePagination(ctx *router.Context, pagination *model.Pagination, defaultLimit int) (err error) {
+	pageStr := ctx.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
 		return
 	}
-	request.Limit = 10
-	_sort := request.Sort
+	if page == 0 {
+		page = 1
+	}
+	pagination.Page = page
+	_sort := ctx.Query("sort")
 	switch _sort {
 	case "Created:Recent":
 		_sort = "created_at desc"
@@ -62,9 +65,22 @@ func GetPublicBountyList(ctx *router.Context) {
 	default:
 		_sort = "created_at desc"
 	}
-	request.Sort = _sort
 
-	if response, err := service.QueryAllBounties(request); err != nil {
+	pagination.Sort = _sort
+	pagination.Limit = defaultLimit
+	log.Infof("pagination param is : %v\n", pagination)
+	return nil
+}
+
+// GetPublicBountyList bounty list displayed in bounty tab
+func GetPublicBountyList(ctx *router.Context) {
+	var request model.Pagination
+	if err := parsePagination(ctx, &request, 10); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	if response, err := service.QueryAllOnChainBounties(request); err != nil {
 		ctx.HandleError(err)
 	} else {
 		ctx.OK(response)
@@ -74,7 +90,7 @@ func GetPublicBountyList(ctx *router.Context) {
 // GetBountyListByStartup get bounty list belongs to startup
 func GetBountyListByStartup(ctx *router.Context) {
 	var request model.Pagination
-	if err := ctx.ShouldBindJSON(&request); err != nil {
+	if err := parsePagination(ctx, &request, 3); err != nil {
 		ctx.HandleError(err)
 		return
 	}
@@ -88,7 +104,6 @@ func GetBountyListByStartup(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	request.Limit = 3
 
 	if response, err := service.QueryBountiesByStartup(startupId, request); err != nil {
 		ctx.HandleError(err)
@@ -101,11 +116,10 @@ func GetBountyListByStartup(ctx *router.Context) {
 func GetMyPostedBountyList(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	var request model.Pagination
-	if err := ctx.ShouldBindJSON(&request); err != nil {
+	if err := parsePagination(ctx, &request, 5); err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	request.Limit = 8
 
 	if response, err := service.QueryComerPostedBountyList(comerID, request); err != nil {
 		ctx.HandleError(err)
@@ -118,11 +132,10 @@ func GetMyPostedBountyList(ctx *router.Context) {
 func GetMyParticipatedBountyList(ctx *router.Context) {
 	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
 	var request model.Pagination
-	if err := ctx.ShouldBindJSON(&request); err != nil {
+	if err := parsePagination(ctx, &request, 8); err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	request.Limit = 8
 
 	if response, err := service.QueryComerParticipatedBountyList(comerID, request); err != nil {
 		ctx.HandleError(err)

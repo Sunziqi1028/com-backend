@@ -32,6 +32,10 @@ const (
 	BountyPaymentTermsStatusUnpaid = 1
 	BountyPaymentTermsStatusPaid   = 2
 	BountyPaymentTermsPeriodSeqNum = 1
+	BountyStatusReadyToWork        = 1
+	BountyStatusWordStarted        = 2
+	BountyStatusCompleted          = 3
+	BountyStatusExpired            = 4
 )
 
 // CreateComerBounty create bounty
@@ -111,7 +115,7 @@ func createBounty(tx *gorm.DB, paymentMode, totalRewardToken int, request *model
 		FounderDeposit:     request.Deposit.TokenAmount,
 		Description:        request.Description,
 		PaymentMode:        paymentMode,
-		Status:             0,
+		Status:             BountyStatusReadyToWork,
 		TotalRewardToken:   totalRewardToken,
 	}
 
@@ -203,21 +207,25 @@ func createPaymentTerms(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 }
 
 func creatPaymentPeriod(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) error {
-	periodAmount := int64(request.Period.Token1Amount + request.Period.Token2Amount)
-	paymentPeriod := &model.BountyPaymentPeriod{
-		BountyID:     bountyID,
-		PeriodType:   request.Period.PeriodType,
-		PeriodAmount: periodAmount,
-		HoursPerDay:  request.Period.HoursPerDay,
-		Token1Symbol: request.Period.Token1Symbol,
-		Token1Amount: request.Period.Token1Amount,
-		Token2Symbol: request.Period.Token2Symbol,
-		Token2Amount: request.Period.Token2Amount,
-		Target:       request.Period.Target,
-	}
-	err := model.CreatePaymentPeriod(tx, paymentPeriod)
-	if err != nil {
-		return err
+	paymentMode, _ := handlePayDetail(request.PayDetail)
+	if paymentMode == PaymentModePeriod {
+		periodAmount := int64(request.Period.Token1Amount + request.Period.Token2Amount)
+		paymentPeriod := &model.BountyPaymentPeriod{
+			BountyID:     bountyID,
+			PeriodType:   request.Period.PeriodType,
+			PeriodAmount: periodAmount,
+			HoursPerDay:  request.Period.HoursPerDay,
+			Token1Symbol: request.Period.Token1Symbol,
+			Token1Amount: request.Period.Token1Amount,
+			Token2Symbol: request.Period.Token2Symbol,
+			Token2Amount: request.Period.Token2Amount,
+			Target:       request.Period.Target,
+		}
+		err := model.CreatePaymentPeriod(tx, paymentPeriod)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 	return nil
 }
@@ -275,9 +283,9 @@ func handlePayDetail(request model.PayDetail) (paymentMode, totalRewardToken int
 	}
 }
 
-// QueryAllBounties query all bounties, display in bounty tab
-func QueryAllBounties(request model2.Pagination) (pagination *model2.Pagination, err error) {
-	pagination, err = model.PageSelectBounties(mysql.DB, request)
+// QueryAllOnChainBounties query all bounties, display in bounty tab
+func QueryAllOnChainBounties(request model2.Pagination) (pagination *model2.Pagination, err error) {
+	pagination, err = model.PageSelectOnChainBounties(mysql.DB, request)
 	if err != nil {
 		return nil, err
 	}
@@ -371,7 +379,6 @@ func iter(pagination *model2.Pagination, crtComerId uint64) (err error) {
 }
 
 var bountyStatusMap = map[int]string{
-	0: "Pending",
 	1: "Ready to work",
 	2: "Work started",
 	3: "Completed",
@@ -410,12 +417,12 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 	var rewards []model.Reward
 	// stage , 查询paymentTerms并统计
 	if paymentMode == 1 {
-		// todo 同一个bounty的terms的所有token2Symbol 一致吧！！！？
 		var terms []model.BountyPaymentTerms
 		if err := model.GetPaymentTermsByBountyId(mysql.DB, bounty.ID, &terms); err != nil {
 			return nil, err
 		}
-		calcRewardWhenIsPaymentTerms(terms, rewards)
+		log.Infof("##### bountyPaymentTerms: %v \n", terms)
+		calcRewardWhenIsPaymentTerms(terms, &rewards)
 		detailItem.PaymentType = "Stage"
 	} else if paymentMode == 2 {
 		var periods []model.BountyPaymentPeriod
@@ -425,11 +432,12 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 				return nil, err
 			}
 		}
-		calcRewardWhenIsPaymentPeriod(periods, rewards)
+		log.Infof("##### bountyPaymentPeriods: %v \n", periods)
+		calcRewardWhenIsPaymentPeriod(periods, &rewards)
 		detailItem.PaymentType = "Period"
 	}
 
-	detailItem.Rewards = rewards
+	detailItem.Rewards = &rewards
 	// 申请者deposit要求, 由bounty_id去tag_target_rel表查询
 	requirementSkills, err := model.GetBountyTagNames(mysql.DB, bounty.ID)
 	if err != nil {
@@ -442,52 +450,53 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 		return nil, err
 	}
 	detailItem.ApplicantCount = int(applicantCount)
-	var status string
+	var status = bountyStatusMap[bounty.Status]
+	var onChainStatus string
 	// bounty状态，bounty tab和startup bounty中是一致的；my posted和my participated中状态不一致
 	if itemType == tabBounty || itemType == startupBounty {
-		status = bountyStatusMap[bounty.Status]
+		onChainStatus = bountyDepositStatusMap[1]
 	} else if itemType == myPostedBounty {
 		bountyDeposit, err := model.GetBountyDepositByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
 		if err != nil {
 			return nil, err
 		}
-		status = bountyDepositStatusMap[bountyDeposit.Status]
+		onChainStatus = bountyDepositStatusMap[bountyDeposit.Status]
 	} else if itemType == myParticipatedBounty {
-		bountyApplicant, err := model.GetApplicantByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
+		// bountyApplicant, err := model.GetApplicantByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
+		bountyDeposit, err := model.GetBountyDepositByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
 		if err != nil {
 			return nil, err
 		}
-		// todo 需要优化！！！
-		switch bountyApplicant.Status {
-		case 0:
-			// 提交
-			status = "Pending"
-		case 1:
-			// 已申请
-			status = "Applied"
-		case 2:
-			// 通过申请
-			status = "Approved"
-		case 3:
-			//
-			status = "Submitted"
-		case 4:
-			status = "Revoked"
-		case 5:
-			status = "Rejected"
-		case 6:
-			status = "Quited"
-		}
+		log.Infof("#### my bounty deposit: %v\n", bountyDeposit)
+		onChainStatus = bountyDepositStatusMap[bountyDeposit.Status]
+		//switch bountyApplicant.Status {
+		//case 1:
+		//	// 已申请
+		//	status = "Applied"
+		//case 2:
+		//	// 通过申请
+		//	status = "Approved"
+		//case 3:
+		//	//
+		//	status = "Submitted"
+		//case 4:
+		//	status = "Revoked"
+		//case 5:
+		//	status = "Rejected"
+		//case 6:
+		//	status = "Quited"
+		//}
 	}
 	detailItem.DepositRequirements = bounty.ApplicantDeposit
 	detailItem.Status = status
+	detailItem.OnChainStatus = onChainStatus
 	return detailItem, nil
 }
 
-func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []model.Reward) {
+func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards *[]model.Reward) {
 	if len(terms) > 0 {
 		termsByTokenSymbol := make(map[string]int)
-		var token1Symbol string // 其实固定是 UVU !!
+		var token1Symbol string
 		var token2Symbol string
 		for _, term := range terms {
 			if term.Token1Symbol != "" {
@@ -508,13 +517,13 @@ func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []mo
 			}
 		}
 		if token1Symbol != "" {
-			rewards = append(rewards, model.Reward{
-				TokenSymbol: "UVU",
-				Amount:      termsByTokenSymbol["UVU"],
+			*rewards = append(*rewards, model.Reward{
+				TokenSymbol: token1Symbol,
+				Amount:      termsByTokenSymbol[token1Symbol],
 			})
 		}
 		if token2Symbol != "" {
-			rewards = append(rewards, model.Reward{
+			*rewards = append(*rewards, model.Reward{
 				TokenSymbol: token2Symbol,
 				Amount:      termsByTokenSymbol[token2Symbol],
 			})
@@ -522,7 +531,7 @@ func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []mo
 	}
 }
 
-func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards []model.Reward) {
+func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards *[]model.Reward) {
 	if len(periods) > 0 {
 		byTokenSymbol := make(map[string]int)
 		var token1Symbol string // 其实固定是 UVU !!
@@ -546,13 +555,13 @@ func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards 
 			}
 		}
 		if token1Symbol != "" {
-			rewards = append(rewards, model.Reward{
+			*rewards = append(*rewards, model.Reward{
 				TokenSymbol: token1Symbol,
 				Amount:      byTokenSymbol[token1Symbol],
 			})
 		}
 		if token2Symbol != "" {
-			rewards = append(rewards, model.Reward{
+			*rewards = append(*rewards, model.Reward{
 				TokenSymbol: token2Symbol,
 				Amount:      byTokenSymbol[token2Symbol],
 			})
