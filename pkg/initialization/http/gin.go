@@ -116,11 +116,10 @@ func Init() (err error) {
 	}
 	bounties := Gin.Group("/bounty")
 	{
-		bounties.Use(middleware.GuestAuthorizationMiddleware())
+		// bounties.Use(middleware.GuestAuthorizationMiddleware())
+		bounties.Use(middleware.ComerAuthorizationMiddleware())
 		//bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
 		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
-
-		bounties.Use(middleware.ComerAuthorizationMiddleware())
 
 	}
 	return

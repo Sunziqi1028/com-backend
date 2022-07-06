@@ -107,10 +107,21 @@ func GetBountyDepositByBountyAndComer(db *gorm.DB, bountyID uint64, crtComerId u
 }
 func PageSelectBounties(db *gorm.DB, pagination model.Pagination) (*model.Pagination, error) {
 	var bounties []*Bounty
-	if err := db.Scopes(model.Paginate(&Bounty{}, &pagination, db)).Find(&bounties).Error; err != nil {
-		return nil, err
+
+	cntSql := fmt.Sprintf("select b.* from bounty b left join bounty_deposit bd on b.id=bd.bounty_id and b.comer_id=bd.comer_id where bd.status=1")
+	var cnt int64
+	if err := db.Raw(cntSql).Scan(&cnt).Error; err != nil {
+		return &pagination, err
+	}
+	pageSql := fmt.Sprintf("select b.* from bounty b left join bounty_deposit bd on b.id=bd.bounty_id and b.comer_id=bd.comer_id where bd.status=1 order by %s limit %d,%d", pagination.Sort, pagination.GetOffset(), pagination.Limit)
+
+	if err := db.Raw(pageSql).Scan(&bounties).Error; err != nil {
+		return &pagination, err
 	}
 	pagination.Rows = bounties
+	pagination.TotalRows = cnt
+	totalPages := int(math.Ceil(float64(cnt) / float64(pagination.Limit)))
+	pagination.TotalPages = totalPages
 	return &pagination, nil
 }
 
@@ -139,7 +150,7 @@ func PageSelectParticipatedBounties(db *gorm.DB, pagination model.Pagination, co
 	if err := db.Raw(countSql).Scan(&cnt).Error; err != nil {
 		return &pagination, err
 	}
-	var sql = fmt.Sprintf("select b.* from bounty b left join bounty_applicant ba on b.id = ba.bounty_id where ba.comer_id=%d and ba.status not in (4,5) order by b.created_at desc limit %d,%d", comerId, pagination.GetLimit(), pagination.GetOffset())
+	var sql = fmt.Sprintf("select b.* from bounty b left join bounty_applicant ba on b.id = ba.bounty_id where ba.comer_id=%d and ba.status not in (4,5) order by b.created_at desc limit %d,%d", comerId, pagination.GetOffset(), pagination.GetLimit())
 	if err := db.Raw(sql).Scan(&bounties).Error; err != nil {
 		return &pagination, err
 	}
