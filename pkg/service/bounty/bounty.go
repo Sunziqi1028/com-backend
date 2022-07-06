@@ -371,7 +371,6 @@ func iter(pagination *model2.Pagination, crtComerId uint64) (err error) {
 }
 
 var bountyStatusMap = map[int]string{
-	0: "Pending",
 	1: "Ready to work",
 	2: "Work started",
 	3: "Completed",
@@ -415,7 +414,7 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 			return nil, err
 		}
 		log.Infof("##### bountyPaymentTerms: %v \n", terms)
-		calcRewardWhenIsPaymentTerms(terms, rewards)
+		calcRewardWhenIsPaymentTerms(terms, &rewards)
 		detailItem.PaymentType = "Stage"
 	} else if paymentMode == 2 {
 		var periods []model.BountyPaymentPeriod
@@ -426,11 +425,11 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 			}
 		}
 		log.Infof("##### bountyPaymentPeriods: %v \n", periods)
-		calcRewardWhenIsPaymentPeriod(periods, rewards)
+		calcRewardWhenIsPaymentPeriod(periods, &rewards)
 		detailItem.PaymentType = "Period"
 	}
 
-	detailItem.Rewards = rewards
+	detailItem.Rewards = &rewards
 	// 申请者deposit要求, 由bounty_id去tag_target_rel表查询
 	requirementSkills, err := model.GetBountyTagNames(mysql.DB, bounty.ID)
 	if err != nil {
@@ -458,11 +457,10 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 		if err != nil {
 			return nil, err
 		}
+		bountyDeposit, err := model.GetBountyDepositByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
+		log.Infof("#### my bounty deposit: %v\n", bountyDeposit)
 		// todo 需要优化！！！
 		switch bountyApplicant.Status {
-		case 0:
-			// 提交
-			status = "Pending"
 		case 1:
 			// 已申请
 			status = "Applied"
@@ -485,7 +483,7 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 	return detailItem, nil
 }
 
-func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []model.Reward) {
+func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards *[]model.Reward) {
 	if len(terms) > 0 {
 		termsByTokenSymbol := make(map[string]int)
 		var token1Symbol string
@@ -509,13 +507,13 @@ func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []mo
 			}
 		}
 		if token1Symbol != "" {
-			rewards = append(rewards, model.Reward{
+			*rewards = append(*rewards, model.Reward{
 				TokenSymbol: token1Symbol,
 				Amount:      termsByTokenSymbol[token1Symbol],
 			})
 		}
 		if token2Symbol != "" {
-			rewards = append(rewards, model.Reward{
+			*rewards = append(*rewards, model.Reward{
 				TokenSymbol: token2Symbol,
 				Amount:      termsByTokenSymbol[token2Symbol],
 			})
@@ -523,7 +521,7 @@ func calcRewardWhenIsPaymentTerms(terms []model.BountyPaymentTerms, rewards []mo
 	}
 }
 
-func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards []model.Reward) {
+func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards *[]model.Reward) {
 	if len(periods) > 0 {
 		byTokenSymbol := make(map[string]int)
 		var token1Symbol string // 其实固定是 UVU !!
@@ -547,13 +545,13 @@ func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards 
 			}
 		}
 		if token1Symbol != "" {
-			rewards = append(rewards, model.Reward{
+			*rewards = append(*rewards, model.Reward{
 				TokenSymbol: token1Symbol,
 				Amount:      byTokenSymbol[token1Symbol],
 			})
 		}
 		if token2Symbol != "" {
-			rewards = append(rewards, model.Reward{
+			*rewards = append(*rewards, model.Reward{
 				TokenSymbol: token2Symbol,
 				Amount:      byTokenSymbol[token2Symbol],
 			})
