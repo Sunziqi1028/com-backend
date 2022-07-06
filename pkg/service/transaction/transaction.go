@@ -52,12 +52,17 @@ func UpdateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint
 	if err != nil {
 		log.Warn(err)
 	}
+	err = bounty.UpdateBountyDepositStatus(tx, bountyID, status)
+	if err != nil {
+		log.Warn(err)
+	}
 }
 
 func GetContractAddress(chainID uint64, txHashString string) (contractAddress string, status uint64) {
 	txHash := common.HexToHash(txHashString)
 	//tx, isPending, err := eth.Client.TransactionByHash(context.Background(), txHash)
 	receipt, err := eth.Client.TransactionReceipt(context.Background(), txHash)
+	defer eth.Close()
 	if err != nil {
 		log.Warn(err)
 		return "", 0
