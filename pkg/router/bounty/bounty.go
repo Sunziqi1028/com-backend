@@ -80,7 +80,7 @@ func GetPublicBountyList(ctx *router.Context) {
 		return
 	}
 
-	if response, err := service.QueryAllBounties(request); err != nil {
+	if response, err := service.QueryAllOnChainBounties(request); err != nil {
 		ctx.HandleError(err)
 	} else {
 		ctx.OK(response)
