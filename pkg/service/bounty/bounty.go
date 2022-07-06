@@ -275,9 +275,9 @@ func handlePayDetail(request model.PayDetail) (paymentMode, totalRewardToken int
 	}
 }
 
-// QueryAllBounties query all bounties, display in bounty tab
-func QueryAllBounties(request model2.Pagination) (pagination *model2.Pagination, err error) {
-	pagination, err = model.PageSelectBounties(mysql.DB, request)
+// QueryAllOnChainBounties query all bounties, display in bounty tab
+func QueryAllOnChainBounties(request model2.Pagination) (pagination *model2.Pagination, err error) {
+	pagination, err = model.PageSelectOnChainBounties(mysql.DB, request)
 	if err != nil {
 		return nil, err
 	}
