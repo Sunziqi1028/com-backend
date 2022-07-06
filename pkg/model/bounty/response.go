@@ -21,6 +21,7 @@ type DetailItem struct {
 	Logo                string    `json:"logo"`
 	Title               string    `json:"title"`
 	Status              string    `json:"status"`
+	OnChainStatus       string    `json:"onChainStatus"`
 	PaymentType         string    `json:"paymentType"`
 	CreatedTime         time.Time `json:"createdTime"`
 	Rewards             *[]Reward `json:"rewards"`

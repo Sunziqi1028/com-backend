@@ -442,44 +442,46 @@ func packItem(bounty model.Bounty, startupMap *map[uint64]startup.Startup, itemT
 		return nil, err
 	}
 	detailItem.ApplicantCount = int(applicantCount)
-	var status string
+	var status = bountyStatusMap[bounty.Status]
+	var onChainStatus string
 	// bounty状态，bounty tab和startup bounty中是一致的；my posted和my participated中状态不一致
 	if itemType == tabBounty || itemType == startupBounty {
-		status = bountyStatusMap[bounty.Status]
+		onChainStatus = bountyDepositStatusMap[1]
 	} else if itemType == myPostedBounty {
 		bountyDeposit, err := model.GetBountyDepositByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
 		if err != nil {
 			return nil, err
 		}
-		status = bountyDepositStatusMap[bountyDeposit.Status]
+		onChainStatus = bountyDepositStatusMap[bountyDeposit.Status]
 	} else if itemType == myParticipatedBounty {
-		bountyApplicant, err := model.GetApplicantByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
+		// bountyApplicant, err := model.GetApplicantByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
+		bountyDeposit, err := model.GetBountyDepositByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
 		if err != nil {
 			return nil, err
 		}
-		bountyDeposit, err := model.GetBountyDepositByBountyAndComer(mysql.DB, bounty.ID, crtComerId)
 		log.Infof("#### my bounty deposit: %v\n", bountyDeposit)
-		// todo 需要优化！！！
-		switch bountyApplicant.Status {
-		case 1:
-			// 已申请
-			status = "Applied"
-		case 2:
-			// 通过申请
-			status = "Approved"
-		case 3:
-			//
-			status = "Submitted"
-		case 4:
-			status = "Revoked"
-		case 5:
-			status = "Rejected"
-		case 6:
-			status = "Quited"
-		}
+		onChainStatus = bountyDepositStatusMap[bountyDeposit.Status]
+		//switch bountyApplicant.Status {
+		//case 1:
+		//	// 已申请
+		//	status = "Applied"
+		//case 2:
+		//	// 通过申请
+		//	status = "Approved"
+		//case 3:
+		//	//
+		//	status = "Submitted"
+		//case 4:
+		//	status = "Revoked"
+		//case 5:
+		//	status = "Rejected"
+		//case 6:
+		//	status = "Quited"
+		//}
 	}
 	detailItem.DepositRequirements = bounty.ApplicantDeposit
 	detailItem.Status = status
+	detailItem.OnChainStatus = onChainStatus
 	return detailItem, nil
 }
 
