@@ -6,6 +6,7 @@ import (
 	"ceres/pkg/event"
 	"ceres/pkg/initialization/config"
 	"ceres/pkg/initialization/eth"
+	"ceres/pkg/initialization/ether"
 	"ceres/pkg/initialization/http"
 	"ceres/pkg/initialization/logger"
 	"ceres/pkg/initialization/metrics"
@@ -13,8 +14,6 @@ import (
 	"ceres/pkg/initialization/redis"
 	"ceres/pkg/initialization/s3"
 	"ceres/pkg/initialization/utility"
-	"ceres/pkg/service/ether"
-
 	"github.com/gotomicro/ego"
 	"github.com/gotomicro/ego/core/elog"
 )
@@ -33,7 +32,6 @@ func main() {
 	// init the web3
 	go event.StartListen()
 
-	go ether.GetAllContractAddresses()
 	//go avax.Init()
 	if err := ego.New().Invoker(
 		config.Init,
@@ -45,6 +43,7 @@ func main() {
 		http.Init,
 		s3.Init,
 		eth.Init,
+		ether.Init,
 	).Serve(
 		metrics.Vernor,
 		http.Gin,
