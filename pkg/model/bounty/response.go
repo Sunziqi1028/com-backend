@@ -23,7 +23,7 @@ type DetailItem struct {
 	Status              string    `json:"status"`
 	PaymentType         string    `json:"paymentType"`
 	CreatedTime         time.Time `json:"createdTime"`
-	Rewards             []Reward  `json:"rewards"`
+	Rewards             *[]Reward `json:"rewards"`
 	ApplicantCount      int       `json:"applicantCount"`
 	ApplicationSkills   []string  `json:"applicationSkills"`
 	DepositRequirements int       `json:"depositRequirements"`

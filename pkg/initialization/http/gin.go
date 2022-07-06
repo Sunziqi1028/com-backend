@@ -81,6 +81,11 @@ func Init() (err error) {
 		coresPriv.PUT("/startups/:startupID/basicSetting", router.Wrap(startup.UpdateStartupBasicSetting))
 		coresPriv.PUT("/startups/:startupID/financeSetting", router.Wrap(startup.UpdateStartupFinanceSetting))
 		coresPriv.GET("/startups/:startupID/followedByMe", router.Wrap(startup.StartupFollowedByMe))
+		// bounty
+		coresPriv.GET("/bounties", router.Wrap(bounty.GetPublicBountyList))
+		coresPriv.GET("/bounties/startup/:startupId", router.Wrap(bounty.GetBountyListByStartup))
+		coresPriv.GET("/bounties/me/participated", router.Wrap(bounty.GetMyParticipatedBountyList))
+		coresPriv.GET("/bounties/me/posted", router.Wrap(bounty.GetMyPostedBountyList))
 	}
 
 	coresPub := Gin.Group("/cores")
@@ -116,10 +121,7 @@ func Init() (err error) {
 		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
 
 		bounties.Use(middleware.ComerAuthorizationMiddleware())
-		bounties.POST("/list", router.Wrap(bounty.GetPublicBountyList))
-		bounties.POST("/:startupId/bounties", router.Wrap(bounty.GetBountyListByStartup))
-		bounties.POST("/my-participated", router.Wrap(bounty.GetMyParticipatedBountyList))
-		bounties.POST("/my-posted", router.Wrap(bounty.GetMyPostedBountyList))
+
 	}
 	return
 }
