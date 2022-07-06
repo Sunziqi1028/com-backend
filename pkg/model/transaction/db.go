@@ -19,7 +19,7 @@ func UpdateTransactionStatus(db *gorm.DB, bountyID uint64, status uint64) error 
 }
 
 func GetTransaction(db *gorm.DB) (transactionResponse []*GetTransactions, err error) {
-	err = db.Table("transcation").Select("chain_id, tx_hash, source_id").Where("status = 0").Find(&transactionResponse).Error
+	err = db.Table("transaction").Select("chain_id, tx_hash, source_id").Where("status = 0").Find(&transactionResponse).Error
 	if err != nil {
 		return nil, err
 	}
