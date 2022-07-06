@@ -25,6 +25,8 @@ const (
 	Failure                      = 2
 	BountyDepositContractCreated = 1
 	BountyDepositAccount         = 2
+	ReceiptSuccess               = 1
+	ReceiptFailure               = 0
 )
 
 func CreateTransaction(db *gorm.DB, bountyID uint64, request *bounty.BountyRequest) error {
@@ -60,17 +62,24 @@ func UpdateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint
 
 func GetContractAddress(chainID uint64, txHashString string) (contractAddress string, status uint64) {
 	txHash := common.HexToHash(txHashString)
-	//tx, isPending, err := eth.Client.TransactionByHash(context.Background(), txHash)
-	receipt, err := eth.Client.TransactionReceipt(context.Background(), txHash)
+	tx, isPending, err := eth.Client.TransactionByHash(context.Background(), txHash)
 	if err != nil {
 		log.Warn(err)
-		return "", 0
+		return "", Failure
 	}
-	if receipt.Status == 0 {
-		return "", receipt.Status
+	if isPending == false {
+		receipt, err := eth.Client.TransactionReceipt(context.Background(), tx.Hash())
+		if err != nil {
+			log.Warn(err)
+			return "", Failure
+		}
+		if receipt.Status == ReceiptFailure {
+			return "", Failure
+		}
+
+		contractAddress = receipt.ContractAddress.String()
+
+		return contractAddress, Success
 	}
-
-	contractAddress = receipt.ContractAddress.String()
-
-	return contractAddress, receipt.Status
+	return "", Pending
 }
