@@ -22,8 +22,9 @@ func GetAllContractAddresses() {
 	go func() {
 		for {
 			t := ticker.C
-			fmt.Println("time now is :", t)
+			fmt.Println("time now is :", &t)
 			transactions, err := modelTransaction.GetTransaction(mysql.DB)
+			fmt.Println(&transactions) // 注释
 			if err != nil {
 				return
 			}
@@ -42,6 +43,7 @@ func GetAllContractAddresses() {
 					}
 				case <-time.After(5 * time.Second):
 					fmt.Println("get contract address time over!")
+					return
 				}
 				return
 			}
