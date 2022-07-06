@@ -62,7 +62,6 @@ func GetContractAddress(chainID uint64, txHashString string) (contractAddress st
 	txHash := common.HexToHash(txHashString)
 	//tx, isPending, err := eth.Client.TransactionByHash(context.Background(), txHash)
 	receipt, err := eth.Client.TransactionReceipt(context.Background(), txHash)
-	defer eth.Close()
 	if err != nil {
 		log.Warn(err)
 		return "", 0
