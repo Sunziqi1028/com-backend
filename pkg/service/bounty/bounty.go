@@ -30,6 +30,10 @@ const (
 	BountyPaymentTermsStatusUnpaid = 1
 	BountyPaymentTermsStatusPaid   = 2
 	BountyPaymentTermsPeriodSeqNum = 1
+	BountyStatusReadyToWork        = 1
+	BountyStatusWordStarted        = 2
+	BountyStatusCompleted          = 3
+	BountyStatusExpired            = 4
 )
 
 // CreateComerBounty create bounty
@@ -109,7 +113,7 @@ func createBounty(tx *gorm.DB, paymentMode, totalRewardToken int, request *model
 		FounderDeposit:     request.Deposit.TokenAmount,
 		Description:        request.Description,
 		PaymentMode:        paymentMode,
-		Status:             0,
+		Status:             BountyStatusReadyToWork,
 		TotalRewardToken:   totalRewardToken,
 	}
 
