@@ -205,21 +205,25 @@ func createPaymentTerms(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 }
 
 func creatPaymentPeriod(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) error {
-	periodAmount := int64(request.Period.Token1Amount + request.Period.Token2Amount)
-	paymentPeriod := &model.BountyPaymentPeriod{
-		BountyID:     bountyID,
-		PeriodType:   request.Period.PeriodType,
-		PeriodAmount: periodAmount,
-		HoursPerDay:  request.Period.HoursPerDay,
-		Token1Symbol: request.Period.Token1Symbol,
-		Token1Amount: request.Period.Token1Amount,
-		Token2Symbol: request.Period.Token2Symbol,
-		Token2Amount: request.Period.Token2Amount,
-		Target:       request.Period.Target,
-	}
-	err := model.CreatePaymentPeriod(tx, paymentPeriod)
-	if err != nil {
-		return err
+	paymentMode, _ := handlePayDetail(request.PayDetail)
+	if paymentMode == PaymentModePeriod {
+		periodAmount := int64(request.Period.Token1Amount + request.Period.Token2Amount)
+		paymentPeriod := &model.BountyPaymentPeriod{
+			BountyID:     bountyID,
+			PeriodType:   request.Period.PeriodType,
+			PeriodAmount: periodAmount,
+			HoursPerDay:  request.Period.HoursPerDay,
+			Token1Symbol: request.Period.Token1Symbol,
+			Token1Amount: request.Period.Token1Amount,
+			Token2Symbol: request.Period.Token2Symbol,
+			Token2Amount: request.Period.Token2Amount,
+			Target:       request.Period.Target,
+		}
+		err := model.CreatePaymentPeriod(tx, paymentPeriod)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 	return nil
 }
