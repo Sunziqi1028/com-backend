@@ -13,7 +13,7 @@ import (
 	modelBonuty "ceres/pkg/model/bounty"
 	modelTransaction "ceres/pkg/model/transaction"
 	serviceTransaction "ceres/pkg/service/transaction"
-	"fmt"
+	"github.com/qiniu/x/log"
 	"time"
 )
 
@@ -22,9 +22,9 @@ func GetAllContractAddresses() {
 	go func() {
 		for {
 			t := ticker.C
-			fmt.Println("time now is :", &t)
+			log.Infof("time now is :", &t)
 			transactions, err := modelTransaction.GetTransaction(mysql.DB)
-			fmt.Println(&transactions) // 注释
+			log.Infof("transaction: %v", transactions) // 注释
 			if err != nil {
 				return
 			}
@@ -42,7 +42,7 @@ func GetAllContractAddresses() {
 						return
 					}
 				case <-time.After(5 * time.Second):
-					fmt.Println("get contract address time over!")
+					log.Info("get contract address time over!")
 					return
 				}
 				return
