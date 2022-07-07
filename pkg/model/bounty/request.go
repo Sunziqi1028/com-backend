@@ -33,7 +33,7 @@ type Contact struct {
 }
 
 type PayDetail struct {
-	Stages []StageType `json:"stage,omitempty"`
+	Stages []StageType `json:"stages,omitempty"`
 	Period PeriodType  `json:"period,omitempty"`
 }
 
