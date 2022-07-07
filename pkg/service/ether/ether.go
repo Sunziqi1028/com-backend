@@ -45,7 +45,6 @@ func GetAllContractAddresses() {
 					log.Info("get contract address time over!")
 					return
 				}
-				return
 			}
 		}
 	}()
