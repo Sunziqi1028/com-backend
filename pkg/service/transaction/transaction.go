@@ -46,6 +46,7 @@ func CreateTransaction(db *gorm.DB, bountyID uint64, request *bounty.BountyReque
 }
 
 func UpdateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint64, contractAddress string) {
+	log.Infof("#####UpdateBountyContractAndTransactoinStatus: bountyId-> %d, status->%d, contractAddress->%s", bountyID, status, contractAddress)
 	err := model.UpdateTransactionStatus(tx, bountyID, status)
 	if err != nil {
 		log.Warn(err)

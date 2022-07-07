@@ -12,8 +12,8 @@ var EthSubChanel = make(chan struct{})
 // Init the eth client
 func Init() (err error) {
 	log.Info("eth.Init ethclient.Dial:", config.Eth.EndPoint+"/"+config.Eth.InfuraKey)
-	//Client, err = ethclient.Dial(config.Eth.EndPoint + "/" + config.Eth.InfuraKey)
-	Client, err = ethclient.Dial("wss://api.avax-test.network/ext/bc/C/ws")
+	Client, err = ethclient.Dial(config.Eth.EndPoint + "/" + config.Eth.InfuraKey)
+	// Client, err = ethclient.Dial("wss://api.avax-test.network/ext/bc/C/ws")
 	if err != nil {
 		log.Warn(err)
 		return err

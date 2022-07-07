@@ -9,15 +9,19 @@
 package bounty
 
 import (
-	model "ceres/pkg/model/bounty"
+	"ceres/pkg/model"
+	"ceres/pkg/model/bounty"
 	"ceres/pkg/router"
+	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/bounty"
 	"fmt"
+	"github.com/qiniu/x/log"
+	"strconv"
 )
 
 // CreateBounty create bounty
 func CreateBounty(ctx *router.Context) {
-	request := new(model.BountyRequest)
+	request := new(bounty.BountyRequest)
 	if err := ctx.ShouldBindJSON(request); err != nil {
 		ctx.HandleError(err)
 		return
@@ -32,4 +36,110 @@ func CreateBounty(ctx *router.Context) {
 	response := "create bounty successful!"
 
 	ctx.OK(response)
+}
+
+func parsePagination(ctx *router.Context, pagination *model.Pagination, defaultLimit int) (err error) {
+	pageStr := ctx.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		return
+	}
+	if page == 0 {
+		page = 1
+	}
+	pagination.Page = page
+	_sort := ctx.Query("sort")
+	switch _sort {
+	case "Created:Recent":
+		_sort = "created_at desc"
+	case "Created:Oldest":
+		_sort = "created_at asc"
+	case "Value:Highest":
+		_sort = "total_reward_token desc"
+	case "Value:Lowest":
+		_sort = "total_reward_token asc"
+	case "Deposit:Highest":
+		_sort = "founder_deposit desc"
+	case "Deposit:Lowest":
+		_sort = "founder_deposit asc"
+	default:
+		_sort = "created_at desc"
+	}
+
+	pagination.Sort = _sort
+	pagination.Limit = defaultLimit
+	log.Infof("pagination param is : %v\n", pagination)
+	return nil
+}
+
+// GetPublicBountyList bounty list displayed in bounty tab
+func GetPublicBountyList(ctx *router.Context) {
+	var request model.Pagination
+	if err := parsePagination(ctx, &request, 10); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	if response, err := service.QueryAllOnChainBounties(request); err != nil {
+		ctx.HandleError(err)
+	} else {
+		ctx.OK(response)
+	}
+}
+
+// GetBountyListByStartup get bounty list belongs to startup
+func GetBountyListByStartup(ctx *router.Context) {
+	var request model.Pagination
+	if err := parsePagination(ctx, &request, 3); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	startupId, err := strconv.ParseUint(ctx.Param("startupId"), 0, 64)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	if startupId == 0 {
+		err := router.ErrBadRequest.WithMsg("Invalid startupId!")
+		ctx.HandleError(err)
+		return
+	}
+
+	if response, err := service.QueryBountiesByStartup(startupId, request); err != nil {
+		ctx.HandleError(err)
+	} else {
+		ctx.OK(response)
+	}
+}
+
+// GetMyPostedBountyList get bounty list posted by me
+func GetMyPostedBountyList(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	var request model.Pagination
+	if err := parsePagination(ctx, &request, 5); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	if response, err := service.QueryComerPostedBountyList(comerID, request); err != nil {
+		ctx.HandleError(err)
+	} else {
+		ctx.OK(response)
+	}
+}
+
+// GetMyParticipatedBountyList get bounty list
+func GetMyParticipatedBountyList(ctx *router.Context) {
+	comerID, _ := ctx.Keys[middleware.ComerUinContextKey].(uint64)
+	var request model.Pagination
+	if err := parsePagination(ctx, &request, 8); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	if response, err := service.QueryComerParticipatedBountyList(comerID, request); err != nil {
+		ctx.HandleError(err)
+	} else {
+		ctx.OK(response)
+	}
 }
