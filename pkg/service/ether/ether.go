@@ -19,7 +19,7 @@ import (
 
 func GetAllContractAddresses() {
 	ticker := time.NewTicker(10 * time.Minute)
-	go func() {
+	go func(t *time.Ticker) {
 		for {
 			t := ticker.C
 			log.Infof("time now is %v:", &t)
@@ -47,5 +47,5 @@ func GetAllContractAddresses() {
 				}
 			}
 		}
-	}()
+	}(ticker)
 }
