@@ -45,7 +45,6 @@ func GetAllContractAddresses() {
 					fmt.Println("get contract address time over!")
 					return
 				}
-				return
 			}
 		}
 	}()
