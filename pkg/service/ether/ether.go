@@ -18,7 +18,7 @@ import (
 )
 
 func GetAllContractAddresses() {
-	ticker := time.NewTicker(10 * time.Minute)
+	ticker := time.NewTicker(1 * time.Minute)
 	go func(t *time.Ticker) {
 		for {
 			t := ticker.C
