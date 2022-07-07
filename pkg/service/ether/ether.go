@@ -22,7 +22,7 @@ func GetAllContractAddresses() {
 	go func() {
 		for {
 			t := ticker.C
-			log.Infof("time now is :", &t)
+			log.Infof("time now is %v:", &t)
 			transactions, err := modelTransaction.GetTransaction(mysql.DB)
 			log.Infof("transaction: %v", transactions) // 注释
 			if err != nil {
