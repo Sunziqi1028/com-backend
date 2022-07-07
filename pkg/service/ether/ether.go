@@ -18,11 +18,9 @@ import (
 )
 
 func GetAllContractAddresses() {
-	ticker := time.NewTicker(1 * time.Minute)
-	go func(t *time.Ticker) {
+	//ticker := time.NewTicker(30 * time.Second)
+	go func() {
 		for {
-			t := ticker.C
-			log.Infof("time now is %v:", &t)
 			transactions, err := modelTransaction.GetTransaction(mysql.DB)
 			log.Infof("transaction: %v", transactions) // 注释
 			if err != nil {
@@ -46,6 +44,7 @@ func GetAllContractAddresses() {
 					return
 				}
 			}
+			time.Sleep(30 * time.Second)
 		}
-	}(ticker)
+	}()
 }
