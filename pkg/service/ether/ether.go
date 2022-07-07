@@ -29,7 +29,7 @@ func GetAllContractAddresses() {
 				return
 			}
 			for _, transaction := range transactions {
-				var contractChan = make(chan *modelBonuty.ContractInfoResponse, 1)
+				var contractChan = make(chan *modelBonuty.ContractInfoResponse, 1024)
 				contractAddress, status := serviceTransaction.GetContractAddress(transaction.ChainID, transaction.TxHash)
 				contractInfo := &modelBonuty.ContractInfoResponse{
 					ContractAddress: contractAddress,
