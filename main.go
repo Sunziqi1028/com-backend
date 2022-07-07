@@ -43,8 +43,7 @@ func main() {
 		http.Init,
 		s3.Init,
 		eth.Init,
-		ether.Init,
-	).Serve(
+	).Cron(ether.Init()).Serve(
 		metrics.Vernor,
 		http.Gin,
 	).Run(); err != nil {

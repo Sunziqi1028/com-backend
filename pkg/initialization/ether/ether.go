@@ -10,9 +10,10 @@ package ether
 
 import (
 	"ceres/pkg/service/ether"
+	"github.com/gotomicro/ego/task/ecron"
 )
 
-func Init() error {
-	ether.GetAllContractAddresses()
-	return nil
+func Init() ecron.Ecron {
+	cron := ether.GetAllContractAddresses()
+	return cron
 }
