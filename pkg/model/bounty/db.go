@@ -112,7 +112,7 @@ func GetBountyDepositByBountyAndComer(db *gorm.DB, bountyID uint64, crtComerId u
 func PageSelectOnChainBounties(db *gorm.DB, pagination model.Pagination) (*model.Pagination, error) {
 	var bounties []*Bounty
 
-	cntSql := fmt.Sprintf("select b.* from bounty b left join bounty_deposit bd on b.id=bd.bounty_id and b.comer_id=bd.comer_id where bd.status=1")
+	cntSql := fmt.Sprintf("select count(b.id) from bounty b left join bounty_deposit bd on b.id=bd.bounty_id and b.comer_id=bd.comer_id where bd.status=1")
 	var cnt int64
 	if err := db.Raw(cntSql).Scan(&cnt).Error; err != nil {
 		return &pagination, err
@@ -132,7 +132,7 @@ func PageSelectOnChainBounties(db *gorm.DB, pagination model.Pagination) (*model
 func PageSelectBountiesByStartupId(db *gorm.DB, pagination model.Pagination, startupId uint64) (*model.Pagination, error) {
 	var bounties []*Bounty
 
-	cntSql := fmt.Sprintf("select b.* from bounty b left join bounty_deposit bd on b.id=bd.bounty_id and b.comer_id=bd.comer_id where bd.status=1 and b.startup_id=%d", startupId)
+	cntSql := fmt.Sprintf("select count(b.id) from bounty b left join bounty_deposit bd on b.id=bd.bounty_id and b.comer_id=bd.comer_id where bd.status=1 and b.startup_id=%d", startupId)
 	var cnt int64
 	if err := db.Raw(cntSql).Scan(&cnt).Error; err != nil {
 		return &pagination, err
