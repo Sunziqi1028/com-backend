@@ -96,4 +96,6 @@ type EthConfig struct {
 	InfuraKey              string
 	StartupContractAddress string
 	ChainID                uint64
+	WSSEndPoint            string
+	RPCEndPoint            string
 }

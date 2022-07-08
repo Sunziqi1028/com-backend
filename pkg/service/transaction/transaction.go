@@ -63,13 +63,13 @@ func UpdateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint
 
 func GetContractAddress(chainID uint64, txHashString string) (contractAddress string, status uint64) {
 	txHash := common.HexToHash(txHashString)
-	tx, isPending, err := eth.Client.TransactionByHash(context.Background(), txHash)
+	tx, isPending, err := eth.RPCClient.TransactionByHash(context.Background(), txHash)
 	if err != nil {
 		log.Warn(err)
 		return "", Failure
 	}
 	if isPending == false {
-		receipt, err := eth.Client.TransactionReceipt(context.Background(), tx.Hash())
+		receipt, err := eth.RPCClient.TransactionReceipt(context.Background(), tx.Hash())
 		if err != nil {
 			log.Warn(err)
 			return "", Failure
