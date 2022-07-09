@@ -260,7 +260,9 @@ func getContract(chainID uint64, txHash string, bountyID uint64) {
 		select {
 		case contractChan <- contractInfo:
 			for contract := range contractChan {
-				transaction.UpdateBountyContractAndTransactoinStatus(mysql.DB, bountyID, contract.Status, contract.ContractAddress)
+				if contract.Status != transaction.Success {
+					transaction.UpdateBountyContractAndTransactoinStatus(mysql.DB, bountyID, transaction.Pending, contract.ContractAddress)
+				}
 			}
 		case <-time.After(5 * time.Second):
 			fmt.Println("get contract address time over!")
