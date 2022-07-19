@@ -599,14 +599,27 @@ func AddDeposit(request *model.AddDepositRequest) error {
 		TokenAmount: request.Deposit.TokenAmount,
 		TimeStamp:   time.Now(),
 	}
-	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
-		transaction.CreateTransaction(tx)
 
-	})
-	err := model.CreateDeposit(mysql.DB, deposit)
-	if err != nil {
-		return err
+	transactionApplicant := &model4.Transaction{
+		ChainID:    request.ChainID,
+		TxHash:     request.TxHash,
+		TimeStamp:  time.Now(),
+		Status:     transaction.Pending,
+		SourceType: transaction.BountyDepositContractCreated,
+		RetryTimes: 0,
+		SourceID:   int64(request.BountyID),
 	}
+	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
+		err = model4.CreateTransaction(tx, transactionApplicant)
+		if err != nil {
+			return err
+		}
+		err = model.CreateDeposit(tx, deposit)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	return nil
 }
 
