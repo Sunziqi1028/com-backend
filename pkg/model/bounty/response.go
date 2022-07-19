@@ -57,12 +57,12 @@ type DetailResponse struct {
 }
 
 type PaymentResponse struct {
-	ComerID                uint64       `json:"comerID" gorm:"comer_id"`
 	PaymentMode            int          `json:"paymentMode" gorm:"payment_mode"`
 	Rewards                BountyReward `json:"rewards"`
 	FounderDeposit         int          `json:"founderDeposit" gorm:"founder_deposit"`
 	ApplicantsTotalDeposit int          `json:"applicantsTotalDeposit"`
-	Terms                  []Term       `json:"terms"`
+	StageTerms             []StageTerm  `json:"stageTerms"`
+	PeriodTerms            `json:"periodTerms"`
 }
 
 type BountyReward struct {
@@ -72,7 +72,7 @@ type BountyReward struct {
 	Token2Amount int    `gorm:"column:token2_amount" json:"token2Amount,omitempty"`
 }
 
-type Term struct {
+type StageTerm struct {
 	SeqNum       int    `json:"seqNum" gorm:"seq_Num"`
 	Status       int    `json:"status" gorm:"status"`
 	Token1Symbol string `gorm:"column:token1_symbol" json:"token1Symbol,omitempty"`
@@ -82,10 +82,23 @@ type Term struct {
 	Terms        string `json:"terms" gorm:"terms"`
 }
 
+type PeriodTerms struct {
+	PeriodModes []PeriodMode
+	Terms       string `json:"terms"`
+}
+
+type PeriodMode struct {
+	SeqNum       int    `json:"seqNum" gorm:"seq_Num"`
+	Status       int    `json:"status" gorm:"status"`
+	Token1Symbol string `gorm:"column:token1_symbol" json:"token1Symbol,omitempty"`
+	Token1Amount int    `gorm:"column:token1_amount" json:"token1Amount,omitempty"`
+	Token2Symbol string `gorm:"column:token2_symbol" json:"token2Symbol,omitempty"`
+	Token2Amount int    `gorm:"column:token2_amount" json:"token2Amount,omitempty"`
+}
+
 type ActivitiesResponse struct {
-	ComerID uint64 `json:"comerID"`
 	ComerInfo
-	ActivitiesContent []ActivityContent
+	ActivityContents []*ActivityContent
 }
 
 type ActivityContent struct {
@@ -95,6 +108,7 @@ type ActivityContent struct {
 }
 
 type ComerInfo struct {
+	ComerID    uint64 `json:"comerID"`
 	ComerName  string `json:"comerName" gorm:"name"`
 	ComerImage string `json:"comerImage" gorm:"avatar"`
 }

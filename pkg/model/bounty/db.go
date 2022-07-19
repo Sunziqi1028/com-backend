@@ -206,7 +206,7 @@ func GetDetailByBountyID(db *gorm.DB, bountyID uint64) (*DetailResponse, error) 
 		return nil, err
 	}
 	var tagIds []uint64
-	err = db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?").Find(&tagIds).Error
+	err = db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?", bountyID).Find(&tagIds).Error
 	if err != nil {
 		return nil, err
 	}
@@ -225,14 +225,37 @@ func GetDetailByBountyID(db *gorm.DB, bountyID uint64) (*DetailResponse, error) 
 
 func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error) {
 	var paymentResponse PaymentResponse
-	db.Table("bounty").Select("comer_id, payment_mode, founder_deposit").Where("id = ? and status != 0", bountyID).Find(&paymentResponse)
-	var Payments []Term
-	db.Table("bounty_payment_terms").Select("seq_num, status, token1_symbol,token1_amount, token2_symbol, token2_amount, terms").Find(&Payments)
+	var comerID uint64
+	err := db.Table("bounty").Select("comer_id").Where("id = ? and status != 0", bountyID).Find(&comerID).Error
+	if err != nil {
+		return nil, err
+	}
+	err = db.Table("bounty").Select("payment_mode, founder_deposit").Where("id = ? and status != 0", bountyID).Find(&paymentResponse).Error
+	if err != nil {
+		return nil, err
+	}
+	if paymentResponse.PaymentMode == PaymentModeStage {
+		var StagePayments []StageTerm
+		db.Table("bounty_payment_terms").Select("seq_num, status, token1_symbol,token1_amount, token2_symbol, token2_amount, terms").Order("seq_num asc").Find(&StagePayments)
 
-	paymentResponse.Terms = Payments
-	var sql = fmt.Sprintf("SELECT SUM(token_amount) FROM bounty_deposit WHERE bounty_id = %d and status != 2 and comer_id != %d", bountyID, paymentResponse.ComerID)
-	db.Raw(sql).Scan(&paymentResponse.ApplicantsTotalDeposit)
-	return &paymentResponse, nil
+		paymentResponse.StageTerms = StagePayments
+		var sql = fmt.Sprintf("SELECT SUM(token_amount) FROM bounty_deposit WHERE bounty_id = %d and status != 2 and comer_id != %d", bountyID, comerID)
+		db.Raw(sql).Scan(&paymentResponse.ApplicantsTotalDeposit)
+		return &paymentResponse, nil
+	}
+	if paymentResponse.PaymentMode == PaymentModePeriod {
+		var periodMode []PeriodMode
+		db.Table("bounty_payment_terms").Select("seq_num, status, token1_symbol,token1_amount, token2_symbol, token2_amount").Order("seq_num asc").Find(&periodMode)
+		var terms string
+		db.Table("bounty_payment_terms").Select("terms").Order("seq_num asc").Find(&terms)
+
+		paymentResponse.PeriodTerms.PeriodModes = periodMode
+		paymentResponse.PeriodTerms.Terms = terms
+		var sql = fmt.Sprintf("SELECT SUM(token_amount) FROM bounty_deposit WHERE bounty_id = %d and status != 2 and comer_id != %d", bountyID, comerID)
+		db.Raw(sql).Scan(&paymentResponse.ApplicantsTotalDeposit)
+		return &paymentResponse, nil
+	}
+	return nil, nil
 }
 
 func UpdateBountyStatusByID(db *gorm.DB, bountyID uint64, isDeleted int) error {
@@ -258,9 +281,9 @@ func GetActivitiesByBountyID(db *gorm.DB, bountyID uint64) ([]*ActivitiesRespons
 	}
 	for _, comerID := range comerIDs {
 		db.Table("comer_profile").Select("name, avatar").Where("comer_id = ?", comerID).Find(&comerInfo)
+		comerInfo.ComerID = comerID
 		activitiesResponse.ComerInfo = comerInfo
-		db.Table("post_update").Select("content, created_at, source_type").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&activitiesResponse.ActivitiesContent)
-		activitiesResponse.ComerID = comerID
+		db.Table("post_update").Select("content, created_at, source_type").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&activitiesResponse.ActivityContents)
 		activitiesTotal = append(activitiesTotal, &activitiesResponse)
 	}
 	return activitiesTotal, nil
