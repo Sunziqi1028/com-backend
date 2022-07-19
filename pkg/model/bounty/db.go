@@ -281,9 +281,9 @@ func GetActivitiesByBountyID(db *gorm.DB, bountyID uint64) ([]*ActivitiesRespons
 	}
 	for _, comerID := range comerIDs {
 		db.Table("comer_profile").Select("name, avatar").Where("comer_id = ?", comerID).Find(&comerInfo)
+		comerInfo.ComerID = comerID
 		activitiesResponse.ComerInfo = comerInfo
-		db.Table("post_update").Select("content, created_at, source_type").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&activitiesResponse.ActivitiesContent)
-		activitiesResponse.ComerID = comerID
+		db.Table("post_update").Select("content, created_at, source_type").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&activitiesResponse.ActivityContents)
 		activitiesTotal = append(activitiesTotal, &activitiesResponse)
 	}
 	return activitiesTotal, nil

@@ -98,7 +98,7 @@ type PeriodMode struct {
 
 type ActivitiesResponse struct {
 	ComerInfo
-	ActivitiesContent []ActivityContent
+	ActivityContents []*ActivityContent
 }
 
 type ActivityContent struct {
