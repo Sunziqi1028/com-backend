@@ -200,7 +200,7 @@ func PageSelectParticipatedBounties(db *gorm.DB, pagination model.Pagination, co
 
 func GetDetailByBountyID(db *gorm.DB, bountyID uint64) (*DetailResponse, error) {
 	var detailResponse DetailResponse
-	var sql = fmt.Sprintf("select title, status, discussion_link, apply_cutoff_date, applicant_deposit, description, created_at from bounty where id = ?", bountyID)
+	var sql = fmt.Sprintf("select title, status, discussion_link, apply_cutoff_date, applicant_deposit, description, created_at from bounty where id = %d", bountyID)
 	err := db.Raw(sql).Scan(&detailResponse).Error
 	if err != nil {
 		return nil, err
@@ -230,7 +230,7 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 	db.Table("bounty_payment_terms").Select("seq_num, status, token1_symbol,token1_amount, token2_symbol, token2_amount, terms").Find(&Payments)
 
 	paymentResponse.Terms = Payments
-	var sql = fmt.Sprintf("SELECT SUM(token_amount) FROM bounty_deposit WHERE bounty_id = ? and status != 2 and comer_id != ?", bountyID, paymentResponse.ComerID)
+	var sql = fmt.Sprintf("SELECT SUM(token_amount) FROM bounty_deposit WHERE bounty_id = %d and status != 2 and comer_id != %d", bountyID, paymentResponse.ComerID)
 	db.Raw(sql).Scan(&paymentResponse.ApplicantsTotalDeposit)
 	return &paymentResponse, nil
 }

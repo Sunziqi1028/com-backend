@@ -354,6 +354,26 @@ func UpdateFounderApprovedApplicant(ctx *router.Context) {
 	ctx.OK("approved success")
 }
 
+func UpdateFounderUnapprovedApplicant(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	request := new(bounty.ApprovedRequest)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err = service.UpdateApplicantApprovedStatus(bountyID, request)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK("approved success")
+}
+
 func GetStartupByBountyID(ctx *router.Context) {
 	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
 	if err != nil {
