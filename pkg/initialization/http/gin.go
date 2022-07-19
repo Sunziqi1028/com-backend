@@ -120,7 +120,21 @@ func Init() (err error) {
 		bounties.Use(middleware.ComerAuthorizationMiddleware())
 		//bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
 		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
-
+		bounties.GET("/detail/:bountyID", router.Wrap(bounty.GetBountyDetailByID))
+		bounties.GET("/:bountyID/payment", router.Wrap(bounty.GetPaymentByBountyID))
+		bounties.PUT("/:bountyID/close", router.Wrap(bounty.UpdateBountyStatus))
+		bounties.POST("/add/deposit", router.Wrap(bounty.AddDeposit))
+		bounties.PUT("/:bountyID/paid/status", router.Wrap(bounty.UpdatePaidStatusByBountyID))
+		bounties.POST("/activities", router.Wrap(bounty.CreateActivities))
+		bounties.POST("/applicants", router.Wrap(bounty.CreateApplicants))
+		bounties.GET("/list/:bountyID/activities", router.Wrap(bounty.GetActivitiesLists))
+		bounties.GET("/list/:bountyID/applicants", router.Wrap(bounty.GetAllApplicantsByBountyID))
+		bounties.GET("/:bountyID/founder", router.Wrap(bounty.GetFounderByBountyID))
+		bounties.GET("/:bountyID/approved", router.Wrap(bounty.GetApprovedApplicantByBountyID))
+		bounties.GET("/:bountyID/deposit-records", router.Wrap(bounty.GetDepositRecords))
+		bounties.GET("/:bountyID/deposit-records", router.Wrap(bounty.GetDepositRecords))
+		bounties.PUT("/founder/:bountyID/approve", router.Wrap(bounty.UpdateFounderApprovedApplicant))
+		bounties.GET("/:bountyID/startup", router.Wrap(bounty.GetStartupByBountyID))
 	}
 	return
 }
