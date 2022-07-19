@@ -83,13 +83,15 @@ type Term struct {
 }
 
 type ActivitiesResponse struct {
+	ComerID uint64 `json:"comerID"`
 	ComerInfo
-	Activities []Activity
+	ActivitiesContent []ActivityContent
 }
 
-type Activity struct {
-	Content  string    `json:"content" gorm:"content"`
-	CreateAt time.Time `json:"creatAt" gorm:"createAt"`
+type ActivityContent struct {
+	SourceType int       `json:"sourceType" gorm:"source_type"`
+	Content    string    `json:"content" gorm:"content"`
+	CreatedAt  time.Time `json:"createdAt" gorm:"created_at"`
 }
 
 type ComerInfo struct {
@@ -97,16 +99,19 @@ type ComerInfo struct {
 	ComerImage string `json:"comerImage" gorm:"avatar"`
 }
 type StartupListResponse struct {
-	Name          string `gorm:"name" json:"name"`
-	Mode          int    `gorm:"mode" json:"mode"`
-	Logo          string `gorm:"logo" json:"logo"`
-	ChainID       uint64 `gorm:"chain_id" json:"chainID"`
-	TxHash        string `gorm:"tx_hash" json:"blockChainAddress"`
-	ContractAudit string `gorm:"contract_audit" json:"contractAudit"`
-	Website       string `gorm:"website" json:"website"`
-	Discord       string `gorm:"discord" json:"discord"`
-	Twitter       string `gorm:"twitter" json:"twitter"`
-	Telegram      string `gorm:"telegram" json:"telegram"`
+	Name          string   `gorm:"name" json:"name"`
+	Mode          int      `gorm:"mode" json:"mode"`
+	Logo          string   `gorm:"logo" json:"logo"`
+	ChainID       uint64   `gorm:"chain_id" json:"chainID"`
+	TxHash        string   `gorm:"tx_hash" json:"blockChainAddress"`
+	ContractAudit string   `gorm:"contract_audit" json:"contractAudit"`
+	Website       string   `gorm:"website" json:"website"`
+	Discord       string   `gorm:"discord" json:"discord"`
+	Twitter       string   `gorm:"twitter" json:"twitter"`
+	Telegram      string   `gorm:"telegram" json:"telegram"`
+	Docs          string   `json:"docs" gorm:"docs"`
+	Mission       string   `json:"mission" gorm:"mission"`
+	Tag           []string `json:"tag"`
 }
 
 type BountyApplicantsResponse struct {
@@ -114,6 +119,7 @@ type BountyApplicantsResponse struct {
 }
 
 type Applicant struct {
+	ComerID     uint64    `json:"comerID"`
 	Image       string    `json:"image"`
 	Name        string    `json:"name"`
 	Description string    `json:"desription"`
@@ -121,13 +127,17 @@ type Applicant struct {
 }
 
 type FounderResponse struct {
+	ComerID          uint64   `json:"comerID"`
 	Name             string   `json:"name"`
 	Image            string   `json:"image"`
 	ApplicantsSkills []string `json:"applicantsSkills"`
 	TimeZone         string   `json:"timeZone"`
+	Location         string   `gorm:"column:location" json:"location"`
+	Email            string   `gorm:"column:email" json:"email"`
 }
 
 type ApprovedResponse struct {
+	ComerID          uint64   `json:"comerID"`
 	Name             string   `json:"name"`
 	Image            string   `json:"image"`
 	ApplicantsSkills []string `json:"applicantsSkills"`
@@ -138,6 +148,7 @@ type DepositRecordsResponse struct {
 }
 
 type DepositRecord struct {
+	ComerID       uint64    `json:"comerID"`
 	Name          string    `json:"name"`
 	Time          time.Time `json:"time"`
 	DepositAmount int       `json:"depositAmount"`

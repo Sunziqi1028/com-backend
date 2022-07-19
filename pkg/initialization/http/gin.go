@@ -132,10 +132,8 @@ func Init() (err error) {
 		bounties.GET("/:bountyID/founder", router.Wrap(bounty.GetFounderByBountyID))
 		bounties.GET("/:bountyID/approved", router.Wrap(bounty.GetApprovedApplicantByBountyID))
 		bounties.GET("/:bountyID/deposit-records", router.Wrap(bounty.GetDepositRecords))
-		bounties.GET("/:bountyID/deposit-records", router.Wrap(bounty.GetDepositRecords))
 		bounties.PUT("/founder/:bountyID/approve", router.Wrap(bounty.UpdateFounderApprovedApplicant))
 		bounties.PUT("/founder/:bountyID/unapprove", router.Wrap(bounty.UpdateFounderApprovedApplicant))
-
 		bounties.GET("/:bountyID/startup", router.Wrap(bounty.GetStartupByBountyID))
 	}
 	return
