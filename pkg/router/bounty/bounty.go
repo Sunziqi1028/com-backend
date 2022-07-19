@@ -143,3 +143,228 @@ func GetMyParticipatedBountyList(ctx *router.Context) {
 		ctx.OK(response)
 	}
 }
+
+func GetBountyDetailByID(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetBountyDetailByID(bountyID)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("get bounty detail fail")
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK(response)
+}
+
+func GetPaymentByBountyID(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetPaymentByBountyID(bountyID)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK(response)
+}
+
+func UpdateBountyStatus(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	request := new(bounty.BountyCloseRequest)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err = service.UpdateBountyStatusByID(bountyID, request.IsDeleted)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK("close bounty success")
+}
+
+func AddDeposit(ctx *router.Context) {
+	request := new(bounty.AddDepositRequest)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err := service.AddDeposit(request)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK("add deposit success")
+}
+
+func UpdatePaidStatusByBountyID(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	request := new(bounty.PaidStatusRequest)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err = service.UpdatePaidStatusByBountyID(bountyID, request)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+
+	ctx.OK("update paid status success")
+}
+
+func CreateActivities(ctx *router.Context) {
+	request := new(bounty.ActivitiesRequest)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err := service.CreateActivities(request)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK("activities create success")
+}
+
+func CreateApplicants(ctx *router.Context) {
+	request := new(bounty.ApplicantsDepositRequest)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err := service.CreateApplicants(request)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK("create applicants success")
+}
+
+func GetActivitiesLists(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetActivitiesByBountyID(bountyID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK(response)
+}
+
+func GetAllApplicantsByBountyID(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetAllApplicantsByBountyID(bountyID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK(response)
+}
+
+func GetFounderByBountyID(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetFounderByBountyID(bountyID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK(response)
+}
+
+func GetApprovedApplicantByBountyID(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetApprovedApplicantByBountyID(bountyID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK(response)
+}
+
+func GetDepositRecords(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetDepositRecords(bountyID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK(response)
+}
+
+func UpdateFounderApprovedApplicant(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	request := new(bounty.ApprovedRequest)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err = service.UpdateApplicantApprovedStatus(bountyID, request)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK("approved success")
+}
+
+func GetStartupByBountyID(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetStartupByBountyID(bountyID)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK(response)
+}

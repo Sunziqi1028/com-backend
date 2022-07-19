@@ -8,7 +8,10 @@
 
 package bounty
 
-import "ceres/pkg/router"
+import (
+	"ceres/pkg/router"
+	"time"
+)
 
 type BountyRequest struct {
 	BountyDetail `json:"bountyDetail"  binding:"required"`
@@ -72,6 +75,54 @@ type ChainInfo struct {
 type PageParam struct {
 	CurrentPage int `json:"currentPage,omitempty"`
 	PageSize    int `json:"pageSize,omitempty"`
+}
+
+type AddDepositRequest struct {
+	BountyID uint64 `json:"bountyID" binding:"required"`
+	ComerID  uint64 `json:"comerID" binding:"required"`
+	Deposit
+	ChainInfo
+}
+
+type PaidStatusRequest struct {
+	SeqNum int `json:"seqNum" binding:"required"`
+	Status int `json:"status" binding:"required"`
+}
+
+type ActivitiesRequest struct {
+	BountyID uint64 `json:"bountyID" binding:"required"`
+	ComerID  uint64 `json:"comerID" binding:"required"`
+	Content  string `json:"content" binding:"required"`
+}
+
+type BountyCloseRequest struct {
+	IsDeleted int `json:"isDeleted" binding:"required"`
+}
+
+type ApplicantsDepositRequest struct {
+	Applicants
+	ApplicantsDeposit
+}
+
+type Applicants struct {
+	BountyID    uint64    `json:"bountyID" binding:"required"`
+	ComerID     uint64    `json:"comerID" binding:"required"`
+	ApplyAt     time.Time `json:"applyAt" binding:"required"`
+	ApprovedAt  time.Time `json:"approvedAt"`
+	RevokeAt    time.Time `json:"revokeAt"`
+	QuitAt      time.Time `json:"quitAt"`
+	SubmitAt    time.Time `json:"submitAt"`
+	Description string    `json:"description" binding:"required"`
+}
+
+type ApplicantsDeposit struct {
+	Deposit
+	ChainInfo
+}
+
+type ApprovedRequest struct {
+	ComerID uint64 `json:"comerID"`
+	Status  int    `json:"status"`
 }
 
 func (p PageParam) Valid() error {

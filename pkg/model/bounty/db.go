@@ -2,6 +2,7 @@ package bounty
 
 import (
 	"ceres/pkg/model"
+	"ceres/pkg/model/account"
 	"ceres/pkg/model/tag"
 	"fmt"
 	"gorm.io/gorm"
@@ -9,6 +10,26 @@ import (
 )
 
 // TODO: bounty model
+
+const (
+	AccessIn                       = 1
+	AccessOut                      = 2
+	PaymentModeStage               = 1
+	PaymentModePeriod              = 2
+	BountyPaymentTermsStatusUnpaid = 1
+	BountyPaymentTermsStatusPaid   = 2
+	BountyPaymentTermsPeriodSeqNum = 1
+	BountyStatusReadyToWork        = 1
+	BountyStatusWordStarted        = 2
+	BountyStatusCompleted          = 3
+	BountyStatusExpired            = 4
+	ApplicantStatusApplied         = 1
+	ApplicantStatusApproved        = 2
+	ApplicantStatusSubmitted       = 3
+	ApplicantStatusRevoked         = 4
+	ApplicantStatusRejected        = 5
+	ApplicantStatusQuited          = 6
+)
 
 func CreateBounty(db *gorm.DB, bounty *Bounty) (uint64, error) {
 	if err := db.Create(&bounty).Error; err != nil {
@@ -175,4 +196,177 @@ func PageSelectParticipatedBounties(db *gorm.DB, pagination model.Pagination, co
 	totalPages := int(math.Ceil(float64(cnt) / float64(pagination.Limit)))
 	pagination.TotalPages = totalPages
 	return &pagination, nil
+}
+
+func GetDetailByBountyID(db *gorm.DB, bountyID uint64) (*DetailResponse, error) {
+	var detailResponse DetailResponse
+	var sql = fmt.Sprintf("select title, status, discussion_link, apply_cutoff_date, applicant_deposit, description, created_at from bounty where id = ?", bountyID)
+	err := db.Raw(sql).Scan(&detailResponse).Error
+	if err != nil {
+		return nil, err
+	}
+	var tagIds []uint64
+	err = db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?").Find(&tagIds).Error
+	if err != nil {
+		return nil, err
+	}
+	var skillNames []string
+	var skillName string
+	for _, tagId := range tagIds {
+		db.Table("tag").Select("name").Where("id = ? and category = bounty", tagId).Find(&skillName)
+		skillNames = append(skillNames, skillName)
+	}
+	var contacts []Contact
+	db.Table("bounty_contact").Select("contact_type, contact_address").Where("bounty_id = ?", bountyID).Find(&contacts)
+	detailResponse.ApplicantSkills = skillNames
+	detailResponse.Contacts = contacts
+	return &detailResponse, nil
+}
+
+func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error) {
+	var paymentResponse PaymentResponse
+	db.Table("bounty").Select("comer_id, payment_mode, founder_deposit").Where("id = ? and status != 0", bountyID).Find(&paymentResponse)
+	var Payments []Term
+	db.Table("bounty_payment_terms").Select("seq_num, status, token1_symbol,token1_amount, token2_symbol, token2_amount, terms").Find(&Payments)
+
+	paymentResponse.Terms = Payments
+	var sql = fmt.Sprintf("SELECT SUM(token_amount) FROM bounty_deposit WHERE bounty_id = ? and status != 2 and comer_id != ?", bountyID, paymentResponse.ComerID)
+	db.Raw(sql).Scan(&paymentResponse.ApplicantsTotalDeposit)
+	return &paymentResponse, nil
+}
+
+func UpdateBountyStatusByID(db *gorm.DB, bountyID uint64, isDeleted int) error {
+	return db.Table("bounty").Where("id = ?", bountyID).Update("is_deleted", isDeleted).Error
+}
+
+func UpdatePaidStatusByBountyID(db *gorm.DB, bountyID uint64, request *PaidStatusRequest) error {
+	return db.Table("bounty_payment_terms").Where("bounty_id = ? and seq_num = ?", bountyID, request.SeqNum).Update("status", request.Status).Error
+}
+
+func CreateApplicants(db *gorm.DB, request *BountyApplicant) error {
+	return db.Create(&request).Error
+}
+
+func GetActivitiesByBountyID(db *gorm.DB, bountyID uint64) ([]*ActivitiesResponse, error) {
+	var comerIDs []uint64
+	var comerInfo ComerInfo
+	var activitiesResponse ActivitiesResponse
+	var activitiesTotal []*ActivitiesResponse
+	err := db.Table("post_update").Select("comer_id").Where("bounty_id = ?", bountyID).Find(&comerIDs).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, comerID := range comerIDs {
+		db.Table("comer_profile").Select("name, avatar").Where("comer_id = ?", comerID).Find(&comerInfo)
+		activitiesResponse.ComerInfo = comerInfo
+		db.Table("post_update").Select("content, created_at").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&activitiesResponse.Activities)
+		activitiesTotal = append(activitiesTotal, &activitiesResponse)
+	}
+	return activitiesTotal, nil
+}
+
+func GetApplicants(db *gorm.DB, bountyID uint64) (*BountyApplicantsResponse, error) {
+	var comerID uint64
+	err := db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerID).Error
+	if err != nil {
+		return nil, err
+	}
+	var applicantComerIDs []uint64
+	err = db.Table("bounty_deposit").Select("comer_id").Where("bounty_id = ? and comer_id != ?", bountyID, comerID).Find(&applicantComerIDs).Error
+	if err != nil {
+		return nil, err
+	}
+	var comerInfo ComerInfo
+	var bountyApplicant BountyApplicant
+	var applicant Applicant
+	var applicantResponse BountyApplicantsResponse
+	for _, applicantComerID := range applicantComerIDs {
+		db.Table("comer_profile").Select("name, avatar").Where("comer_id = ?", applicantComerID).Find(&comerInfo)
+		db.Table("bounty_applicant").Select("description, apply_at").Where("comer_id = ? and bounty_id = ?", applicantComerID, bountyID).Find(&bountyApplicant)
+		applicant.Name = comerInfo.ComerName
+		applicant.Image = comerInfo.ComerImage
+		applicant.Description = bountyApplicant.Description
+		applicant.ApplyAt = bountyApplicant.ApplyAt
+		applicantResponse.Applicants = append(applicantResponse.Applicants, applicant)
+		return &applicantResponse, nil
+	}
+	return nil, nil
+}
+
+func GetFounderByBountyID(db *gorm.DB, bountyID uint64) (*FounderResponse, error) {
+	var comerID uint64
+	var comerInfo account.ComerProfile
+	var tagIds []uint64
+	var skillNames []string
+	var skillName string
+	var founderInfo FounderResponse
+	db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerID)
+	db.Table("comer_profile").Select("name, avatar, time_zone").Where("comer_id = ?", comerID).Find(&comerInfo)
+	db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?", bountyID).Find(&comerInfo)
+	for _, tagId := range tagIds {
+		db.Table("tag").Select("name").Where("id = ?", tagId).Find(&skillName)
+		skillNames = append(skillNames, skillName)
+	}
+	founderInfo.Name = comerInfo.Name
+	founderInfo.Image = comerInfo.Avatar
+	founderInfo.TimeZone = comerInfo.TimeZone
+	founderInfo.ApplicantsSkills = skillNames
+	return &founderInfo, nil
+}
+
+func GetApprovedApplicantByBountyID(db *gorm.DB, bountyID uint64) (*ApprovedResponse, error) {
+	var comerID uint64
+	err := db.Table("bounty_applicant").Select("comer_id").Where("bounty_id = ? and status = 2", bountyID).Find(&comerID).Error
+	if err != nil {
+		return nil, err
+	}
+	var comerInfo account.ComerProfile
+	var tagIds []uint64
+	var skillNames []string
+	var skillName string
+	var approvedInfo ApprovedResponse
+	db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerID)
+	db.Table("comer_profile").Select("name, avatar, time_zone").Where("comer_id = ?", comerID).Find(&comerInfo)
+	db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?", bountyID).Find(&comerInfo)
+	for _, tagId := range tagIds {
+		db.Table("tag").Select("name").Where("id = ?", tagId).Find(&skillName)
+		skillNames = append(skillNames, skillName)
+	}
+	approvedInfo.Name = comerInfo.Name
+	approvedInfo.Image = comerInfo.Avatar
+	approvedInfo.ApplicantsSkills = skillNames
+	return &approvedInfo, nil
+}
+
+func GetDepositRecordsByBountyID(db *gorm.DB, bountyID uint64) (*DepositRecordsResponse, error) {
+	var comerIDs []uint64
+	var depositRecorids DepositRecordsResponse
+	var depositRecorid DepositRecord
+	err := db.Table("bounty_deposit").Select("comer_id").Where("bounty_id = ? ", bountyID).Find(&comerIDs).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, comerID := range comerIDs {
+		db.Table("bounty_deposit").Select("token_amount, access, created_at").Where("comer_id = ?", comerID).Find(&depositRecorid)
+		depositRecorids.DepositRecords = append(depositRecorids.DepositRecords, depositRecorid)
+	}
+	return &depositRecorids, nil
+}
+
+func UpdateApplicantApprovedStatus(db *gorm.DB, bountyID, comerID uint64, status int) (err error) {
+	return db.Table("bounty_applicant").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Update("status", status).Error
+}
+
+func GetStartupByBountyID(db *gorm.DB, bountyID uint64) (*StartupListResponse, error) {
+	var startupID uint64
+	err := db.Table("bounty").Select("startup_id").Where("id = ?", bountyID).Find(&startupID).Error
+	if err != nil {
+		return nil, err
+	}
+	var startupListResponse StartupListResponse
+	err = db.Table("startup").Select("name, mode, logo, chain_id, tx_hash, contract_audit, website, discord, twitter, telegram").Where("id = ?", startupID).Find(&startupListResponse).Error
+	if err != nil {
+		return nil, err
+	}
+	return &startupListResponse, nil
 }
