@@ -56,10 +56,13 @@ type DetailResponse struct {
 	CreatAt           time.Time `json:"creatAt"`
 }
 
+type BountyPaymentInfo struct {
+	PaymentMode    int `json:"paymentMode" gorm:"payment_mode"`
+	FounderDeposit int `json:"founderDeposit" gorm:"founder_deposit"`
+}
 type PaymentResponse struct {
-	PaymentMode            int          `json:"paymentMode" gorm:"payment_mode"`
-	Rewards                BountyReward `json:"rewards"`
-	FounderDeposit         int          `json:"founderDeposit" gorm:"founder_deposit"`
+	BountyPaymentInfo      `json:"bountyPaymentInfo"`
+	Rewards                BountyReward `json:"rewards,omitempty"`
 	ApplicantsTotalDeposit int          `json:"applicantsTotalDeposit"`
 	StageTerms             []StageTerm  `json:"stageTerms"`
 	PeriodTerms            `json:"periodTerms"`
