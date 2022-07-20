@@ -86,8 +86,8 @@ type StageTerm struct {
 }
 
 type PeriodTerms struct {
-	PeriodModes []PeriodMode
-	Terms       string `json:"terms"`
+	PeriodModes []PeriodMode `json:"periodModes"`
+	Terms       string       `json:"terms"`
 }
 
 type PeriodMode struct {

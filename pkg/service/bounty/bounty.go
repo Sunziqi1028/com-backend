@@ -647,6 +647,8 @@ func CreateActivities(request *model.ActivitiesRequest) error {
 }
 
 func CreateApplicants(request *model.ApplicantsDepositRequest) error {
+	getContract(request.ChainID, request.TxHash, request.BountyID)
+
 	bountyApplicant := &model.BountyApplicant{
 		BountyID:  request.BountyID,
 		ComerID:   request.ComerID,
@@ -669,7 +671,6 @@ func CreateApplicants(request *model.ApplicantsDepositRequest) error {
 		TokenAmount: request.Deposit.TokenAmount,
 		TimeStamp:   time.Now(),
 	}
-
 	transaction := &model4.Transaction{
 		ChainID:    request.ChainID,
 		TxHash:     request.TxHash,
