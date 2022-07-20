@@ -100,7 +100,7 @@ type PeriodMode struct {
 }
 
 type ActivitiesResponse struct {
-	ComerID    uint64    `json:"comerID" gorm:"comer_id"'`
+	ComerID    uint64    `json:"comerID" gorm:"comer_id"`
 	ComerName  string    `json:"comerName" gorm:"name"`
 	ComerImage string    `json:"comerImage" gorm:"avatar"`
 	SourceType int       `json:"sourceType" gorm:"source_type"`

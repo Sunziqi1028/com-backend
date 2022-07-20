@@ -702,7 +702,7 @@ func CreateApplicants(request *model.ApplicantsDepositRequest) error {
 	return nil
 }
 
-func GetActivitiesByBountyID(bountyID uint64) ([]*model.ActivitiesResponse, error) {
+func GetActivitiesByBountyID(bountyID uint64) (*[]model.ActivitiesResponse, error) {
 	response, err := model.GetActivitiesByBountyID(mysql.DB, bountyID)
 	if err != nil {
 		return nil, err
