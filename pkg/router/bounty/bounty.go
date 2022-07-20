@@ -162,6 +162,7 @@ func GetBountyDetailByID(ctx *router.Context) {
 
 func GetPaymentByBountyID(ctx *router.Context) {
 	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	fmt.Println("router.go line:165:", bountyID) //注释
 	if err != nil {
 		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
 		ctx.HandleError(err)
@@ -169,7 +170,6 @@ func GetPaymentByBountyID(ctx *router.Context) {
 	}
 	response, err := service.GetPaymentByBountyID(bountyID)
 	if err != nil {
-		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
 		ctx.HandleError(err)
 		return
 	}
