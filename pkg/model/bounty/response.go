@@ -57,8 +57,9 @@ type DetailResponse struct {
 }
 
 type BountyPaymentInfo struct {
-	PaymentMode    int `json:"paymentMode" gorm:"payment_mode"`
-	FounderDeposit int `json:"founderDeposit" gorm:"founder_deposit"`
+	PaymentMode      int `json:"paymentMode" gorm:"payment_mode"`
+	FounderDeposit   int `json:"founderDeposit" gorm:"founder_deposit"`
+	ApplicantDeposit int `json:"applicantDeposit" gorm:"applicant_deposit"`
 }
 type PaymentResponse struct {
 	BountyPaymentInfo      `json:"bountyPaymentInfo"`
@@ -66,6 +67,7 @@ type PaymentResponse struct {
 	ApplicantsTotalDeposit int          `json:"applicantsTotalDeposit"`
 	StageTerms             []StageTerm  `json:"stageTerms"`
 	PeriodTerms            `json:"periodTerms"`
+	BountyDepositStatus    int `json:"bountyDepositStatus" gorm:"status"`
 }
 
 type BountyReward struct {
@@ -88,6 +90,8 @@ type StageTerm struct {
 type PeriodTerms struct {
 	PeriodModes []PeriodMode `json:"periodModes"`
 	Terms       string       `json:"terms"`
+	HoursPerDay int          `json:"hoursPerDay" gorm:"hours_per_day"`
+	PeriodType  int          `json:"periodType" gorm:"period_type"`
 }
 
 type PeriodMode struct {
@@ -99,10 +103,14 @@ type PeriodMode struct {
 	Token2Amount int    `gorm:"column:token2_amount" json:"token2Amount,omitempty"`
 }
 
+type PeriodInfo struct {
+	HoursPerDay int `json:"hoursPerDay" gorm:"hours_per_day"`
+	PeriodType  int `json:"periodType" gorm:"period_type"`
+}
 type ActivitiesResponse struct {
 	ComerID    uint64    `json:"comerID" gorm:"comer_id"`
-	ComerName  string    `json:"comerName" gorm:"name"`
-	ComerImage string    `json:"comerImage" gorm:"avatar"`
+	Name       string    `json:"name" gorm:"name"`
+	Avatar     string    `json:"avatar" gorm:"avatar"`
 	SourceType int       `json:"sourceType" gorm:"source_type"`
 	Content    string    `json:"content" gorm:"content"`
 	Timestamp  time.Time `json:"timestamp" gorm:"timestamp"`
@@ -170,9 +178,9 @@ type DepositRecordsResponse struct {
 }
 
 type DepositRecord struct {
-	ComerID       uint64    `json:"comerID"`
-	Name          string    `json:"name"`
-	Time          time.Time `json:"time"`
-	DepositAmount int       `json:"depositAmount"`
-	Access        int       `json:"access"`
+	ComerID     uint64    `json:"comerID"`
+	Name        string    `json:"name"`
+	Time        time.Time `json:"time"`
+	TokenAmount int       `json:"tokenAmount" gorm:"token_Amount"`
+	Access      int       `json:"access"`
 }
