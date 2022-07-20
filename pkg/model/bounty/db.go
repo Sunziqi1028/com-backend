@@ -231,7 +231,7 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 	if err != nil {
 		return nil, err
 	}
-	err = db.Table("bounty").Select("payment_mode, founder_deposit").Where("id = ? and status != '0'", bountyID).Find(&bountyPaymentInfo).Error
+	err = db.Table("bounty").Select("payment_mode, founder_deposit, applicant_deposit").Where("id = ? and status != '0'", bountyID).Find(&bountyPaymentInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -244,17 +244,17 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 			paymentResponse.Rewards.Token1Amount += stagePayments.Token1Amount
 			paymentResponse.Rewards.Token2Amount += stagePayments.Token2Amount
 		}
-		//	db.Table("bounty_payment_terms").Select("token1_symbol, token2_symbol").Find(&paymentResponse.Rewards.Token1Amount, &paymentResponse.Rewards.Token2Symbol)
-
 		paymentResponse.BountyPaymentInfo = bountyPaymentInfo
 		paymentResponse.StageTerms = StagePayments
-		//var sql = fmt.Sprintf("SELECT SUM(token_amount) FROM bounty_deposit WHERE bounty_id = %d and status != 2 and comer_id != %d", bountyID, comerID)
-		//db.Raw(sql).Scan(&paymentResponse.ApplicantsTotalDeposit)
 		var results []int
 		db.Table("bounty_deposit").Where("bounty_id = ? and status != 2 and comer_id != ?", bountyID, comerID).Pluck("token_amount", &results)
 		for _, result := range results {
 			paymentResponse.ApplicantsTotalDeposit += result
 		}
+		for _, result := range results {
+			paymentResponse.ApplicantsTotalDeposit += result
+		}
+		db.Table("bounty_deposit").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.BountyDepositStatus)
 		return &paymentResponse, nil
 	}
 	if bountyPaymentInfo.PaymentMode == PaymentModePeriod {
@@ -268,17 +268,19 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 			paymentResponse.Rewards.Token1Amount += periodMode.Token1Amount
 			paymentResponse.Rewards.Token2Amount += periodMode.Token2Amount
 		}
-		//	db.Table("bounty_payment_terms").Select("token1_symbol, token2_symbol").Find(&paymentResponse.Rewards.Token1Amount, &paymentResponse.Rewards.Token2Symbol)
-
 		paymentResponse.BountyPaymentInfo = bountyPaymentInfo
 		paymentResponse.PeriodTerms.PeriodModes = periodModes
 		paymentResponse.PeriodTerms.Terms = terms
-		//var sql = fmt.Sprintf("SELECT SUM(token_amount) FROM bounty_deposit WHERE bounty_id = %d and status != 2 and comer_id != %d", bountyID, comerID)
 		var results []int
 		db.Table("bounty_deposit").Where("bounty_id = ? and status != 2 and comer_id != ?", bountyID, comerID).Pluck("token_amount", &results)
 		for _, result := range results {
 			paymentResponse.ApplicantsTotalDeposit += result
 		}
+		db.Table("bounty_deposit").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.BountyDepositStatus)
+		var periodInfo PeriodInfo
+		db.Table("bounty_payment_period").Select("hours_per_day, period_type").Where("bounty_id = ?", bountyID).Find(&periodInfo)
+		paymentResponse.HoursPerDay = periodInfo.HoursPerDay
+		paymentResponse.PeriodType = periodInfo.PeriodType
 		return &paymentResponse, nil
 	}
 	return nil, nil
@@ -289,7 +291,7 @@ func UpdateBountyStatusByID(db *gorm.DB, bountyID uint64, isDeleted int) error {
 }
 
 func UpdatePaidStatusByBountyID(db *gorm.DB, bountyID uint64, request *PaidStatusRequest) error {
-	return db.Table("bounty_payment_terms").Where("bounty_id = ? and seq_num = ?", bountyID, request.SeqNum).Update("status", request.Status).Error
+	return db.Table("bounty_payment_terms").Where("bounty_id = ? and seq_num = ?", bountyID, request.SeqNum).Update("status", BountyPaymentTermsStatusPaid).Error
 }
 
 func CreateApplicants(db *gorm.DB, request *BountyApplicant) error {
@@ -297,12 +299,13 @@ func CreateApplicants(db *gorm.DB, request *BountyApplicant) error {
 }
 
 func GetActivitiesByBountyID(db *gorm.DB, bountyID uint64) (*[]ActivitiesResponse, error) {
-	var sql = fmt.Sprintf("SELECT content, source_type, timestamp, name, avatar, pu.comer_id from post_update pu left join comer_profile cp on cp.comer_id = pu.comer_id where pu.source_id = %d", bountyID)
+	var sql = fmt.Sprintf("SELECT content, source_type, pu.created_at, cp.name, cp.avatar, pu.comer_id from post_update pu left join comer_profile cp on cp.comer_id = pu.comer_id where pu.source_id = %d", bountyID)
 	var activitiesTotal []ActivitiesResponse
-	err := db.Raw(sql).Scan(&activitiesTotal).Error
+	err := db.Raw(sql).Find(&activitiesTotal).Error
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(activitiesTotal)
 	return &activitiesTotal, nil
 }
 
@@ -343,8 +346,8 @@ func GetFounderByBountyID(db *gorm.DB, bountyID uint64) (*FounderResponse, error
 	var skillName string
 	var founderInfo FounderResponse
 	db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerID)
-	db.Table("comer_profile").Select("name, avatar, time_zone").Where("comer_id = ?", comerID).Find(&comerInfo)
-	db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?", bountyID).Find(&comerInfo)
+	db.Table("comer_profile").Select("name, avatar, time_zone, email, location").Where("comer_id = ?", comerID).Find(&comerInfo)
+	db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?", bountyID).Find(&tagIds)
 	for _, tagId := range tagIds {
 		db.Table("tag").Select("name").Where("id = ?", tagId).Find(&skillName)
 		skillNames = append(skillNames, skillName)
@@ -372,7 +375,7 @@ func GetApprovedApplicantByBountyID(db *gorm.DB, bountyID uint64) (*ApprovedResp
 	var approvedInfo ApprovedResponse
 	db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerID)
 	db.Table("comer_profile").Select("name, avatar, time_zone").Where("comer_id = ?", comerID).Find(&comerInfo)
-	db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?", bountyID).Find(&comerInfo)
+	db.Table("tag_target_rel").Select("tag_id").Where("target_id = ?", bountyID).Find(&tagIds)
 	for _, tagId := range tagIds {
 		db.Table("tag").Select("name").Where("id = ?", tagId).Find(&skillName)
 		skillNames = append(skillNames, skillName)
@@ -393,7 +396,8 @@ func GetDepositRecordsByBountyID(db *gorm.DB, bountyID uint64) (*DepositRecordsR
 		return nil, err
 	}
 	for _, comerID := range comerIDs {
-		db.Table("bounty_deposit").Select("token_amount, access, created_at").Where("comer_id = ?", comerID).Find(&depositRecorid)
+		var sql = fmt.Sprintf("SELECT token_amount, access, bd.created_at, name FROM `bounty_deposit` bd LEFT JOIN comer_profile cp on bd.comer_id = cp.comer_id WHERE bounty_id = %d", bountyID)
+		db.Raw(sql).Find(&depositRecorid)
 		depositRecorid.ComerID = comerID
 		depositRecorids.DepositRecords = append(depositRecorids.DepositRecords, depositRecorid)
 	}

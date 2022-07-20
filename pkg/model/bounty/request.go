@@ -86,7 +86,6 @@ type AddDepositRequest struct {
 
 type PaidStatusRequest struct {
 	SeqNum int `json:"seqNum" binding:"required"`
-	Status int `json:"status" binding:"required"`
 }
 
 type ActivitiesRequest struct {

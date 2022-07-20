@@ -391,7 +391,16 @@ func GetStartupByBountyID(ctx *router.Context) {
 }
 
 func GetBountyRoleByComerID(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	fmt.Println(bountyID)
 	header := ctx.Request.Header
 	token := header.Get("x-comunion-authorization")
-	jwt.Verify(token)
+	fmt.Println(token)
+	s, _ := jwt.Verify(token)
+	fmt.Println(s)
 }
