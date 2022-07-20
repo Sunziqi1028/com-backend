@@ -17,6 +17,7 @@ require (
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/qiniu/x v1.11.5
+	github.com/shopspring/decimal v1.3.1 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0

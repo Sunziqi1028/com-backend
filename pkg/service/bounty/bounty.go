@@ -255,7 +255,7 @@ func getContract(chainID uint64, txHash string, bountyID uint64) {
 		contractAddress, status := transaction.GetContractAddress(chainID, txHash)
 		contractInfo := &model.ContractInfoResponse{
 			ContractAddress: contractAddress,
-			Status:          status,
+			Status:          uint64(status),
 		}
 		select {
 		case contractChan <- contractInfo:
@@ -263,7 +263,7 @@ func getContract(chainID uint64, txHash string, bountyID uint64) {
 				if contract.Status != transaction.Success {
 					transaction.UpdateBountyContractAndTransactoinStatus(mysql.DB, bountyID, transaction.Pending, contract.ContractAddress)
 				} else {
-					transaction.UpdateBountyContractAndTransactoinStatus(mysql.DB, bountyID, contract.Status, contract.ContractAddress)
+					transaction.UpdateBountyContractAndTransactoinStatus(mysql.DB, bountyID, int(contract.Status), contract.ContractAddress)
 				}
 			}
 		case <-time.After(5 * time.Second):

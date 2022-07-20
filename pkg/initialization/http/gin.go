@@ -4,8 +4,10 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/account"
 	"ceres/pkg/router/bounty"
+	"ceres/pkg/router/crowdfunding"
 	"ceres/pkg/router/image"
 	"ceres/pkg/router/middleware"
+	"ceres/pkg/router/my"
 	"ceres/pkg/router/startup"
 	"ceres/pkg/router/tag"
 	"ceres/pkg/router/upload"
@@ -70,6 +72,7 @@ func Init() (err error) {
 	{
 		coresPriv.Use(middleware.ComerAuthorizationMiddleware())
 		coresPriv.GET("/startups/me", router.Wrap(startup.ListStartupsMe))
+		coresPriv.GET("/startups/crowdfundable", router.Wrap(crowdfunding.SelectNonFundingStartups))
 		coresPriv.POST("/startups/:startupID/follow", router.Wrap(startup.FollowStartup))
 		coresPriv.DELETE("/startups/:startupID/unfollow", router.Wrap(startup.UnfollowStartup))
 		coresPriv.GET("/startups/follow", router.Wrap(startup.ListFollowStartups))
@@ -86,6 +89,8 @@ func Init() (err error) {
 		coresPriv.GET("/bounties/startup/:startupId", router.Wrap(bounty.GetBountyListByStartup))
 		coresPriv.GET("/bounties/me/participated", router.Wrap(bounty.GetMyParticipatedBountyList))
 		coresPriv.GET("/bounties/me/posted", router.Wrap(bounty.GetMyPostedBountyList))
+		// crowdfunding
+
 	}
 
 	coresPub := Gin.Group("/cores")
@@ -98,6 +103,7 @@ func Init() (err error) {
 		coresPub.GET("/startups/member/:comerID", router.Wrap(startup.ListBeMemberStartups))
 		coresPub.GET("/startups/comer/:comerID", router.Wrap(startup.ListStartupsComer))
 		//coresPub.GET("/startups/:startupId/setting", router.Wrap(startup.GetStartupSetting))
+
 	}
 
 	// misc operation router
@@ -121,6 +127,20 @@ func Init() (err error) {
 		//bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
 		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
 
+	}
+
+	crowdfundingRouters := Gin.Group("/crowdfunding")
+	{
+		crowdfundingRouters.Use(middleware.ComerAuthorizationMiddleware())
+		// crowdFunding
+		crowdfundingRouters.POST("/", router.Wrap(crowdfunding.CreateCrowdFunding))
+
+	}
+
+	testR := Gin.Group("/test")
+	{
+		testR.Use(middleware.GuestAuthorizationMiddleware())
+		testR.GET("/token/:comerId", router.Wrap(my.Token))
 	}
 	return
 }
