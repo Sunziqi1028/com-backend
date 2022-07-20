@@ -633,7 +633,7 @@ func UpdatePaidStatusByBountyID(bountyID uint64, request *model.PaidStatusReques
 
 func CreateActivities(request *model.ActivitiesRequest) error {
 	postUpdate := &model3.PostUpdate{
-		SourceType: postupdate.Bounty, //1 bounty
+		SourceType: request.SourceType, //1 bounty normal 2 send-paid-info
 		SourceID:   request.BountyID,
 		ComerID:    request.ComerID,
 		Content:    request.Content,

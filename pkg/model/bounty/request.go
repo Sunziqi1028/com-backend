@@ -90,9 +90,10 @@ type PaidStatusRequest struct {
 }
 
 type ActivitiesRequest struct {
-	BountyID uint64 `json:"bountyID" binding:"required"`
-	ComerID  uint64 `json:"comerID" binding:"required"`
-	Content  string `json:"content" binding:"required"`
+	BountyID   uint64 `json:"bountyID" binding:"required"`
+	ComerID    uint64 `json:"comerID" binding:"required"`
+	Content    string `json:"content" binding:"required"`
+	SourceType int    `json:"sourceType" bing:"required"`
 }
 
 type BountyCloseRequest struct {
