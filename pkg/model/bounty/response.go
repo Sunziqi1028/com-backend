@@ -100,21 +100,26 @@ type PeriodMode struct {
 }
 
 type ActivitiesResponse struct {
-	ComerInfo
-	ActivityContents []*ActivityContent
-}
-
-type ActivityContent struct {
+	ComerID    uint64    `json:"comerID" gorm:"comer_id"'`
+	ComerName  string    `json:"comerName" gorm:"name"`
+	ComerImage string    `json:"comerImage" gorm:"avatar"`
 	SourceType int       `json:"sourceType" gorm:"source_type"`
 	Content    string    `json:"content" gorm:"content"`
-	CreatedAt  time.Time `json:"createdAt" gorm:"created_at"`
+	Timestamp  time.Time `json:"timestamp" gorm:"timestamp"`
 }
+
+//type ActivityContent struct {
+//	SourceType int       `json:"sourceType" gorm:"source_type"`
+//	Content    string    `json:"content" gorm:"content"`
+//	CreatedAt  time.Time `json:"createdAt" gorm:"created_at"`
+//}
 
 type ComerInfo struct {
 	ComerID    uint64 `json:"comerID"`
 	ComerName  string `json:"comerName" gorm:"name"`
 	ComerImage string `json:"comerImage" gorm:"avatar"`
 }
+
 type StartupListResponse struct {
 	Name          string   `gorm:"name" json:"name"`
 	Mode          int      `gorm:"mode" json:"mode"`

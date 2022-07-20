@@ -283,23 +283,14 @@ func CreateApplicants(db *gorm.DB, request *BountyApplicant) error {
 	return db.Create(&request).Error
 }
 
-func GetActivitiesByBountyID(db *gorm.DB, bountyID uint64) ([]*ActivitiesResponse, error) {
-	var comerIDs []uint64
-	var comerInfo ComerInfo
-	var activitiesResponse ActivitiesResponse
-	var activitiesTotal []*ActivitiesResponse
-	err := db.Table("post_update").Select("comer_id").Where("source_id = ?", bountyID).Find(&comerIDs).Error
+func GetActivitiesByBountyID(db *gorm.DB, bountyID uint64) (*[]ActivitiesResponse, error) {
+	var sql = fmt.Sprintf("SELECT content, source_type, timestamp, name, avatar, pu.comer_id from post_update pu left join comer_profile cp on cp.comer_id = pu.comer_id where pu.source_id = %d", bountyID)
+	var activitiesTotal []ActivitiesResponse
+	err := db.Raw(sql).Scan(&activitiesTotal).Error
 	if err != nil {
 		return nil, err
 	}
-	for _, comerID := range comerIDs {
-		db.Table("comer_profile").Select("name, avatar").Where("comer_id = ?", comerID).Find(&comerInfo)
-		comerInfo.ComerID = comerID
-		activitiesResponse.ComerInfo = comerInfo
-		db.Table("post_update").Select("content, created_at, source_type").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&activitiesResponse.ActivityContents)
-		activitiesTotal = append(activitiesTotal, &activitiesResponse)
-	}
-	return activitiesTotal, nil
+	return &activitiesTotal, nil
 }
 
 func GetApplicants(db *gorm.DB, bountyID uint64) (*BountyApplicantsResponse, error) {
