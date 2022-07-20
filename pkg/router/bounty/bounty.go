@@ -14,6 +14,7 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/bounty"
+	"ceres/pkg/utility/jwt"
 	"fmt"
 	"github.com/qiniu/x/log"
 	"strconv"
@@ -387,4 +388,10 @@ func GetStartupByBountyID(ctx *router.Context) {
 		return
 	}
 	ctx.OK(response)
+}
+
+func GetBountyRoleByComerID(ctx *router.Context) {
+	header := ctx.Request.Header
+	token := header.Get("x-comunion-authorization")
+	jwt.Verify(token)
 }
