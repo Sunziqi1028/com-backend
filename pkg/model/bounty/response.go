@@ -121,7 +121,7 @@ type ComerInfo struct {
 }
 
 type StartupListResponse struct {
-	Name          string   `gorm:"name" json:"name"`
+	Title         string   `gorm:"name" json:"title"`
 	Mode          int      `gorm:"mode" json:"mode"`
 	Logo          string   `gorm:"logo" json:"logo"`
 	ChainID       uint64   `gorm:"chain_id" json:"chainID"`
