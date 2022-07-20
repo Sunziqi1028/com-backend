@@ -53,7 +53,7 @@ type DetailResponse struct {
 	ApplicantsDeposit int       `json:"applicantsDeposit"`
 	Description       string    `json:"description"`
 	Contacts          []Contact `json:"contact"`
-	CreatAt           time.Time `json:"creatAt"`
+	CreatedAt         time.Time `json:"createdAt"`
 }
 
 type BountyPaymentInfo struct {
