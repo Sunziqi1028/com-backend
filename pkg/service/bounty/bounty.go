@@ -12,8 +12,10 @@ import (
 	"ceres/pkg/initialization/mysql"
 	model2 "ceres/pkg/model"
 	model "ceres/pkg/model/bounty"
+	model3 "ceres/pkg/model/postupdate"
 	"ceres/pkg/model/startup"
 	"ceres/pkg/model/tag"
+	model4 "ceres/pkg/model/transaction"
 	"ceres/pkg/service/postupdate"
 	"ceres/pkg/service/transaction"
 	"ceres/pkg/utility/tool"
@@ -22,20 +24,6 @@ import (
 	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
 	"time"
-)
-
-const (
-	AccessIn                       = 1
-	AccessOut                      = 2
-	PaymentModeStage               = 1
-	PaymentModePeriod              = 2
-	BountyPaymentTermsStatusUnpaid = 1
-	BountyPaymentTermsStatusPaid   = 2
-	BountyPaymentTermsPeriodSeqNum = 1
-	BountyStatusReadyToWork        = 1
-	BountyStatusWordStarted        = 2
-	BountyStatusCompleted          = 3
-	BountyStatusExpired            = 4
 )
 
 // CreateComerBounty create bounty
@@ -115,7 +103,7 @@ func createBounty(tx *gorm.DB, paymentMode, totalRewardToken int, request *model
 		FounderDeposit:     request.Deposit.TokenAmount,
 		Description:        request.Description,
 		PaymentMode:        paymentMode,
-		Status:             BountyStatusReadyToWork,
+		Status:             model.BountyStatusReadyToWork,
 		TotalRewardToken:   totalRewardToken,
 	}
 
@@ -133,7 +121,7 @@ func createDeposit(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) e
 		Status:      transaction.Pending,
 		BountyID:    bountyID,
 		ComerID:     request.ComerID,
-		Access:      AccessIn,
+		Access:      model.AccessIn,
 		TokenSymbol: request.Deposit.TokenSymbol,
 		TokenAmount: request.Deposit.TokenAmount,
 		TimeStamp:   time.Now(),
@@ -165,7 +153,7 @@ func createContact(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) [
 func createPaymentTerms(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) []string {
 	paymentMode, _ := handlePayDetail(request.PayDetail)
 	var errorLog []string
-	if paymentMode == PaymentModeStage {
+	if paymentMode == model.PaymentModeStage {
 		for _, stage := range request.PayDetail.Stages {
 			paymentTerms := &model.BountyPaymentTerms{
 				BountyID:     bountyID,
@@ -176,7 +164,7 @@ func createPaymentTerms(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 				Token2Amount: stage.Token2Amount,
 				Terms:        stage.Terms,
 				SeqNum:       stage.SeqNum,
-				Status:       BountyPaymentTermsStatusUnpaid,
+				Status:       model.BountyPaymentTermsStatusUnpaid,
 			}
 			err := model.CreatePaymentTerms(tx, paymentTerms)
 			if err != nil {
@@ -185,21 +173,23 @@ func createPaymentTerms(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 			}
 		}
 	} else {
-		paymentTerms := &model.BountyPaymentTerms{
-			BountyID:     bountyID,
-			PaymentMode:  paymentMode,
-			Token1Symbol: request.Period.Token1Symbol,
-			Token1Amount: request.Period.Token1Amount,
-			Token2Symbol: request.Period.Token2Symbol,
-			Token2Amount: request.Period.Token2Amount,
-			Terms:        request.Period.Target,
-			SeqNum:       BountyPaymentTermsPeriodSeqNum,
-			Status:       BountyPaymentTermsStatusUnpaid,
-		}
-		err := model.CreatePaymentTerms(tx, paymentTerms)
-		if err != nil {
-			errorLog = append(errorLog, fmt.Sprintf("create period err:%v", err))
-			return errorLog
+		for i := 1; i <= request.Period.PeriodAmount; i++ {
+			paymentTerms := &model.BountyPaymentTerms{
+				BountyID:     bountyID,
+				PaymentMode:  paymentMode,
+				Token1Symbol: request.Period.Token1Symbol,
+				Token1Amount: request.Period.Token1Amount,
+				Token2Symbol: request.Period.Token2Symbol,
+				Token2Amount: request.Period.Token2Amount,
+				Terms:        request.Period.Target,
+				SeqNum:       i,
+				Status:       model.BountyPaymentTermsStatusUnpaid,
+			}
+			err := model.CreatePaymentTerms(tx, paymentTerms)
+			if err != nil {
+				errorLog = append(errorLog, fmt.Sprintf("create period err:%v", err))
+				return errorLog
+			}
 		}
 	}
 
@@ -208,7 +198,7 @@ func createPaymentTerms(tx *gorm.DB, bountyID uint64, request *model.BountyReque
 
 func creatPaymentPeriod(tx *gorm.DB, bountyID uint64, request *model.BountyRequest) error {
 	paymentMode, _ := handlePayDetail(request.PayDetail)
-	if paymentMode == PaymentModePeriod {
+	if paymentMode == model.PaymentModePeriod {
 		periodAmount := int64(request.Period.Token1Amount + request.Period.Token2Amount)
 		paymentPeriod := &model.BountyPaymentPeriod{
 			BountyID:     bountyID,
@@ -275,13 +265,13 @@ func getContract(chainID uint64, txHash string, bountyID uint64) {
 
 func handlePayDetail(request model.PayDetail) (paymentMode, totalRewardToken int) {
 	if len(request.Stages) > 0 {
-		paymentMode = PaymentModeStage
+		paymentMode = model.PaymentModeStage
 		for _, stage := range request.Stages {
 			totalRewardToken = stage.Token1Amount + stage.Token2Amount
 		}
 		return paymentMode, totalRewardToken
 	} else {
-		paymentMode = PaymentModePeriod
+		paymentMode = model.PaymentModePeriod
 		totalRewardToken = request.Period.Token1Amount + request.Period.Token2Amount
 		return paymentMode, totalRewardToken
 	}
@@ -571,4 +561,199 @@ func calcRewardWhenIsPaymentPeriod(periods []model.BountyPaymentPeriod, rewards 
 			})
 		}
 	}
+}
+
+func GetBountyDetailByID(bountyID uint64) (*model.DetailResponse, error) {
+	detailResponse, err := model.GetDetailByBountyID(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	return detailResponse, nil
+}
+
+func GetPaymentByBountyID(bountyID uint64) (*model.PaymentResponse, error) {
+	response, err := model.GetPaymentByBountyID(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func UpdateBountyStatusByID(bountID uint64, isDeleted int) error {
+	err := model.UpdateBountyStatusByID(mysql.DB, bountID, isDeleted)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func AddDeposit(request *model.AddDepositRequest) error {
+	deposit := &model.BountyDeposit{
+		ChainID:     request.ChainID,
+		TxHash:      request.TxHash,
+		Status:      transaction.Pending,
+		BountyID:    request.BountyID,
+		ComerID:     request.ComerID,
+		Access:      model.AccessIn,
+		TokenSymbol: request.Deposit.TokenSymbol,
+		TokenAmount: request.Deposit.TokenAmount,
+		TimeStamp:   time.Now(),
+	}
+
+	transactionApplicant := &model4.Transaction{
+		ChainID:    request.ChainID,
+		TxHash:     request.TxHash,
+		TimeStamp:  time.Now(),
+		Status:     transaction.Pending,
+		SourceType: transaction.BountyDepositContractCreated,
+		RetryTimes: 0,
+		SourceID:   int64(request.BountyID),
+	}
+	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
+		err = model4.CreateTransaction(tx, transactionApplicant)
+		if err != nil {
+			return err
+		}
+		err = model.CreateDeposit(tx, deposit)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return nil
+}
+
+func UpdatePaidStatusByBountyID(bountyID uint64, request *model.PaidStatusRequest) error {
+	err := model.UpdatePaidStatusByBountyID(mysql.DB, bountyID, request)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateActivities(request *model.ActivitiesRequest) error {
+	postUpdate := &model3.PostUpdate{
+		SourceType: request.SourceType, //1 bounty normal 2 send-paid-info
+		SourceID:   request.BountyID,
+		ComerID:    request.ComerID,
+		Content:    request.Content,
+		TimeStamp:  time.Now(),
+	}
+	err := model3.CreatePostUpdate(mysql.DB, postUpdate)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateApplicants(request *model.ApplicantsDepositRequest) error {
+	getContract(request.ChainID, request.TxHash, request.BountyID)
+
+	bountyApplicant := &model.BountyApplicant{
+		BountyID:  request.BountyID,
+		ComerID:   request.ComerID,
+		ApplyAt:   request.ApplyAt,
+		RevokeAt:  request.RevokeAt,
+		QuitAt:    request.QuitAt,
+		ApproveAt: request.ApprovedAt,
+		SubmitAt:  request.SubmitAt,
+		Status:    model.ApplicantStatusApplied,
+	}
+
+	deposit := &model.BountyDeposit{
+		ChainID:     request.ChainID,
+		TxHash:      request.TxHash,
+		Status:      transaction.Pending,
+		BountyID:    request.BountyID,
+		ComerID:     request.ComerID,
+		Access:      model.AccessIn,
+		TokenSymbol: request.Deposit.TokenSymbol,
+		TokenAmount: request.Deposit.TokenAmount,
+		TimeStamp:   time.Now(),
+	}
+	transaction := &model4.Transaction{
+		ChainID:    request.ChainID,
+		TxHash:     request.TxHash,
+		TimeStamp:  time.Now(),
+		Status:     transaction.Pending,
+		SourceType: transaction.BountyDepositContractCreated,
+		RetryTimes: 1,
+		SourceID:   int64(request.BountyID),
+	}
+
+	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
+		err = model.CreateApplicants(tx, bountyApplicant)
+		if err != nil {
+			log.Warn(err)
+			return
+		}
+
+		err = model.CreateDeposit(tx, deposit)
+		if err != nil {
+			log.Warn(err)
+			return err
+		}
+
+		if err := model4.CreateTransaction(tx, transaction); err != nil {
+			log.Warn(err)
+			return err
+		}
+		return
+	})
+	return nil
+}
+
+func GetActivitiesByBountyID(bountyID uint64) (*[]model.ActivitiesResponse, error) {
+	response, err := model.GetActivitiesByBountyID(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func GetAllApplicantsByBountyID(bountyID uint64) (*model.BountyApplicantsResponse, error) {
+	response, err := model.GetApplicants(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func GetFounderByBountyID(bountyID uint64) (*model.FounderResponse, error) {
+	response, err := model.GetFounderByBountyID(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func GetApprovedApplicantByBountyID(bountyID uint64) (*model.ApprovedResponse, error) {
+	response, err := model.GetApprovedApplicantByBountyID(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func GetDepositRecords(bountyID uint64) (*model.DepositRecordsResponse, error) {
+	response, err := model.GetDepositRecordsByBountyID(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func UpdateApplicantApprovedStatus(bountyID uint64, request *model.ApprovedRequest) error {
+	if err := model.UpdateApplicantApprovedStatus(mysql.DB, bountyID, request.ComerID, request.Status); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetStartupByBountyID(bountyID uint64) (*model.StartupListResponse, error) {
+	response, err := model.GetStartupByBountyID(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
