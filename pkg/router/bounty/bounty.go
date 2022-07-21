@@ -21,10 +21,10 @@ import (
 )
 
 const (
-	DepositUnLockStatus          = 2
-	DepositLockStatus            = 3
+	DepositUnLockStatus          = uint64(2)
+	DepositLockStatus            = uint64(3)
 	BountyStatusReadyToWorkAgain = 1
-	BountyStatusWordStarted      = 2
+	BountyStatusWordStarted      = uint64(2)
 	ApplicantStatusApproved      = 2
 	ApplicantStatusRevoked       = 4
 )
