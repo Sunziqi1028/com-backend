@@ -79,7 +79,6 @@ type PageParam struct {
 
 type AddDepositRequest struct {
 	BountyID uint64 `json:"bountyID" binding:"required"`
-	ComerID  uint64 `json:"comerID" binding:"required"`
 	Deposit
 	ChainInfo
 }
@@ -90,39 +89,30 @@ type PaidStatusRequest struct {
 
 type ActivitiesRequest struct {
 	BountyID   uint64 `json:"bountyID" binding:"required"`
-	ComerID    uint64 `json:"comerID" binding:"required"`
 	Content    string `json:"content" binding:"required"`
 	SourceType int    `json:"sourceType" bing:"required"`
 }
 
-type BountyCloseRequest struct {
-	IsDeleted int `json:"isDeleted" binding:"required"`
-}
-
 type ApplicantsDepositRequest struct {
-	Applicants
-	ApplicantsDeposit
+	Applicants        `json:"applicants"`
+	ApplicantsDeposit `json:"applicantsDeposit"`
 }
 
 type Applicants struct {
-	BountyID    uint64    `json:"bountyID" binding:"required"`
-	ComerID     uint64    `json:"comerID" binding:"required"`
-	ApplyAt     time.Time `json:"applyAt" binding:"required"`
+	BountyID    uint64    `json:"bountyID"`
+	ApplyAt     time.Time `json:"applyAt"`
 	ApprovedAt  time.Time `json:"approvedAt"`
 	RevokeAt    time.Time `json:"revokeAt"`
 	QuitAt      time.Time `json:"quitAt"`
 	SubmitAt    time.Time `json:"submitAt"`
-	Description string    `json:"description" binding:"required"`
+	Description string    `json:"description"`
 }
 
 type ApplicantsDeposit struct {
-	Deposit
-	ChainInfo
-}
-
-type ApprovedRequest struct {
-	ComerID uint64 `json:"comerID"`
-	Status  int    `json:"status"`
+	TokenSymbol string `json:"tokenSymbol"`
+	TokenAmount int    `json:"tokenAmount"`
+	ChainID     uint64 `json:"chainID"`
+	TxHash      string `json:"txHash"`
 }
 
 func (p PageParam) Valid() error {
