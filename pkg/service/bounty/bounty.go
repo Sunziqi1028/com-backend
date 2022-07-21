@@ -743,7 +743,7 @@ func GetDepositRecords(bountyID uint64) (*model.DepositRecordsResponse, error) {
 	return response, nil
 }
 
-func UpdateApplicantApprovedStatus(bountyID, comerID, depositStatus, bountyStatus uint64, applicantApprovedStatus int) (err error) {
+func UpdateApplicantApprovedStatus(bountyID, comerID uint64, depositStatus, bountyStatus, applicantApprovedStatus int) (err error) {
 	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
 		if err := model.UpdateApplicantApprovedStatus(tx, bountyID, comerID, applicantApprovedStatus); err != nil {
 			return err

@@ -62,7 +62,7 @@ func UpdateBountyDepositContract(db *gorm.DB, bountyID uint64, depositContract s
 	return db.Model(&Bounty{}).Where("id = ?", bountyID).Update("deposit_contract", depositContract).Error
 }
 
-func UpdateBountyDepositStatus(db *gorm.DB, bountyID uint64, status uint64) error {
+func UpdateBountyDepositStatus(db *gorm.DB, bountyID uint64, status int) error {
 	return db.Model(&BountyDeposit{}).Where("bounty_id = ?", bountyID).Update("status", status).Error
 }
 
@@ -460,7 +460,7 @@ func GetBountyRoleByComerID(db *gorm.DB, bountyID, comerID uint64) int {
 	}
 }
 
-func UpdateBountyStatus(db *gorm.DB, bountyID uint64, status uint64) error {
+func UpdateBountyStatus(db *gorm.DB, bountyID uint64, status int) error {
 	return db.Table("bounty").Where("id = ?", bountyID).Update("status", status).Error
 }
 
