@@ -460,7 +460,7 @@ func GetBountyRoleByComerID(db *gorm.DB, bountyID, comerID uint64) int {
 	}
 }
 
-func UpdateBountyStatus(db *gorm.DB, bountyID uint64, status uint64) error {
+func UpdateBountyStatus(db *gorm.DB, bountyID uint64, status int) error {
 	return db.Table("bounty").Where("id = ?", bountyID).Update("status", status).Error
 }
 
