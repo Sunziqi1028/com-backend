@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"math"
+	"time"
 )
 
 // TODO: bounty model
@@ -29,6 +30,9 @@ const (
 	ApplicantStatusRevoked         = 4
 	ApplicantStatusRejected        = 5
 	ApplicantStatusQuited          = 6
+	FOUNDER                        = 1
+	APPLICANT                      = 2
+	ISDETELED                      = 1
 )
 
 func CreateBounty(db *gorm.DB, bounty *Bounty) (uint64, error) {
@@ -286,8 +290,20 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 	return nil, nil
 }
 
-func UpdateBountyStatusByID(db *gorm.DB, bountyID uint64, isDeleted int) error {
-	return db.Table("bounty").Where("id = ?", bountyID).Update("is_deleted", isDeleted).Error
+func UpdateBountyCloseStatusByID(db *gorm.DB, bountyID, comerID uint64) (string, error) {
+	var tokenAmount int
+	err := db.Table("bounty_deposit").Select("token_amount").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&tokenAmount).Error
+	if err != nil {
+		return "", err
+	}
+	if tokenAmount != 0 {
+		return "the deposit is not null", nil
+	}
+	err = db.Table("bounty").Where("id = ?", bountyID).Update("status", BountyStatusCompleted).Error
+	if err != nil {
+		return "", err
+	}
+	return "close bounty", nil
 }
 
 func UpdatePaidStatusByBountyID(db *gorm.DB, bountyID uint64, request *PaidStatusRequest) error {
@@ -405,7 +421,7 @@ func GetDepositRecordsByBountyID(db *gorm.DB, bountyID uint64) (*DepositRecordsR
 }
 
 func UpdateApplicantApprovedStatus(db *gorm.DB, bountyID, comerID uint64, status int) (err error) {
-	return db.Table("bounty_applicant").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Update("status", status).Error
+	return db.Table("bounty_applicant").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Updates(BountyApplicant{Status: status, ApproveAt: time.Now()}).Error
 }
 
 func GetStartupByBountyID(db *gorm.DB, bountyID uint64) (*StartupListResponse, error) {
@@ -432,4 +448,31 @@ func GetStartupByBountyID(db *gorm.DB, bountyID uint64) (*StartupListResponse, e
 	}
 	startupListResponse.Tag = tagNames
 	return &startupListResponse, nil
+}
+
+func GetBountyRoleByComerID(db *gorm.DB, bountyID, comerID uint64) int {
+	var comerIDtmp uint64
+	db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerIDtmp)
+	if comerIDtmp == comerID {
+		return FOUNDER
+	} else {
+		return APPLICANT
+	}
+}
+
+func UpdateBountyStatus(db *gorm.DB, bountyID uint64, status uint64) error {
+	return db.Table("bounty").Where("id = ?", bountyID).Update("status", status).Error
+}
+
+func UpdateApplicantRejectStatus(db *gorm.DB, comerID, bountyID uint64) error {
+	var rejectedApplicantComerIDs []uint64
+	err := db.Table("bounty_deposit").Select("comer_id").Where("bounty_id = ? and comer_id != ?", bountyID, comerID).Find(&rejectedApplicantComerIDs).Error
+	if err != nil {
+		return err
+	}
+	for _, rejectedApplicantComerID := range rejectedApplicantComerIDs {
+		db.Table("bounty_applicant").Where("comer_id = ?", rejectedApplicantComerID).Update("status", ApplicantStatusRejected)
+		db.Table("bounty_deposit").Where("comer_id = ?", rejectedApplicantComerID).Update("access", AccessOut)
+	}
+	return nil
 }

@@ -14,10 +14,19 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/router/middleware"
 	service "ceres/pkg/service/bounty"
-	"ceres/pkg/utility/jwt"
+	"ceres/pkg/utility/tool"
 	"fmt"
 	"github.com/qiniu/x/log"
 	"strconv"
+)
+
+const (
+	DepositUnLockStatus          = 2
+	DepositLockStatus            = 3
+	BountyStatusReadyToWorkAgain = 1
+	BountyStatusWordStarted      = 2
+	ApplicantStatusApproved      = 2
+	ApplicantStatusRevoked       = 4
 )
 
 // CreateBounty create bounty
@@ -177,24 +186,24 @@ func GetPaymentByBountyID(ctx *router.Context) {
 	ctx.OK(response)
 }
 
-func UpdateBountyStatus(ctx *router.Context) {
+func UpdateBountyCloseStatus(ctx *router.Context) {
 	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
 	if err != nil {
 		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
 		ctx.HandleError(err)
 		return
 	}
-	request := new(bounty.BountyCloseRequest)
-	if err := ctx.ShouldBindJSON(request); err != nil {
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	err = service.UpdateBountyStatusByID(bountyID, request.IsDeleted)
-	if err := ctx.ShouldBindJSON(request); err != nil {
+	response, err := service.UpdateBountyStatusByID(bountyID, comerID)
+	if err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	ctx.OK("close bounty success")
+	ctx.OK(response)
 }
 
 func AddDeposit(ctx *router.Context) {
@@ -203,7 +212,12 @@ func AddDeposit(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	err := service.AddDeposit(request)
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err = service.AddDeposit(request, comerID)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -224,7 +238,7 @@ func UpdatePaidStatusByBountyID(ctx *router.Context) {
 		return
 	}
 	err = service.UpdatePaidStatusByBountyID(bountyID, request)
-	if err := ctx.ShouldBindJSON(request); err != nil {
+	if err != nil {
 		ctx.HandleError(err)
 		return
 	}
@@ -238,7 +252,13 @@ func CreateActivities(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	err := service.CreateActivities(request)
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	fmt.Println(comerID, "router.go line:260")
+	err = service.CreateActivities(request, comerID)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -252,7 +272,14 @@ func CreateApplicants(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	err := service.CreateApplicants(request)
+
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	fmt.Println("-------------------", comerID)
+	err = service.CreateApplicants(request, comerID)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -342,12 +369,12 @@ func UpdateFounderApprovedApplicant(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	request := new(bounty.ApprovedRequest)
-	if err := ctx.ShouldBindJSON(request); err != nil {
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	err = service.UpdateApplicantApprovedStatus(bountyID, request)
+	err = service.UpdateApplicantApprovedStatus(bountyID, comerID, DepositLockStatus, BountyStatusWordStarted, ApplicantStatusApproved)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -362,17 +389,17 @@ func UpdateFounderUnapprovedApplicant(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	request := new(bounty.ApprovedRequest)
-	if err := ctx.ShouldBindJSON(request); err != nil {
-		ctx.HandleError(err)
-		return
-	}
-	err = service.UpdateApplicantApprovedStatus(bountyID, request)
+	comerID, err := tool.GetComerIDByToken(ctx)
 	if err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	ctx.OK("approved success")
+	err = service.UpdateApplicantApprovedStatus(bountyID, comerID, DepositUnLockStatus, BountyStatusReadyToWorkAgain, ApplicantStatusRevoked)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK("unapproved success")
 }
 
 func GetStartupByBountyID(ctx *router.Context) {
@@ -398,9 +425,11 @@ func GetBountyRoleByComerID(ctx *router.Context) {
 		return
 	}
 	fmt.Println(bountyID)
-	header := ctx.Request.Header
-	token := header.Get("x-comunion-authorization")
-	fmt.Println(token)
-	s, _ := jwt.Verify(token)
-	fmt.Println(s)
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	response := service.GetBountyRoleByComerID(bountyID, comerID)
+	ctx.OK(response)
 }

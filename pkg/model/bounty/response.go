@@ -63,7 +63,7 @@ type BountyPaymentInfo struct {
 }
 type PaymentResponse struct {
 	BountyPaymentInfo      `json:"bountyPaymentInfo"`
-	Rewards                BountyReward `json:"rewards,omitempty"`
+	Rewards                BountyReward `json:"rewards"`
 	ApplicantsTotalDeposit int          `json:"applicantsTotalDeposit"`
 	StageTerms             []StageTerm  `json:"stageTerms"`
 	PeriodTerms            `json:"periodTerms"`
@@ -71,10 +71,10 @@ type PaymentResponse struct {
 }
 
 type BountyReward struct {
-	Token1Symbol string `gorm:"column:token1_symbol" json:"token1Symbol,omitempty"`
-	Token1Amount int    `gorm:"column:token1_amount" json:"token1Amount,omitempty"`
-	Token2Symbol string `gorm:"column:token2_symbol" json:"token2Symbol,omitempty"`
-	Token2Amount int    `gorm:"column:token2_amount" json:"token2Amount,omitempty"`
+	Token1Symbol string `gorm:"column:token1_symbol" json:"token1Symbol"`
+	Token1Amount int    `gorm:"column:token1_amount" json:"token1Amount"`
+	Token2Symbol string `gorm:"column:token2_symbol" json:"token2Symbol"`
+	Token2Amount int    `gorm:"column:token2_amount" json:"token2Amount"`
 }
 
 type StageTerm struct {
