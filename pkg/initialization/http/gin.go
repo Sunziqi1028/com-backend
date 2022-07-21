@@ -7,7 +7,6 @@ import (
 	"ceres/pkg/router/crowdfunding"
 	"ceres/pkg/router/image"
 	"ceres/pkg/router/middleware"
-	"ceres/pkg/router/my"
 	"ceres/pkg/router/startup"
 	"ceres/pkg/router/tag"
 	"ceres/pkg/router/upload"
@@ -156,10 +155,10 @@ func Init() (err error) {
 
 	}
 
-	testR := Gin.Group("/test")
-	{
-		testR.Use(middleware.GuestAuthorizationMiddleware())
-		testR.GET("/token/:comerId", router.Wrap(my.Token))
-	}
+	//testR := Gin.Group("/test")
+	//{
+	//	testR.Use(middleware.GuestAuthorizationMiddleware())
+	//	testR.GET("/token/:comerId", router.Wrap(my.Token))
+	//}
 	return
 }

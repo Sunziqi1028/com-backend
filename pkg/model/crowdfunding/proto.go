@@ -9,10 +9,6 @@ import (
 
 type CrowdfundingStatus int
 
-func (s CrowdfundingStatus) int() int {
-	return int(s)
-}
-
 const (
 	Pending CrowdfundingStatus = iota
 	Upcoming
