@@ -618,6 +618,7 @@ func AddDeposit(request *model.AddDepositRequest, comerID uint64) error {
 		if err != nil {
 			return err
 		}
+		err = model.UpdateBountyDepositAmount(tx, request.BountyID, request.TokenAmount)
 		return nil
 	})
 	return nil
@@ -776,7 +777,7 @@ func GetStartupByBountyID(bountyID uint64) (*model.StartupListResponse, error) {
 	return response, nil
 }
 
-func GetBountyRoleByComerID(bountyID, comerID uint64) (*model.BountyDetailStatus, error) {
+func GetBountyDetailStatusByComerID(bountyID, comerID uint64) (*model.BountyDetailStatus, error) {
 	var bountyDetailStatus model.BountyDetailStatus
 	role := model.GetBountyRoleByComerID(mysql.DB, bountyID, comerID)
 	lockStatus, err := model.GetApplicantLockStatus(mysql.DB, bountyID, comerID)
@@ -828,4 +829,8 @@ func GetFounderReleaseDepositStatus(bountyID uint64) (int, error) {
 
 func FounderReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
 	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
+}
+
+func ApplicantRevokeDeposit(bountyID, comerID uint64) error {
+	return model.ApplicantRevokeDeposit(mysql.DB, bountyID, comerID)
 }

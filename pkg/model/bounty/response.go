@@ -97,10 +97,10 @@ type PeriodTerms struct {
 type PeriodMode struct {
 	SeqNum       int    `json:"seqNum" gorm:"seq_Num"`
 	Status       int    `json:"status" gorm:"status"`
-	Token1Symbol string `gorm:"column:token1_symbol" json:"token1Symbol,omitempty"`
-	Token1Amount int    `gorm:"column:token1_amount" json:"token1Amount,omitempty"`
-	Token2Symbol string `gorm:"column:token2_symbol" json:"token2Symbol,omitempty"`
-	Token2Amount int    `gorm:"column:token2_amount" json:"token2Amount,omitempty"`
+	Token1Symbol string `gorm:"column:token1_symbol" json:"token1Symbol"`
+	Token1Amount int    `gorm:"column:token1_amount" json:"token1Amount"`
+	Token2Symbol string `gorm:"column:token2_symbol" json:"token2Symbol"`
+	Token2Amount int    `gorm:"column:token2_amount" json:"token2Amount"`
 }
 
 type PeriodInfo struct {
@@ -180,7 +180,7 @@ type DepositRecordsResponse struct {
 type DepositRecord struct {
 	ComerID     uint64    `json:"comerID"`
 	Name        string    `json:"name"`
-	Time        time.Time `json:"time"`
+	CreatedAt   time.Time `json:"time" gorm:"create_at"`
 	TokenAmount int       `json:"tokenAmount" gorm:"token_Amount"`
 	Access      int       `json:"access"`
 }

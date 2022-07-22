@@ -32,6 +32,7 @@ const (
 	ApplicantStatusQuited          = 6
 	FOUNDER                        = 1
 	APPLICANT                      = 2
+	OTHERS                         = 3
 	ISDETELED                      = 1
 )
 
@@ -58,6 +59,15 @@ func CreatePaymentPeriod(db *gorm.DB, paymentPeriod *BountyPaymentPeriod) error 
 	return db.Create(&paymentPeriod).Error
 }
 
+func UpdateBountyDepositAmount(db *gorm.DB, bountyID uint64, tokenAmount int) error {
+	var sql = fmt.Sprintf("UPDATE bounty SET founder_deposit = founder_deposit + %d WHERE id = %d", tokenAmount, bountyID)
+	dbTmp := db.Exec(sql)
+	err := dbTmp.Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
 func UpdateBountyDepositContract(db *gorm.DB, bountyID uint64, depositContract string) error {
 	return db.Model(&Bounty{}).Where("id = ?", bountyID).Update("deposit_contract", depositContract).Error
 }
@@ -347,17 +357,14 @@ func GetApplicants(db *gorm.DB, bountyID uint64) (*BountyApplicantsResponse, err
 		db.Table("comer_profile").Select("comer_id, name, avatar").Where("comer_id = ?", applicantComerID).Find(&comerInfo)
 		fmt.Println(comerInfo)
 		db.Table("bounty_applicant").Select("description, apply_at").Where("comer_id = ? and bounty_id = ?", applicantComerID, bountyID).Find(&bountyApplicant)
-		fmt.Println(bountyApplicant)
 		applicant.Name = comerInfo.Name
 		applicant.Image = comerInfo.Avatar
 		applicant.Description = bountyApplicant.Description
 		applicant.ApplyAt = bountyApplicant.ApplyAt
 		applicant.ComerID = applicantComerID
 		applicantResponse.Applicants = append(applicantResponse.Applicants, applicant)
-		fmt.Println(applicantResponse)
-		return &applicantResponse, nil
 	}
-	return nil, nil
+	return &applicantResponse, nil
 }
 
 func GetFounderByBountyID(db *gorm.DB, bountyID uint64) (*FounderResponse, error) {
@@ -461,9 +468,15 @@ func GetBountyRoleByComerID(db *gorm.DB, bountyID, comerID uint64) int {
 	db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerIDtmp)
 	if comerIDtmp == comerID {
 		return FOUNDER
-	} else {
-		return APPLICANT
 	}
+	var applicantStatus int
+	db.Table("bounty_applicant").Select("status").Where("comer_id = ?").Find(&applicantStatus)
+	if applicantStatus == 2 {
+		return APPLICANT
+	} else {
+		return OTHERS
+	}
+	return 0
 }
 
 func UpdateBountyStatus(db *gorm.DB, bountyID uint64, status int) error {
@@ -539,6 +552,21 @@ func FounderReleaseDeposit(db *gorm.DB, bountyID, founerComerID uint64, bountySt
 			return err
 		}
 		err = db.Table("bounty").Where("id = ? and comer_id = ?", bountyID, founerComerID).Update("status", bountyStatus).Error
+		return nil
+	})
+	return nil
+}
+
+func ApplicantRevokeDeposit(db *gorm.DB, bountyID, comerID uint64) error {
+	db.Transaction(func(tx *gorm.DB) (err error) {
+		err = db.Table("bounty_applicant").Where("bounty_id = ? and comer_id = ? and status = 1", bountyID, comerID).Updates(BountyApplicant{Status: ApplicantStatusRevoked, RevokeAt: time.Now()}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Table("bounty_deposit").Where("comer_id = ? and bounty_id = ?", comerID, bountyID).Update("access", AccessOut).Error
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 	return nil
