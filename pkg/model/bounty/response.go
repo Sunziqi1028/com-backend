@@ -123,9 +123,9 @@ type ActivitiesResponse struct {
 //}
 
 type ComerInfo struct {
-	ComerID    uint64 `json:"comerID"`
-	ComerName  string `json:"comerName" gorm:"name"`
-	ComerImage string `json:"comerImage" gorm:"avatar"`
+	ComerID uint64 `json:"comerID" gorm:"comer_id"`
+	Name    string `json:"comerName" gorm:"name"`
+	Avatar  string `json:"comerImage" gorm:"avatar"`
 }
 
 type StartupListResponse struct {
