@@ -116,8 +116,8 @@ func Init() (err error) {
 	}
 	bounties := Gin.Group("/bounty")
 	{
-		// bounties.Use(middleware.GuestAuthorizationMiddleware())
-		bounties.Use(middleware.ComerAuthorizationMiddleware())
+		bounties.Use(middleware.GuestAuthorizationMiddleware())
+		//bounties.Use(middleware.ComerAuthorizationMiddleware())
 		//bounties.GET("/startups/:comerID", router.Wrap(bounty.GetComerStartups))
 		bounties.POST("/detail", router.Wrap(bounty.CreateBounty))
 		bounties.GET("/detail/:bountyID", router.Wrap(bounty.GetBountyDetailByID))
@@ -132,13 +132,15 @@ func Init() (err error) {
 		bounties.GET("/:bountyID/founder", router.Wrap(bounty.GetFounderByBountyID))
 		bounties.GET("/:bountyID/approved", router.Wrap(bounty.GetApprovedApplicantByBountyID))
 		bounties.GET("/:bountyID/deposit-records", router.Wrap(bounty.GetDepositRecords))
-		bounties.PUT("/founder/:bountyID/approve", router.Wrap(bounty.UpdateFounderApprovedApplicant))
-		bounties.PUT("/founder/:bountyID/unapprove", router.Wrap(bounty.UpdateFounderUnapprovedApplicant))
+		bounties.PUT("/founder/:bountyID/approve/:applicantComerID", router.Wrap(bounty.UpdateFounderApprovedApplicant))
+		bounties.PUT("/founder/:bountyID/unapprove/:applicantComerID", router.Wrap(bounty.UpdateFounderUnapprovedApplicant))
 		bounties.GET("/:bountyID/startup", router.Wrap(bounty.GetStartupByBountyID))
-		bounties.GET("/:bountyID/role", router.Wrap(bounty.GetBountyRoleByComerID))
-		//bounties.PUT("/:bountyID/applicant/unlock", router.Wrap(bounty.UpdateFounderApprovedApplicant))
-		//bounties.PUT("/:bountyID/founder/release", router.Wrap(bounty.UpdateFounderApprovedApplicant))
-
+		bounties.GET("/:bountyID/detail/status", router.Wrap(bounty.GetBountyDetailStatusByComerID))
+		//bounties.GET("/:bountyID/applicant/lock/status", router.Wrap(bounty.GetApplicantLockStatus)) // 和role 接口一起
+		bounties.PUT("/:bountyID/applicant/lock", router.Wrap(bounty.UpdateApplicantsLockDeposit))
+		bounties.PUT("/:bountyID/applicant/unlock", router.Wrap(bounty.UpdateApplicantsUnlockDeposit))
+		//bounties.GET("/:bountyID/founder/release/status", router.Wrap(bounty.GetFounderReleaseDepositStatus)) // 和role 接口一起
+		bounties.PUT("/:bountyID/founder/release", router.Wrap(bounty.FounderReleaseDeposit))
 	}
 	return
 }

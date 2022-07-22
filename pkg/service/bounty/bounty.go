@@ -649,15 +649,12 @@ func CreateActivities(request *model.ActivitiesRequest, comerID uint64) error {
 func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) error {
 	getContract(request.ChainID, request.TxHash, request.BountyID)
 
-	bountyApplicant := &model.BountyApplicant{
-		BountyID:  request.BountyID,
-		ComerID:   comerID,
-		ApplyAt:   request.ApplyAt,
-		RevokeAt:  request.RevokeAt,
-		QuitAt:    request.QuitAt,
-		ApproveAt: request.ApprovedAt,
-		SubmitAt:  request.SubmitAt,
-		Status:    model.ApplicantStatusApplied,
+	bountyApplicant := &model.BountyApplicantForBounty{
+		BountyID:    request.BountyID,
+		ComerID:     comerID,
+		ApplyAt:     tool.ParseTimeString2Time(request.ApplyAt),
+		Description: request.Description,
+		Status:      model.ApplicantStatusApplied,
 	}
 
 	deposit := &model.BountyDeposit{
@@ -743,19 +740,25 @@ func GetDepositRecords(bountyID uint64) (*model.DepositRecordsResponse, error) {
 	return response, nil
 }
 
-func UpdateApplicantApprovedStatus(bountyID, comerID uint64, depositStatus, bountyStatus, applicantApprovedStatus int) (err error) {
+func UpdateApplicantApprovedStatus(bountyID, founderComerID, applicantComerID uint64, depositStatus, bountyStatus, applicantApprovedStatus int) (err error) {
 	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
-		if err := model.UpdateApplicantApprovedStatus(tx, bountyID, comerID, applicantApprovedStatus); err != nil {
+		if err := model.UpdateApplicantApprovedStatus(tx, bountyID, applicantComerID, applicantApprovedStatus); err != nil {
 			return err
 		}
-		if err := model.UpdateBountyDepositStatus(tx, bountyID, depositStatus); err != nil {
+		if err := model.UpdateBountyDetailDepositStatus(tx, bountyID, founderComerID, depositStatus); err != nil {
 			return err
 		}
 		if err := model.UpdateBountyStatus(tx, bountyID, bountyStatus); err != nil {
 			return err
 		}
 		if applicantApprovedStatus == 2 {
-			err := model.UpdateApplicantRejectStatus(tx, bountyID, comerID)
+			err := model.UpdateApplicantRejectStatus(tx, bountyID, applicantComerID)
+			if err != nil {
+				return err
+			}
+		}
+		if applicantApprovedStatus == 4 {
+			err := model.UpdateApplicantApproveStatus(tx, bountyID, applicantComerID)
 			if err != nil {
 				return err
 			}
@@ -773,6 +776,56 @@ func GetStartupByBountyID(bountyID uint64) (*model.StartupListResponse, error) {
 	return response, nil
 }
 
-func GetBountyRoleByComerID(bountyID, comerID uint64) int {
-	return model.GetBountyRoleByComerID(mysql.DB, bountyID, comerID)
+func GetBountyRoleByComerID(bountyID, comerID uint64) (*model.BountyDetailStatus, error) {
+	var bountyDetailStatus model.BountyDetailStatus
+	role := model.GetBountyRoleByComerID(mysql.DB, bountyID, comerID)
+	lockStatus, err := model.GetApplicantLockStatus(mysql.DB, bountyID, comerID)
+	bountyDetailStatus.Role = role
+	if err != nil {
+		return nil, err
+	}
+	if lockStatus == 3 {
+		bountyDetailStatus.Lock = true
+	} else {
+		bountyDetailStatus.Lock = false
+	}
+	releaseStatus, err := model.GetFounderReleaseDepositStatus(mysql.DB, bountyID)
+	if err != nil {
+		return nil, err
+	}
+	if releaseStatus == 4 {
+		bountyDetailStatus.Lock = true
+	} else {
+		bountyDetailStatus.Lock = false
+	}
+	return &bountyDetailStatus, nil
+}
+
+func GetApplicantLockStatus(bountyID, comerID uint64) (int, error) {
+	status, err := model.GetApplicantLockStatus(mysql.DB, bountyID, comerID)
+	if err != nil {
+		return 0, err
+	}
+	return status, nil
+
+}
+
+func UpdateApplicantDepositLockStatus(bountyID, comerID uint64, depositStatus int) error {
+	err := model.UpdateApplicantDepositLockStatus(mysql.DB, bountyID, comerID, depositStatus)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetFounderReleaseDepositStatus(bountyID uint64) (int, error) {
+	status, err := model.GetFounderReleaseDepositStatus(mysql.DB, bountyID)
+	if err != nil {
+		return 0, err
+	}
+	return status, nil
+}
+
+func FounderReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
+	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
 }

@@ -10,7 +10,6 @@ package bounty
 
 import (
 	"ceres/pkg/router"
-	"time"
 )
 
 type BountyRequest struct {
@@ -99,13 +98,13 @@ type ApplicantsDepositRequest struct {
 }
 
 type Applicants struct {
-	BountyID    uint64    `json:"bountyID"`
-	ApplyAt     time.Time `json:"applyAt"`
-	ApprovedAt  time.Time `json:"approvedAt"`
-	RevokeAt    time.Time `json:"revokeAt"`
-	QuitAt      time.Time `json:"quitAt"`
-	SubmitAt    time.Time `json:"submitAt"`
-	Description string    `json:"description"`
+	BountyID uint64 `json:"bountyID"`
+	ApplyAt  string `json:"applyAt" bind:"required"`
+	//ApprovedAt  string `json:"approvedAt,omitempty"`
+	//RevokeAt    string `json:"revokeAt,omitempty"`
+	//QuitAt      string `json:"quitAt,omitempty"`
+	//SubmitAt    string `json:"submitAt,omitempty"`
+	Description string `json:"description"`
 }
 
 type ApplicantsDeposit struct {

@@ -14,7 +14,7 @@ import (
 
 type ContractInfoResponse struct {
 	ContractAddress string
-	Status          uint64
+	Status          int
 }
 
 type DetailItem struct {
@@ -183,4 +183,10 @@ type DepositRecord struct {
 	Time        time.Time `json:"time"`
 	TokenAmount int       `json:"tokenAmount" gorm:"token_Amount"`
 	Access      int       `json:"access"`
+}
+
+type BountyDetailStatus struct {
+	Role    int  `json:"role"`
+	Lock    bool `json:"lock"`
+	Release bool `json:"release"`
 }

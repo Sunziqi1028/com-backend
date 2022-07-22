@@ -14,7 +14,7 @@ func CreateTransaction(db *gorm.DB, transaction *Transaction) error {
 	return db.Create(&transaction).Error
 }
 
-func UpdateTransactionStatus(db *gorm.DB, bountyID uint64, status uint64) error {
+func UpdateTransactionStatus(db *gorm.DB, bountyID uint64, status int) error {
 	return db.Model(&Transaction{}).Where("source_id = ?", bountyID).Update("status", int(status)).Error
 }
 

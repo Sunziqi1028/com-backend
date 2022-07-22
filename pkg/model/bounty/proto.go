@@ -55,6 +55,19 @@ func (BountyApplicant) TableName() string {
 	return "bounty_applicant"
 }
 
+type BountyApplicantForBounty struct {
+	model.RelationBase
+	BountyID    uint64    `gorm:"column:bounty_id" json:"bountyID"`
+	ComerID     uint64    `gorm:"column:comer_id" json:"comerID"`
+	ApplyAt     time.Time `gorm:"column:apply_at" json:"applyAt"`
+	Status      int       `gorm:"column:status" json:"status"`
+	Description string    `gorm:"column:description" json:"description"`
+}
+
+func (BountyApplicantForBounty) TableName() string {
+	return "bounty_applicant"
+}
+
 type BountyContact struct {
 	model.RelationBase
 	BountyID       uint64 `gorm:"column:bounty_id;unique_index:bounty_contact_uindex" json:"bountyID"`

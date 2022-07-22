@@ -45,7 +45,7 @@ func CreateTransaction(db *gorm.DB, bountyID uint64, request *bounty.BountyReque
 	return nil
 }
 
-func UpdateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint64, contractAddress string) {
+func UpdateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID uint64, status int, contractAddress string) {
 	log.Infof("#####UpdateBountyContractAndTransactoinStatus: bountyId-> %d, status->%d, contractAddress->%s", bountyID, status, contractAddress)
 	err := model.UpdateTransactionStatus(tx, bountyID, status)
 	if err != nil {
@@ -61,7 +61,7 @@ func UpdateBountyContractAndTransactoinStatus(tx *gorm.DB, bountyID, status uint
 	}
 }
 
-func GetContractAddress(chainID uint64, txHashString string) (contractAddress string, status uint64) {
+func GetContractAddress(chainID uint64, txHashString string) (contractAddress string, status int) {
 	txHash := common.HexToHash(txHashString)
 	tx, isPending, err := eth.RPCClient.TransactionByHash(context.Background(), txHash)
 	if err != nil {

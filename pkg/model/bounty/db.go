@@ -66,6 +66,9 @@ func UpdateBountyDepositStatus(db *gorm.DB, bountyID uint64, status int) error {
 	return db.Model(&BountyDeposit{}).Where("bounty_id = ?", bountyID).Update("status", status).Error
 }
 
+func UpdateBountyDetailDepositStatus(db *gorm.DB, bountyID, founderComerID uint64, status int) error {
+	return db.Model(&BountyDeposit{}).Where("bounty_id = ? and comer_id = ?", bountyID, founderComerID).Update("status", status).Error
+}
 func GetAndUpdateTagID(db *gorm.DB, name string) (tagID uint64, err error) {
 	err = db.Table("tag").Select("id").Where("name = ? and 'category' = 'comerSkill' ", name).Find(&tagID).Error
 	if err != nil {
@@ -310,7 +313,7 @@ func UpdatePaidStatusByBountyID(db *gorm.DB, bountyID uint64, request *PaidStatu
 	return db.Table("bounty_payment_terms").Where("bounty_id = ? and seq_num = ?", bountyID, request.SeqNum).Update("status", BountyPaymentTermsStatusPaid).Error
 }
 
-func CreateApplicants(db *gorm.DB, request *BountyApplicant) error {
+func CreateApplicants(db *gorm.DB, request *BountyApplicantForBounty) error {
 	return db.Create(&request).Error
 }
 
@@ -464,7 +467,7 @@ func UpdateBountyStatus(db *gorm.DB, bountyID uint64, status int) error {
 	return db.Table("bounty").Where("id = ?", bountyID).Update("status", status).Error
 }
 
-func UpdateApplicantRejectStatus(db *gorm.DB, comerID, bountyID uint64) error {
+func UpdateApplicantRejectStatus(db *gorm.DB, bountyID, comerID uint64) error {
 	var rejectedApplicantComerIDs []uint64
 	err := db.Table("bounty_deposit").Select("comer_id").Where("bounty_id = ? and comer_id != ?", bountyID, comerID).Find(&rejectedApplicantComerIDs).Error
 	if err != nil {
@@ -474,5 +477,66 @@ func UpdateApplicantRejectStatus(db *gorm.DB, comerID, bountyID uint64) error {
 		db.Table("bounty_applicant").Where("comer_id = ?", rejectedApplicantComerID).Update("status", ApplicantStatusRejected)
 		db.Table("bounty_deposit").Where("comer_id = ?", rejectedApplicantComerID).Update("access", AccessOut)
 	}
+	return nil
+}
+
+func UpdateApplicantApproveStatus(db *gorm.DB, comerID, bountyID uint64) error {
+	var approvedApplicantComerIDs []uint64
+	err := db.Table("bounty_deposit").Select("comer_id").Where("bounty_id = ? and comer_id != ?", bountyID, comerID).Find(&approvedApplicantComerIDs).Error
+	if err != nil {
+		return err
+	}
+	for _, approvedApplicantComerID := range approvedApplicantComerIDs {
+		db.Table("bounty_applicant").Where("comer_id = ?", approvedApplicantComerID).Update("status", ApplicantStatusApplied)
+		db.Table("bounty_deposit").Where("comer_id = ?", approvedApplicantComerID).Update("access", AccessIn)
+	}
+	return nil
+}
+
+func GetApplicantLockStatus(db *gorm.DB, bountyID, comerID uint64) (int, error) {
+	var applicantStatus int
+	err := db.Table("bounty_applicant").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&applicantStatus).Error
+	if err != nil {
+		return 0, err
+	}
+	return applicantStatus, nil
+}
+
+func UpdateApplicantDepositLockStatus(db *gorm.DB, bountyID, comerID uint64, depositStatus int) error {
+	return db.Table("bounty_deposit").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Update("status", depositStatus).Error
+}
+
+func GetFounderReleaseDepositStatus(db *gorm.DB, bountyID uint64) (int, error) {
+	var applicantComerID uint64
+	err := db.Table("bounty_applicant").Select("comer_id").Where("status = 2").Find(&applicantComerID).Error
+	if err != nil {
+		return 0, err
+	}
+	var depositStatus int
+	err = db.Table("bounty_deposit").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, applicantComerID).Find(&depositStatus).Error
+	if err != nil {
+		return 0, err
+	}
+	return depositStatus, nil
+}
+
+func FounderReleaseDeposit(db *gorm.DB, bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
+	var applicantComerID uint64
+	err := db.Table("bounty_applicant").Select("comer_id").Where("status = 2").Find(&applicantComerID).Error
+	if err != nil {
+		return err
+	}
+	db.Transaction(func(tx *gorm.DB) error {
+		err := db.Table("bounty_deposit").Where("bounty_id = ? and comer_id = ?", bountyID, founerComerID).Updates(BountyDeposit{Status: depositStatus, Access: AccessOut}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Table("bounty_deposit").Where("bounty_id = ? and comer_id = ?", bountyID, applicantComerID).Updates(BountyDeposit{Status: depositStatus, Access: AccessOut}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Table("bounty").Where("id = ? and comer_id = ?", bountyID, founerComerID).Update("status", bountyStatus).Error
+		return nil
+	})
 	return nil
 }
