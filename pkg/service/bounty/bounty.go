@@ -245,7 +245,7 @@ func getContract(chainID uint64, txHash string, bountyID uint64) {
 		contractAddress, status := transaction.GetContractAddress(chainID, txHash)
 		contractInfo := &model.ContractInfoResponse{
 			ContractAddress: contractAddress,
-			Status:          uint64(status),
+			Status:          status,
 		}
 		select {
 		case contractChan <- contractInfo:
