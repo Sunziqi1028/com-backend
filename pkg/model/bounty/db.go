@@ -476,7 +476,6 @@ func GetBountyRoleByComerID(db *gorm.DB, bountyID, comerID uint64) int {
 	} else {
 		return OTHERS
 	}
-	return 0
 }
 
 func UpdateBountyStatus(db *gorm.DB, bountyID uint64, status int) error {
