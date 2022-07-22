@@ -25,6 +25,7 @@ const (
 	Failure                      = 2
 	BountyDepositContractCreated = 1
 	BountyDepositAccount         = 2
+	CrowdfundingContractCreated  = 3
 	ReceiptSuccess               = 1
 	ReceiptFailure               = 0
 )
