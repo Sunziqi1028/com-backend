@@ -153,7 +153,7 @@ type Applicant struct {
 	Image       string    `json:"image"`
 	Name        string    `json:"name"`
 	Description string    `json:"desription"`
-	ApplyAt     time.Time `json:"applyAt"`
+	SubmitAt    time.Time `json:"submitAt"`
 }
 
 type FounderResponse struct {

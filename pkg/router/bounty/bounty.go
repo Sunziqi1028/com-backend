@@ -270,18 +270,17 @@ func CreateActivities(ctx *router.Context) {
 func CreateApplicants(ctx *router.Context) {
 	request := new(bounty.ApplicantsDepositRequest)
 	if err := ctx.ShouldBindJSON(request); err != nil {
-		fmt.Println("-------", err)
 		ctx.HandleError(err)
 		return
 	}
 
-	//comerID, err := tool.GetComerIDByToken(ctx)
-	//if err != nil {
-	//	ctx.HandleError(err)
-	//	return
-	//}
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
 
-	err := service.CreateApplicants(request, 129525702930432)
+	err = service.CreateApplicants(request, comerID)
 	if err != nil {
 		ctx.HandleError(err)
 		return

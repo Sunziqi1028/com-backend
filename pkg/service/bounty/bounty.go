@@ -21,6 +21,7 @@ import (
 	"ceres/pkg/utility/tool"
 	"errors"
 	"fmt"
+	"github.com/labstack/gommon/random"
 	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
 	"time"
@@ -648,19 +649,19 @@ func CreateActivities(request *model.ActivitiesRequest, comerID uint64) error {
 }
 
 func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) error {
-	getContract(request.ChainID, request.TxHash, request.BountyID)
+	//getContract(request.ChainID, request.TxHash, request.BountyID)
 
 	bountyApplicant := &model.BountyApplicantForBounty{
 		BountyID:    request.BountyID,
 		ComerID:     comerID,
-		ApplyAt:     tool.ParseTimeString2Time(request.ApplyAt),
+		SubmitAt:    time.Now(),
 		Description: request.Description,
 		Status:      model.ApplicantStatusApplied,
 	}
-
+	s := random.String(15, "test hash")
 	deposit := &model.BountyDeposit{
-		ChainID:     request.ChainID,
-		TxHash:      request.TxHash,
+		ChainID:     43113,
+		TxHash:      s,
 		Status:      transaction.Pending,
 		BountyID:    request.BountyID,
 		ComerID:     comerID,
@@ -670,8 +671,8 @@ func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) e
 		TimeStamp:   time.Now(),
 	}
 	transaction := &model4.Transaction{
-		ChainID:    request.ChainID,
-		TxHash:     request.TxHash,
+		ChainID:    43113,
+		TxHash:     s,
 		TimeStamp:  time.Now(),
 		Status:     transaction.Pending,
 		SourceType: transaction.BountyDepositContractCreated,
@@ -709,7 +710,7 @@ func GetActivitiesByBountyID(bountyID uint64) (*[]model.ActivitiesResponse, erro
 	return response, nil
 }
 
-func GetAllApplicantsByBountyID(bountyID uint64) (*model.BountyApplicantsResponse, error) {
+func GetAllApplicantsByBountyID(bountyID uint64) (*[]model.Applicant, error) {
 	response, err := model.GetApplicants(mysql.DB, bountyID)
 	if err != nil {
 		return nil, err

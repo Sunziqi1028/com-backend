@@ -15,6 +15,7 @@ require (
 	github.com/gotomicro/ego v1.0.0
 	github.com/gotomicro/ego-component/eredis v0.3.1
 	github.com/jinzhu/now v1.1.4 // indirect
+	github.com/labstack/gommon v0.3.0
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/qiniu/x v1.11.5
 	github.com/shopspring/decimal v1.3.1 // indirect
