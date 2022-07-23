@@ -338,7 +338,7 @@ func GetActivitiesByBountyID(db *gorm.DB, bountyID uint64) (*[]ActivitiesRespons
 	return &activitiesTotal, nil
 }
 
-func GetApplicants(db *gorm.DB, bountyID uint64) (*BountyApplicantsResponse, error) {
+func GetApplicants(db *gorm.DB, bountyID uint64) (*[]Applicant, error) {
 	var comerID uint64
 	err := db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerID).Error
 	if err != nil {
@@ -352,19 +352,19 @@ func GetApplicants(db *gorm.DB, bountyID uint64) (*BountyApplicantsResponse, err
 	var comerInfo ComerInfo
 	var bountyApplicant BountyApplicant
 	var applicant Applicant
-	var applicantResponse BountyApplicantsResponse
+	var applicants []Applicant
 	for _, applicantComerID := range applicantComerIDs {
 		db.Table("comer_profile").Select("comer_id, name, avatar").Where("comer_id = ?", applicantComerID).Find(&comerInfo)
 		fmt.Println(comerInfo)
-		db.Table("bounty_applicant").Select("description, apply_at").Where("comer_id = ? and bounty_id = ?", applicantComerID, bountyID).Find(&bountyApplicant)
+		db.Table("bounty_applicant").Select("description, submit_at").Where("comer_id = ? and bounty_id = ?", applicantComerID, bountyID).Find(&bountyApplicant)
 		applicant.Name = comerInfo.Name
 		applicant.Image = comerInfo.Avatar
 		applicant.Description = bountyApplicant.Description
-		applicant.ApplyAt = bountyApplicant.ApplyAt
+		applicant.SubmitAt = bountyApplicant.SubmitAt
 		applicant.ComerID = applicantComerID
-		applicantResponse.Applicants = append(applicantResponse.Applicants, applicant)
+		applicants = append(applicants, applicant)
 	}
-	return &applicantResponse, nil
+	return &applicants, nil
 }
 
 func GetFounderByBountyID(db *gorm.DB, bountyID uint64) (*FounderResponse, error) {

@@ -98,20 +98,15 @@ type ApplicantsDepositRequest struct {
 }
 
 type Applicants struct {
-	BountyID uint64 `json:"bountyID"`
-	ApplyAt  string `json:"applyAt" bind:"required"`
-	//ApprovedAt  string `json:"approvedAt,omitempty"`
-	//RevokeAt    string `json:"revokeAt,omitempty"`
-	//QuitAt      string `json:"quitAt,omitempty"`
-	//SubmitAt    string `json:"submitAt,omitempty"`
+	BountyID    uint64 `json:"bountyID"`
 	Description string `json:"description"`
 }
 
 type ApplicantsDeposit struct {
 	TokenSymbol string `json:"tokenSymbol"`
 	TokenAmount int    `json:"tokenAmount"`
-	ChainID     uint64 `json:"chainID"`
-	TxHash      string `json:"txHash"`
+	ChainID     uint64 `json:"chainID,omitempty"`
+	TxHash      string `json:"txHash,omitempty"`
 }
 
 func (p PageParam) Valid() error {
