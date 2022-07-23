@@ -484,13 +484,14 @@ func GetBountyRoleByComerID(db *gorm.DB, bountyID, comerID uint64) int {
 	db.Table("bounty").Select("comer_id").Where("id = ?", bountyID).Find(&comerIDtmp)
 	if comerIDtmp == comerID {
 		return FOUNDER
-	}
-	var applicantStatus int
-	db.Table("bounty_applicant").Select("status").Where("comer_id = ?").Find(&applicantStatus)
-	if applicantStatus == 2 {
-		return APPLICANT
 	} else {
-		return OTHERS
+		var applicantStatus int
+		db.Table("bounty_applicant").Select("status").Where("comer_id = ?").Find(&applicantStatus)
+		if applicantStatus == 2 {
+			return APPLICANT
+		} else {
+			return OTHERS
+		}
 	}
 }
 
@@ -526,7 +527,7 @@ func UpdateApplicantApproveStatus(db *gorm.DB, comerID, bountyID uint64) error {
 
 func GetApplicantLockStatus(db *gorm.DB, bountyID, comerID uint64) (int, error) {
 	var applicantStatus int
-	err := db.Table("bounty_applicant").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&applicantStatus).Error
+	err := db.Table("bounty_deposit").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&applicantStatus).Error
 	if err != nil {
 		return 0, err
 	}
@@ -534,7 +535,7 @@ func GetApplicantLockStatus(db *gorm.DB, bountyID, comerID uint64) (int, error) 
 }
 
 func UpdateApplicantDepositLockStatus(db *gorm.DB, bountyID, comerID uint64, depositStatus int) error {
-	return db.Table("bounty_deposit").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Update("status", depositStatus).Error
+	return db.Table("bounty_deposit").Where("bounty_id = ? and comer_id = ? and status = 3", bountyID, comerID).Update("status", depositStatus).Error
 }
 
 func GetFounderReleaseDepositStatus(db *gorm.DB, bountyID uint64) (int, error) {

@@ -781,8 +781,8 @@ func GetStartupByBountyID(bountyID uint64) (*model.StartupListResponse, error) {
 func GetBountyDetailStatusByComerID(bountyID, comerID uint64) (*model.BountyDetailStatus, error) {
 	var bountyDetailStatus model.BountyDetailStatus
 	role := model.GetBountyRoleByComerID(mysql.DB, bountyID, comerID)
-	lockStatus, err := model.GetApplicantLockStatus(mysql.DB, bountyID, comerID)
 	bountyDetailStatus.Role = role
+	lockStatus, err := model.GetApplicantLockStatus(mysql.DB, bountyID, comerID)
 	if err != nil {
 		return nil, err
 	}
