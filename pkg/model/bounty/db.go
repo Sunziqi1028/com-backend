@@ -230,7 +230,7 @@ func GetDetailByBountyID(db *gorm.DB, bountyID uint64) (*DetailResponse, error) 
 	var skillNames []string
 	var skillName string
 	for _, tagId := range tagIds {
-		db.Table("tag").Select("name").Where("id = ? and category = bounty", tagId).Find(&skillName)
+		db.Table("tag").Select("name").Where("id = ? and category = 'bounty'", tagId).Find(&skillName)
 		skillNames = append(skillNames, skillName)
 	}
 	var contacts []Contact

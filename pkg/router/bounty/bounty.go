@@ -325,12 +325,12 @@ func GetFounderByBountyID(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	//comerID, err := tool.GetComerIDByToken(ctx)
-	//if err != nil {
-	//	ctx.HandleError(err)
-	//	return
-	//}
-	response, err := service.GetFounderByBountyID(bountyID, 129525702930432)
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	response, err := service.GetFounderByBountyID(bountyID, comerID)
 	if err != nil {
 		ctx.HandleError(err)
 		return
