@@ -718,8 +718,8 @@ func GetAllApplicantsByBountyID(bountyID uint64) (*[]model.Applicant, error) {
 	return response, nil
 }
 
-func GetFounderByBountyID(bountyID uint64) (*model.FounderResponse, error) {
-	response, err := model.GetFounderByBountyID(mysql.DB, bountyID)
+func GetFounderByBountyID(bountyID, comerID uint64) (*model.FounderResponse, error) {
+	response, err := model.GetFounderByBountyID(mysql.DB, bountyID, comerID)
 	if err != nil {
 		return nil, err
 	}
@@ -754,7 +754,7 @@ func UpdateApplicantApprovedStatus(bountyID, founderComerID, applicantComerID ui
 			return err
 		}
 		if applicantApprovedStatus == 2 {
-			err := model.UpdateApplicantRejectStatus(tx, bountyID, applicantComerID)
+			err := model.UpdateApplicantRejectStatus(tx, bountyID, founderComerID, applicantComerID)
 			if err != nil {
 				return err
 			}
