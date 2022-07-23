@@ -274,13 +274,13 @@ func CreateApplicants(ctx *router.Context) {
 		return
 	}
 
-	comerID, err := tool.GetComerIDByToken(ctx)
-	if err != nil {
-		ctx.HandleError(err)
-		return
-	}
+	//comerID, err := tool.GetComerIDByToken(ctx)
+	//if err != nil {
+	//	ctx.HandleError(err)
+	//	return
+	//}
 
-	err = service.CreateApplicants(request, comerID)
+	err := service.CreateApplicants(request, 124247070683136)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -325,12 +325,7 @@ func GetFounderByBountyID(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	comerID, err := tool.GetComerIDByToken(ctx)
-	if err != nil {
-		ctx.HandleError(err)
-		return
-	}
-	response, err := service.GetFounderByBountyID(bountyID, comerID)
+	response, err := service.GetFounderByBountyID(bountyID)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -513,6 +508,27 @@ func FounderReleaseDeposit(ctx *router.Context) {
 		return
 	}
 	err = service.FounderReleaseDeposit(bountyID, comerID, BountyStatusCompleted, DepositSuccessStatus)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	ctx.OK("release deposit success")
+}
+
+func ApplicantReleaseDeposit(ctx *router.Context) {
+	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+	if err != nil {
+		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+		ctx.HandleError(err)
+		return
+	}
+	fmt.Println(bountyID)
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err = service.ApplicantReleaseDeposit(bountyID, comerID, BountyStatusCompleted, DepositSuccessStatus)
 	if err != nil {
 		ctx.HandleError(err)
 		return
