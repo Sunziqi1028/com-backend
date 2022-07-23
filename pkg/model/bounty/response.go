@@ -44,16 +44,20 @@ type Reward struct {
 	Amount      int    `json:"amount"`
 }
 
+type DetailBounty struct {
+	Title            string    `json:"title" gorm:"title"`
+	Status           int       `json:"status" gorm:"status"`
+	DiscussionLink   string    `json:"discussionLink" gorm:"discussion_link"`
+	ApplyCutoffDate  string    `json:"expiresIn" gorm:"apply_cutoff_date"`
+	ApplicantDeposit int       `json:"applicantsDeposit" gorm:"applicant_deposit"`
+	Description      string    `json:"description" gorm:"description,"`
+	CreatedAt        time.Time `json:"createdAt" gorm:"created_at"`
+}
+
 type DetailResponse struct {
-	Title             string    `json:"title"`
-	Status            int       `json:"status"`
-	ApplicantSkills   []string  `json:"applicantSkills"`
-	DiscussionLink    string    `json:"discussionLink"`
-	ExpiresIn         string    `json:"expiresIn"`
-	ApplicantsDeposit int       `json:"applicantsDeposit"`
-	Description       string    `json:"description"`
-	Contacts          []Contact `json:"contact"`
-	CreatedAt         time.Time `json:"createdAt"`
+	DetailBounty
+	ApplicantSkills []string  `json:"applicantSkills"`
+	Contacts        []Contact `json:"contact"`
 }
 
 type BountyPaymentInfo struct {
@@ -68,6 +72,7 @@ type PaymentResponse struct {
 	StageTerms             []StageTerm  `json:"stageTerms"`
 	PeriodTerms            `json:"periodTerms"`
 	BountyDepositStatus    int `json:"bountyDepositStatus" gorm:"status"`
+	ApplicantApplyStatus   int `json:"applicantApplyStatus" gorm:"status"`
 }
 
 type BountyReward struct {
