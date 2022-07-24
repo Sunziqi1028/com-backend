@@ -276,7 +276,6 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 		if err == gorm.ErrRecordNotFound {
 			paymentResponse.ApplicantApplyStatus = -1
 		}
-
 		return &paymentResponse, nil
 	}
 	if bountyPaymentInfo.PaymentMode == PaymentModePeriod {
