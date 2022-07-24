@@ -274,7 +274,9 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 		}
 		db.Table("bounty_deposit").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.BountyDepositStatus)
 		db.Table("bounty_applicant").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.ApplicantApplyStatus) // 0:Pending 1:Applied 2:Approved 3:Submitted 4:Revoked 5:Rejected 6:Quited
-
+		if err == gorm.ErrRecordNotFound {
+			paymentResponse.ApplicantApplyStatus = -1
+		}
 		return &paymentResponse, nil
 	}
 	if bountyPaymentInfo.PaymentMode == PaymentModePeriod {
