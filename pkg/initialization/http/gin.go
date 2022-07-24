@@ -145,7 +145,7 @@ func Init() (err error) {
 		bounties.PUT("/:bountyID/applicant/lock", router.Wrap(bounty.UpdateApplicantsLockDeposit))
 		bounties.PUT("/:bountyID/applicant/unlock", router.Wrap(bounty.UpdateApplicantsUnlockDeposit))
 		//bounties.GET("/:bountyID/founder/release/status", router.Wrap(bounty.GetFounderReleaseDepositStatus)) // 和role 接口一起
-		bounties.PUT("/:bountyID/founder/release", router.Wrap(bounty.FounderReleaseDeposit))
+		bounties.PUT("/:bountyID/founder/release", router.Wrap(bounty.ReleaseDeposit))
 		//bounties.PUT("/:bountyID/applicant/release", router.Wrap(bounty.ApplicantReleaseDeposit))
 		bounties.PUT("/:bountyID/applicant/revoke", router.Wrap(bounty.ApplicantRevokeDeposit))
 	}
