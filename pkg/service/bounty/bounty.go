@@ -654,9 +654,9 @@ func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) e
 	bountyApplicant := &model.BountyApplicantForBounty{
 		BountyID:    request.BountyID,
 		ComerID:     comerID,
-		SubmitAt:    time.Now(),
+		ApplyAt:     time.Now(),
 		Description: request.Description,
-		Status:      model.ApplicantStatusApplied,
+		Status:      model.ApplicantStatusPending,
 	}
 	s := random.String(15, "test hash")
 	deposit := &model.BountyDeposit{

@@ -59,7 +59,7 @@ type BountyApplicantForBounty struct {
 	model.RelationBase
 	BountyID    uint64    `gorm:"column:bounty_id" json:"bountyID"`
 	ComerID     uint64    `gorm:"column:comer_id" json:"comerID"`
-	SubmitAt    time.Time `gorm:"column:submit_at"`
+	ApplyAt     time.Time `gorm:"column:apply_at"`
 	Status      int       `gorm:"column:status" json:"status"`
 	Description string    `gorm:"column:description" json:"description"`
 }

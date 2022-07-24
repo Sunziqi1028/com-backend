@@ -24,6 +24,7 @@ const (
 	BountyStatusWordStarted        = 2
 	BountyStatusCompleted          = 3
 	BountyStatusExpired            = 4
+	ApplicantStatusPending         = 0
 	ApplicantStatusApplied         = 1
 	ApplicantStatusApproved        = 2
 	ApplicantStatusSubmitted       = 3
@@ -300,10 +301,6 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 		db.Table("bounty_deposit").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.BountyDepositStatus)
 		var periodInfo PeriodInfo
 		db.Table("bounty_payment_period").Select("hours_per_day, period_type").Where("bounty_id = ?", bountyID).Find(&periodInfo)
-		err := db.Table("bounty_applicant").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.ApplicantApplyStatus).Error // 0:Pending 1:Applied 2:Approved 3:Submitted 4:Revoked 5:Rejected 6:Quited
-		if err == gorm.ErrRecordNotFound {
-			paymentResponse.ApplicantApplyStatus = -1
-		}
 		paymentResponse.HoursPerDay = periodInfo.HoursPerDay
 		paymentResponse.PeriodType = periodInfo.PeriodType
 		err = db.Table("bounty_applicant").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.ApplicantApplyStatus).Error // null：任何人都可apply 0:Pending 1:Applied 2:Approved 3:Submitted 4:Revoked 5:Rejected 6:Quited
