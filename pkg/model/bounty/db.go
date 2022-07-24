@@ -24,13 +24,13 @@ const (
 	BountyStatusWordStarted        = 2
 	BountyStatusCompleted          = 3
 	BountyStatusExpired            = 4
-	ApplicantStatusPending         = 0
-	ApplicantStatusApplied         = 1
-	ApplicantStatusApproved        = 2
-	ApplicantStatusSubmitted       = 3
-	ApplicantStatusRevoked         = 4
-	ApplicantStatusRejected        = 5
-	ApplicantStatusQuited          = 6
+	ApplicantStatusPending         = 1
+	ApplicantStatusApplied         = 2
+	ApplicantStatusApproved        = 3
+	ApplicantStatusSubmitted       = 4
+	ApplicantStatusRevoked         = 5
+	ApplicantStatusRejected        = 6
+	ApplicantStatusQuited          = 7
 	FOUNDER                        = 1
 	APPLICANT                      = 2
 	OTHERS                         = 3
@@ -552,7 +552,7 @@ func ReleaseDeposit(db *gorm.DB, request *ApplicantsDeposit, bountyID, ComerID u
 	bountyDeposit := &BountyDeposit{
 		BountyID:    bountyID,
 		ComerID:     ComerID,
-		Status:      0,
+		Status:      2,
 		ChainID:     request.ChainID,
 		TxHash:      request.TxHash,
 		TokenAmount: request.TokenAmount,
