@@ -662,7 +662,7 @@ func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) e
 	deposit := &model.BountyDeposit{
 		ChainID:     43113,
 		TxHash:      s,
-		Status:      transaction.Pending,
+		Status:      transaction.Success,
 		BountyID:    request.BountyID,
 		ComerID:     comerID,
 		Access:      model.AccessIn,
@@ -674,8 +674,8 @@ func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) e
 		ChainID:    43113,
 		TxHash:     s,
 		TimeStamp:  time.Now(),
-		Status:     transaction.Pending,
-		SourceType: transaction.BountyDepositContractCreated,
+		Status:     transaction.Success,
+		SourceType: transaction.BountyDepositAccount,
 		RetryTimes: 1,
 		SourceID:   int64(request.BountyID),
 	}

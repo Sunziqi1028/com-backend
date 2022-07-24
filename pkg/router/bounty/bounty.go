@@ -274,13 +274,13 @@ func CreateApplicants(ctx *router.Context) {
 		return
 	}
 
-	//comerID, err := tool.GetComerIDByToken(ctx)
-	//if err != nil {
-	//	ctx.HandleError(err)
-	//	return
-	//}
+	comerID, err := tool.GetComerIDByToken(ctx)
+	if err != nil {
+		ctx.HandleError(err)
+		return
+	}
 
-	err := service.CreateApplicants(request, 124247070683136)
+	err = service.CreateApplicants(request, comerID)
 	if err != nil {
 		ctx.HandleError(err)
 		return
