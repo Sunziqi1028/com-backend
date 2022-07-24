@@ -494,7 +494,7 @@ func UpdateApplicantsUnlockDeposit(ctx *router.Context) {
 	ctx.OK("unlock deposit success")
 }
 
-func FounderReleaseDeposit(ctx *router.Context) {
+func ReleaseDeposit(ctx *router.Context) {
 	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
 	if err != nil {
 		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
@@ -507,7 +507,12 @@ func FounderReleaseDeposit(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	err = service.FounderReleaseDeposit(bountyID, comerID, BountyStatusCompleted, DepositSuccessStatus)
+	request := new(bounty.ApplicantsDeposit)
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		ctx.HandleError(err)
+		return
+	}
+	err = service.ReleaseDeposit(request, bountyID, comerID)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -515,26 +520,26 @@ func FounderReleaseDeposit(ctx *router.Context) {
 	ctx.OK("release deposit success")
 }
 
-func ApplicantReleaseDeposit(ctx *router.Context) {
-	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
-	if err != nil {
-		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
-		ctx.HandleError(err)
-		return
-	}
-	fmt.Println(bountyID)
-	comerID, err := tool.GetComerIDByToken(ctx)
-	if err != nil {
-		ctx.HandleError(err)
-		return
-	}
-	err = service.ApplicantReleaseDeposit(bountyID, comerID, BountyStatusCompleted, DepositSuccessStatus)
-	if err != nil {
-		ctx.HandleError(err)
-		return
-	}
-	ctx.OK("release deposit success")
-}
+//func ApplicantReleaseDeposit(ctx *router.Context) {
+//	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
+//	if err != nil {
+//		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
+//		ctx.HandleError(err)
+//		return
+//	}
+//	fmt.Println(bountyID)
+//	comerID, err := tool.GetComerIDByToken(ctx)
+//	if err != nil {
+//		ctx.HandleError(err)
+//		return
+//	}
+//	err = service.ApplicantReleaseDeposit(bountyID, comerID, BountyStatusCompleted, DepositSuccessStatus)
+//	if err != nil {
+//		ctx.HandleError(err)
+//		return
+//	}
+//	ctx.OK("release deposit success")
+//}
 
 //func GetFounderReleaseDepositStatus(ctx *router.Context) {
 //	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)

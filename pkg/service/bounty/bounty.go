@@ -829,13 +829,13 @@ func GetFounderReleaseDepositStatus(bountyID uint64) (int, error) {
 	return status, nil
 }
 
-func FounderReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
-	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
+func ReleaseDeposit(request *model.ApplicantsDeposit, bountyID, founerComerID uint64) error {
+	return model.ReleaseDeposit(mysql.DB, request, bountyID, founerComerID)
 }
 
-func ApplicantReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
-	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
-}
+//func ApplicantReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
+//	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
+//}
 
 func ApplicantRevokeDeposit(bountyID, comerID uint64) error {
 	return model.ApplicantRevokeDeposit(mysql.DB, bountyID, comerID)
