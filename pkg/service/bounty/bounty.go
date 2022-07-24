@@ -662,7 +662,7 @@ func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) e
 	deposit := &model.BountyDeposit{
 		ChainID:     43113,
 		TxHash:      s,
-		Status:      transaction.Pending,
+		Status:      transaction.Success,
 		BountyID:    request.BountyID,
 		ComerID:     comerID,
 		Access:      model.AccessIn,
@@ -674,8 +674,8 @@ func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) e
 		ChainID:    43113,
 		TxHash:     s,
 		TimeStamp:  time.Now(),
-		Status:     transaction.Pending,
-		SourceType: transaction.BountyDepositContractCreated,
+		Status:     transaction.Success,
+		SourceType: transaction.BountyDepositAccount,
 		RetryTimes: 1,
 		SourceID:   int64(request.BountyID),
 	}
@@ -829,13 +829,13 @@ func GetFounderReleaseDepositStatus(bountyID uint64) (int, error) {
 	return status, nil
 }
 
-func FounderReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
-	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
+func ReleaseDeposit(request *model.ApplicantsDeposit, bountyID, founerComerID uint64) error {
+	return model.ReleaseDeposit(mysql.DB, request, bountyID, founerComerID)
 }
 
-func ApplicantReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
-	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
-}
+//func ApplicantReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
+//	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
+//}
 
 func ApplicantRevokeDeposit(bountyID, comerID uint64) error {
 	return model.ApplicantRevokeDeposit(mysql.DB, bountyID, comerID)
