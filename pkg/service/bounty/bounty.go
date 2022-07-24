@@ -21,9 +21,9 @@ import (
 	"ceres/pkg/utility/tool"
 	"errors"
 	"fmt"
-	"github.com/labstack/gommon/random"
 	"github.com/qiniu/x/log"
 	"gorm.io/gorm"
+	"strconv"
 	"time"
 )
 
@@ -580,8 +580,8 @@ func GetPaymentByBountyID(bountyID uint64) (*model.PaymentResponse, error) {
 	return response, nil
 }
 
-func UpdateBountyStatusByID(bountID, comerID uint64) (string, error) {
-	response, err := model.UpdateBountyCloseStatusByID(mysql.DB, bountID, comerID)
+func UpdateBountyStatusByID(bountyID uint64) (string, error) {
+	response, err := model.UpdateBountyCloseStatusByID(mysql.DB, bountyID)
 	if err != nil {
 		return "", err
 	}
@@ -589,11 +589,15 @@ func UpdateBountyStatusByID(bountID, comerID uint64) (string, error) {
 }
 
 func AddDeposit(request *model.AddDepositRequest, comerID uint64) error {
+	bountyID, err := strconv.ParseUint(request.BountyID, 0, 64)
+	if err != nil {
+		return err
+	}
 	deposit := &model.BountyDeposit{
-		ChainID:     request.ChainID,
-		TxHash:      request.TxHash,
-		Status:      transaction.Pending,
-		BountyID:    request.BountyID,
+		ChainID:     43113,
+		TxHash:      tool.RandStr(), // test chain
+		Status:      transaction.Success,
+		BountyID:    bountyID,
 		ComerID:     comerID,
 		Access:      model.AccessIn,
 		TokenSymbol: request.Deposit.TokenSymbol,
@@ -602,15 +606,15 @@ func AddDeposit(request *model.AddDepositRequest, comerID uint64) error {
 	}
 
 	transactionApplicant := &model4.Transaction{
-		ChainID:    request.ChainID,
-		TxHash:     request.TxHash,
+		ChainID:    43113,
+		TxHash:     tool.RandStr(), // test chain
 		TimeStamp:  time.Now(),
-		Status:     transaction.Pending,
-		SourceType: transaction.BountyDepositContractCreated,
+		Status:     transaction.Success,
+		SourceType: transaction.BountyDepositAccount,
 		RetryTimes: 0,
-		SourceID:   int64(request.BountyID),
+		SourceID:   int64(bountyID),
 	}
-	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
+	err = mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
 		err = model4.CreateTransaction(tx, transactionApplicant)
 		if err != nil {
 			return err
@@ -619,10 +623,10 @@ func AddDeposit(request *model.AddDepositRequest, comerID uint64) error {
 		if err != nil {
 			return err
 		}
-		err = model.UpdateBountyDepositAmount(tx, request.BountyID, request.TokenAmount)
+		err = model.UpdateBountyDepositAmount(tx, bountyID, request.TokenAmount)
 		return nil
 	})
-	return nil
+	return err
 }
 
 func UpdatePaidStatusByBountyID(bountyID uint64, request *model.PaidStatusRequest) error {
@@ -634,14 +638,18 @@ func UpdatePaidStatusByBountyID(bountyID uint64, request *model.PaidStatusReques
 }
 
 func CreateActivities(request *model.ActivitiesRequest, comerID uint64) error {
+	bountyID, err := strconv.ParseUint(request.BountyID, 0, 64)
+	if err != nil {
+		return err
+	}
 	postUpdate := &model3.PostUpdate{
 		SourceType: request.SourceType, //1 bounty normal 2 send-paid-info
-		SourceID:   request.BountyID,
+		SourceID:   bountyID,
 		ComerID:    comerID,
 		Content:    request.Content,
 		TimeStamp:  time.Now(),
 	}
-	err := model3.CreatePostUpdate(mysql.DB, postUpdate)
+	err = model3.CreatePostUpdate(mysql.DB, postUpdate)
 	if err != nil {
 		return err
 	}
@@ -649,21 +657,24 @@ func CreateActivities(request *model.ActivitiesRequest, comerID uint64) error {
 }
 
 func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) error {
+	bountyID, err := strconv.ParseUint(request.BountyID, 0, 64)
+	if err != nil {
+		return err
+	}
 	//getContract(request.ChainID, request.TxHash, request.BountyID)
 
 	bountyApplicant := &model.BountyApplicantForBounty{
-		BountyID:    request.BountyID,
+		BountyID:    bountyID,
 		ComerID:     comerID,
 		ApplyAt:     time.Now(),
 		Description: request.Description,
 		Status:      model.ApplicantStatusPending,
 	}
-	s := random.String(15, "test hash")
 	deposit := &model.BountyDeposit{
 		ChainID:     43113,
-		TxHash:      s,
+		TxHash:      tool.RandStr(), // test chain
 		Status:      transaction.Success,
-		BountyID:    request.BountyID,
+		BountyID:    bountyID,
 		ComerID:     comerID,
 		Access:      model.AccessIn,
 		TokenSymbol: request.TokenSymbol,
@@ -672,15 +683,15 @@ func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) e
 	}
 	transaction := &model4.Transaction{
 		ChainID:    43113,
-		TxHash:     s,
+		TxHash:     tool.RandStr(), // test chain
 		TimeStamp:  time.Now(),
 		Status:     transaction.Success,
 		SourceType: transaction.BountyDepositAccount,
 		RetryTimes: 1,
-		SourceID:   int64(request.BountyID),
+		SourceID:   int64(bountyID),
 	}
 
-	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
+	err = mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
 		err = model.CreateApplicants(tx, bountyApplicant)
 		if err != nil {
 			log.Warn(err)
@@ -699,7 +710,7 @@ func CreateApplicants(request *model.ApplicantsDepositRequest, comerID uint64) e
 		}
 		return
 	})
-	return nil
+	return err
 }
 
 func GetActivitiesByBountyID(bountyID uint64) (*[]model.ActivitiesResponse, error) {
@@ -734,7 +745,7 @@ func GetApprovedApplicantByBountyID(bountyID uint64) (*model.ApprovedResponse, e
 	return response, nil
 }
 
-func GetDepositRecords(bountyID uint64) (*model.DepositRecordsResponse, error) {
+func GetDepositRecords(bountyID uint64) (*[]model.DepositRecord, error) {
 	response, err := model.GetDepositRecordsByBountyID(mysql.DB, bountyID)
 	if err != nil {
 		return nil, err
@@ -742,32 +753,59 @@ func GetDepositRecords(bountyID uint64) (*model.DepositRecordsResponse, error) {
 	return response, nil
 }
 
-func UpdateApplicantApprovedStatus(bountyID, founderComerID, applicantComerID uint64, depositStatus, bountyStatus, applicantApprovedStatus int) (err error) {
-	mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
+func UpdateApplicantApprovedStatus(request *model.ApplicantsRejectedDepositsRequst, bountyID, applicantComerID uint64, bountyStatus, applicantApprovedStatus int) (err error) {
+	err = mysql.DB.Transaction(func(tx *gorm.DB) (err error) {
 		if err := model.UpdateApplicantApprovedStatus(tx, bountyID, applicantComerID, applicantApprovedStatus); err != nil {
 			return err
 		}
-		if err := model.UpdateBountyDetailDepositStatus(tx, bountyID, founderComerID, depositStatus); err != nil {
-			return err
-		}
+
 		if err := model.UpdateBountyStatus(tx, bountyID, bountyStatus); err != nil {
 			return err
 		}
-		if applicantApprovedStatus == 2 {
-			err := model.UpdateApplicantRejectStatus(tx, bountyID, founderComerID, applicantComerID)
+		for _, rejectedApplicantInfo := range request.ApplicantsRejectedDeposits {
+			// getContract(rejectedApplicantInfo.ChainID, rejectedApplicantInfo.TxHash, bountyID)
+			applicantComerID, err := strconv.ParseUint(rejectedApplicantInfo.ComerID, 0, 64)
+			if err != nil {
+				continue
+			}
+			deposit := &model.BountyDeposit{
+				ChainID:     43113,
+				TxHash:      tool.RandStr(), // test chain
+				Status:      transaction.Success,
+				BountyID:    bountyID,
+				ComerID:     applicantComerID,
+				Access:      model.AccessOut,
+				TokenSymbol: rejectedApplicantInfo.TokenSymbol,
+				TokenAmount: rejectedApplicantInfo.TokenAmount,
+				TimeStamp:   time.Now(),
+			}
+
+			transactionApplicant := &model4.Transaction{
+				ChainID:    43113,
+				TxHash:     tool.RandStr(), // test chain
+				TimeStamp:  time.Now(),
+				Status:     transaction.Success,
+				SourceType: transaction.BountyDepositAccount,
+				RetryTimes: 1,
+				SourceID:   int64(bountyID),
+			}
+			err = model4.CreateTransaction(tx, transactionApplicant)
+			if err != nil {
+				return err
+			}
+			err = model.CreateDeposit(tx, deposit)
+			if err != nil {
+				return err
+			}
+			err = model.UpdateApplicantRejectStatus(tx, bountyID, applicantComerID)
 			if err != nil {
 				return err
 			}
 		}
-		if applicantApprovedStatus == 4 {
-			err := model.UpdateApplicantApproveStatus(tx, bountyID, applicantComerID)
-			if err != nil {
-				return err
-			}
-		}
+
 		return nil
 	})
-	return
+	return err
 }
 
 func GetStartupByBountyID(bountyID uint64) (*model.StartupListResponse, error) {
@@ -804,15 +842,6 @@ func GetBountyDetailStatusByComerID(bountyID, comerID uint64) (*model.BountyDeta
 	return &bountyDetailStatus, nil
 }
 
-func GetApplicantLockStatus(bountyID, comerID uint64) (int, error) {
-	status, err := model.GetApplicantLockStatus(mysql.DB, bountyID, comerID)
-	if err != nil {
-		return 0, err
-	}
-	return status, nil
-
-}
-
 func UpdateApplicantDepositLockStatus(bountyID, comerID uint64, depositStatus int) error {
 	err := model.UpdateApplicantDepositLockStatus(mysql.DB, bountyID, comerID, depositStatus)
 	if err != nil {
@@ -821,22 +850,53 @@ func UpdateApplicantDepositLockStatus(bountyID, comerID uint64, depositStatus in
 	return nil
 }
 
-func GetFounderReleaseDepositStatus(bountyID uint64) (int, error) {
-	status, err := model.GetFounderReleaseDepositStatus(mysql.DB, bountyID)
-	if err != nil {
-		return 0, err
+func ReleaseDeposit(request *model.ApplicantsDeposit, bountyID, comerID uint64) error {
+	// getContract(request.ChainID, request.TxHash, bountyID) 查询release deposit 上链状态
+	bountyDeposit := &model.BountyDeposit{
+		BountyID:    bountyID,
+		ComerID:     comerID,
+		Status:      2,
+		ChainID:     43114,
+		TxHash:      tool.RandStr(), // test chain
+		TokenAmount: request.TokenAmount,
+		TokenSymbol: request.TokenSymbol,
+		Access:      model.AccessOut,
+		TimeStamp:   time.Now(),
 	}
-	return status, nil
-}
-
-func ReleaseDeposit(request *model.ApplicantsDeposit, bountyID, founerComerID uint64) error {
-	return model.ReleaseDeposit(mysql.DB, request, bountyID, founerComerID)
-}
-
-//func ApplicantReleaseDeposit(bountyID, founerComerID uint64, bountyStatus, depositStatus int) error {
-//	return model.FounderReleaseDeposit(mysql.DB, bountyID, founerComerID, bountyStatus, depositStatus)
-//}
-
-func ApplicantRevokeDeposit(bountyID, comerID uint64) error {
-	return model.ApplicantRevokeDeposit(mysql.DB, bountyID, comerID)
+	transactionApplicant := &model4.Transaction{
+		ChainID:    43113,
+		TxHash:     tool.RandStr(), // test chain
+		TimeStamp:  time.Now(),
+		Status:     transaction.Success,
+		SourceType: transaction.BountyDepositAccount,
+		RetryTimes: 1,
+		SourceID:   int64(bountyID),
+	}
+	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
+		err := model.CreateDeposit(tx, bountyDeposit)
+		if err != nil {
+			return err
+		}
+		err = model4.CreateTransaction(tx, transactionApplicant)
+		if err != nil {
+			return err
+		}
+		founderComerID, err := model.GetComerIDByBountyID(tx, bountyID)
+		if err != nil {
+			return err
+		}
+		if founderComerID == comerID {
+			err := model.UpdateFounderDepositByBountyID(tx, bountyID)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := model.UpdateApplicantRevokeTimeByComerID(tx, comerID)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	return err
 }

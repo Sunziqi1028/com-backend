@@ -131,7 +131,7 @@ func Init() (err error) {
 		bounties.POST("/add/deposit", router.Wrap(bounty.AddDeposit))
 		bounties.PUT("/:bountyID/paid/status", router.Wrap(bounty.UpdatePaidStatusByBountyID))
 		bounties.POST("/activities", router.Wrap(bounty.CreateActivities))
-		bounties.POST("/applicants", router.Wrap(bounty.CreateApplicants))
+		bounties.POST("/applicants/apply", router.Wrap(bounty.CreateApplicants))
 		bounties.GET("/list/:bountyID/activities", router.Wrap(bounty.GetActivitiesLists))
 		bounties.GET("/list/:bountyID/applicants", router.Wrap(bounty.GetAllApplicantsByBountyID))
 		bounties.GET("/:bountyID/founder", router.Wrap(bounty.GetFounderByBountyID))
@@ -145,9 +145,7 @@ func Init() (err error) {
 		bounties.PUT("/:bountyID/applicant/lock", router.Wrap(bounty.UpdateApplicantsLockDeposit))
 		bounties.PUT("/:bountyID/applicant/unlock", router.Wrap(bounty.UpdateApplicantsUnlockDeposit))
 		//bounties.GET("/:bountyID/founder/release/status", router.Wrap(bounty.GetFounderReleaseDepositStatus)) // 和role 接口一起
-		bounties.PUT("/:bountyID/founder/release", router.Wrap(bounty.ReleaseDeposit))
-		//bounties.PUT("/:bountyID/applicant/release", router.Wrap(bounty.ApplicantReleaseDeposit))
-		bounties.PUT("/:bountyID/applicant/revoke", router.Wrap(bounty.ApplicantRevokeDeposit))
+		bounties.PUT("/:bountyID/release", router.Wrap(bounty.ReleaseDeposit))
 	}
 
 	crowdfundingRouters := Gin.Group("/crowdfunding")

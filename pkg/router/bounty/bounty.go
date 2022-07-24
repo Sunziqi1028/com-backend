@@ -27,7 +27,7 @@ const (
 	BountyStatusReadyToWorkAgain = 1
 	BountyStatusWordStarted      = 2
 	ApplicantStatusApproved      = 2
-	ApplicantStatusRevoked       = 4
+	ApplicantStatusRejected      = 6
 	BountyStatusCompleted        = 3
 )
 
@@ -195,12 +195,7 @@ func UpdateBountyCloseStatus(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	comerID, err := tool.GetComerIDByToken(ctx)
-	if err != nil {
-		ctx.HandleError(err)
-		return
-	}
-	response, err := service.UpdateBountyStatusByID(bountyID, comerID)
+	response, err := service.UpdateBountyStatusByID(bountyID)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -377,12 +372,13 @@ func UpdateFounderApprovedApplicant(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	founderComerID, err := tool.GetComerIDByToken(ctx)
-	if err != nil {
+	request := new(bounty.ApplicantsRejectedDepositsRequst)
+	if err := ctx.ShouldBindJSON(request); err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	err = service.UpdateApplicantApprovedStatus(bountyID, founderComerID, applicantComerID, DepositLockStatus, BountyStatusWordStarted, ApplicantStatusApproved)
+
+	err = service.UpdateApplicantApprovedStatus(request, bountyID, applicantComerID, BountyStatusWordStarted, ApplicantStatusApproved)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -403,12 +399,13 @@ func UpdateFounderUnapprovedApplicant(ctx *router.Context) {
 		ctx.HandleError(err)
 		return
 	}
-	founderComerID, err := tool.GetComerIDByToken(ctx)
-	if err != nil {
+	request := new(bounty.ApplicantsRejectedDepositsRequst)
+	if err := ctx.ShouldBindJSON(request); err != nil {
 		ctx.HandleError(err)
 		return
 	}
-	err = service.UpdateApplicantApprovedStatus(bountyID, founderComerID, applicantComerID, DepositUnLockStatus, BountyStatusReadyToWorkAgain, ApplicantStatusRevoked)
+
+	err = service.UpdateApplicantApprovedStatus(request, bountyID, applicantComerID, BountyStatusReadyToWorkAgain, ApplicantStatusRejected)
 	if err != nil {
 		ctx.HandleError(err)
 		return
@@ -518,82 +515,4 @@ func ReleaseDeposit(ctx *router.Context) {
 		return
 	}
 	ctx.OK("release deposit success")
-}
-
-//func ApplicantReleaseDeposit(ctx *router.Context) {
-//	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
-//	if err != nil {
-//		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
-//		ctx.HandleError(err)
-//		return
-//	}
-//	fmt.Println(bountyID)
-//	comerID, err := tool.GetComerIDByToken(ctx)
-//	if err != nil {
-//		ctx.HandleError(err)
-//		return
-//	}
-//	err = service.ApplicantReleaseDeposit(bountyID, comerID, BountyStatusCompleted, DepositSuccessStatus)
-//	if err != nil {
-//		ctx.HandleError(err)
-//		return
-//	}
-//	ctx.OK("release deposit success")
-//}
-
-//func GetFounderReleaseDepositStatus(ctx *router.Context) {
-//	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
-//	if err != nil {
-//		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
-//		ctx.HandleError(err)
-//		return
-//	}
-//	response, err := service.GetFounderReleaseDepositStatus(bountyID)
-//	if err != nil {
-//		ctx.HandleError(err)
-//		return
-//	}
-//	ctx.OK(response)
-//}
-
-//func GetApplicantLockStatus(ctx *router.Context) {
-//	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
-//	if err != nil {
-//		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
-//		ctx.HandleError(err)
-//		return
-//	}
-//	fmt.Println(bountyID)
-//	applicantComerID, err := tool.GetComerIDByToken(ctx)
-//	if err != nil {
-//		ctx.HandleError(err)
-//		return
-//	}
-//	response, err := service.GetApplicantLockStatus(bountyID, applicantComerID)
-//	if err != nil {
-//		ctx.HandleError(err)
-//		return
-//	}
-//	ctx.OK(response)
-//}
-
-func ApplicantRevokeDeposit(ctx *router.Context) {
-	bountyID, err := strconv.ParseUint(ctx.Param("bountyID"), 0, 64)
-	if err != nil {
-		err = router.ErrBadRequest.WithMsg("Invalid bounty ID")
-		ctx.HandleError(err)
-		return
-	}
-
-	comerID, err := tool.GetComerIDByToken(ctx)
-	if err != nil {
-		ctx.HandleError(err)
-		return
-	}
-	err = service.ApplicantRevokeDeposit(bountyID, comerID)
-	if err != nil {
-		ctx.HandleError(err)
-		return
-	}
-	ctx.OK("revoke deposit success")
 }

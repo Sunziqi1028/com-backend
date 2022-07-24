@@ -4,6 +4,7 @@ import (
 	"ceres/pkg/router"
 	"ceres/pkg/utility/jwt"
 	"errors"
+	"github.com/google/uuid"
 	"reflect"
 )
 
@@ -52,4 +53,10 @@ func GetComerIDByToken(ctx *router.Context) (uint64, error) {
 		return 0, err
 	}
 	return comerID, err
+}
+
+func RandStr() string {
+	uuid := uuid.New()
+	key := uuid.String()
+	return key
 }

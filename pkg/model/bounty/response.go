@@ -63,7 +63,7 @@ type DetailResponse struct {
 type BountyPaymentInfo struct {
 	PaymentMode      int `json:"paymentMode" gorm:"payment_mode"`
 	FounderDeposit   int `json:"founderDeposit" gorm:"founder_deposit"`
-	ApplicantDeposit int `json:"applicantDeposit" gorm:"applicant_deposit"`
+	ApplicantDeposit int `json:"applicantMinDeposit" gorm:"applicant_deposit"`
 }
 type PaymentResponse struct {
 	BountyPaymentInfo      `json:"bountyPaymentInfo"`
@@ -113,7 +113,7 @@ type PeriodInfo struct {
 	PeriodType  int `json:"periodType" gorm:"period_type"`
 }
 type ActivitiesResponse struct {
-	ComerID    uint64    `json:"comerID" gorm:"comer_id"`
+	ComerID    string    `json:"comerID" gorm:"comer_id"`
 	Name       string    `json:"name" gorm:"name"`
 	Avatar     string    `json:"avatar" gorm:"avatar"`
 	SourceType int       `json:"sourceType" gorm:"source_type"`
@@ -154,11 +154,11 @@ type BountyApplicantsResponse struct {
 }
 
 type Applicant struct {
-	ComerID     uint64    `json:"comerID"`
+	ComerID     string    `json:"comerID"`
 	Image       string    `json:"image"`
 	Name        string    `json:"name"`
-	Description string    `json:"desription"`
-	SubmitAt    time.Time `json:"submitAt"`
+	Description string    `json:"description"`
+	Applyat     time.Time `json:"applyAt"`
 }
 
 type FounderResponse struct {
@@ -183,8 +183,9 @@ type DepositRecordsResponse struct {
 }
 
 type DepositRecord struct {
-	ComerID     uint64    `json:"comerID"`
+	ComerID     string    `json:"comerID"`
 	Name        string    `json:"name"`
+	Avatar      string    `json:"avatar"`
 	CreatedAt   time.Time `json:"time" gorm:"create_at"`
 	TokenAmount int       `json:"tokenAmount" gorm:"token_Amount"`
 	Access      int       `json:"access"`

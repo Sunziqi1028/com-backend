@@ -67,8 +67,8 @@ type Deposit struct {
 }
 
 type ChainInfo struct {
-	ChainID uint64 `json:"chainID" binding:"required"`
-	TxHash  string `json:"txHash" binding:"required"`
+	ChainID uint64 `json:"chainID,omitempty"`
+	TxHash  string `json:"txHash,omitempty"`
 }
 
 type PageParam struct {
@@ -77,7 +77,7 @@ type PageParam struct {
 }
 
 type AddDepositRequest struct {
-	BountyID uint64 `json:"bountyID" binding:"required"`
+	BountyID string `json:"bountyID" binding:"required"`
 	Deposit
 	ChainInfo
 }
@@ -87,7 +87,7 @@ type PaidStatusRequest struct {
 }
 
 type ActivitiesRequest struct {
-	BountyID   uint64 `json:"bountyID" binding:"required"`
+	BountyID   string `json:"bountyID" binding:"required"`
 	Content    string `json:"content" binding:"required"`
 	SourceType int    `json:"sourceType" bing:"required"`
 }
@@ -98,8 +98,19 @@ type ApplicantsDepositRequest struct {
 }
 
 type Applicants struct {
-	BountyID    uint64 `json:"bountyID"`
+	BountyID    string `json:"bountyID"`
 	Description string `json:"description"`
+}
+type ApplicantsRejectedDepositsRequst struct {
+	ApplicantsRejectedDeposits []ApplicantsRejectedDeposit
+}
+
+type ApplicantsRejectedDeposit struct {
+	ComerID     string `json:"comerID"`
+	TokenSymbol string `json:"tokenSymbol"`
+	TokenAmount int    `json:"tokenAmount"`
+	ChainID     uint64 `json:"chainID,omitempty"`
+	TxHash      string `json:"txHash,omitempty"`
 }
 
 type ApplicantsDeposit struct {
