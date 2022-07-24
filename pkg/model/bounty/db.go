@@ -4,7 +4,6 @@ import (
 	"ceres/pkg/model"
 	"ceres/pkg/model/account"
 	"ceres/pkg/model/tag"
-	"ceres/pkg/service/transaction"
 	"fmt"
 	"gorm.io/gorm"
 	"math"
@@ -308,7 +307,7 @@ func GetPaymentByBountyID(db *gorm.DB, bountyID uint64) (*PaymentResponse, error
 		}
 		paymentResponse.HoursPerDay = periodInfo.HoursPerDay
 		paymentResponse.PeriodType = periodInfo.PeriodType
-		err := db.Table("bounty_applicant").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.ApplicantApplyStatus).Error // null：任何人都可apply 0:Pending 1:Applied 2:Approved 3:Submitted 4:Revoked 5:Rejected 6:Quited
+		err = db.Table("bounty_applicant").Select("status").Where("bounty_id = ? and comer_id = ?", bountyID, comerID).Find(&paymentResponse.ApplicantApplyStatus).Error // null：任何人都可apply 0:Pending 1:Applied 2:Approved 3:Submitted 4:Revoked 5:Rejected 6:Quited
 		if err == gorm.ErrRecordNotFound {
 			paymentResponse.ApplicantApplyStatus = -1
 		}
@@ -557,7 +556,7 @@ func ReleaseDeposit(db *gorm.DB, request *ApplicantsDeposit, bountyID, ComerID u
 	bountyDeposit := &BountyDeposit{
 		BountyID:    bountyID,
 		ComerID:     ComerID,
-		Status:      transaction.Pending,
+		Status:      0,
 		ChainID:     request.ChainID,
 		TxHash:      request.TxHash,
 		TokenAmount: request.TokenAmount,
